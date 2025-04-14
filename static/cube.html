@@ -4,67 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rubik's Cube</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        h1 {
-            text-align: center;
-            margin: 20px 0;
-        }
-        #container {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        #cubeCanvas {
-            width: 600px;
-            height: 500px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .controls {
-            width: 400px;
-            padding: 20px;
-            background-color: #fff;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        .face-controls {
-            margin-bottom: 20px;
-        }
-        .face-label {
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #555;
-        }
-        button {
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            margin: 5px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-            border-radius: 3px;
-        }
-        button:hover {
-            background-color: #45a049;
-        }
-        button:active {
-            background-color: #3e8e41;
-        }
-        button.reset {
-            background-color: #f44336;
-        }
-        button.reset:hover {
-            background-color: #d32f2f;
-        }
-    </style>
+    <link rel="stylesheet" href="cube.css">
     <!-- Required for Go's WebAssembly runtime -->
     <script src="wasm_exec.js"></script>
     <!-- Three.js library for 3D rendering -->
@@ -80,65 +20,92 @@
         <div class="controls">
             <div class="face-controls">
                 <div class="face-label">Front Face (White)</div>
-                <button onclick="rotateFace(0, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(0, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(0, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(0, false)">Rotate Counter-Clockwise</button>
             </div>
             
             <div class="face-controls">
                 <div class="face-label">Back Face (Yellow)</div>
-                <button onclick="rotateFace(1, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(1, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(1, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(1, false)">Rotate Counter-Clockwise</button>
             </div>
             
             <div class="face-controls">
                 <div class="face-label">Up Face (Blue)</div>
-                <button onclick="rotateFace(2, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(2, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(2, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(2, false)">Rotate Counter-Clockwise</button>
             </div>
             
             <div class="face-controls">
                 <div class="face-label">Down Face (Green)</div>
-                <button onclick="rotateFace(3, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(3, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(3, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(3, false)">Rotate Counter-Clockwise</button>
             </div>
             
             <div class="face-controls">
                 <div class="face-label">Left Face (Red)</div>
-                <button onclick="rotateFace(4, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(4, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(4, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(4, false)">Rotate Counter-Clockwise</button>
             </div>
             
             <div class="face-controls">
                 <div class="face-label">Right Face (Orange)</div>
-                <button onclick="rotateFace(5, true)">Rotate Clockwise</button>
-                <button onclick="rotateFace(5, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleRotate(5, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(5, false)">Rotate Counter-Clockwise</button>
             </div>
             
-            <button class="reset" onclick="resetCube()">Reset Cube</button>
+            <button class="reset" onclick="handleReset()">Reset Cube</button>
         </div>
     </div>
     
     <script>
-        // ThreeJS variables
-        let scene, camera, renderer, controls;
-        let cubeGroup;
-        const cubeSize = 1;
-        const gap = 0.05;
-        let isAnimating = false; // Track if an animation is in progress
+        // Global flag to track WebAssembly loading status
+        let wasmLoaded = false;
         
-        // Color mapping (HTML color names to hex values)
-        const colorMap = {
-            'white': 0xFFFFFF,
-            'yellow': 0xFFFF00,
-            'blue': 0x0000FF,
-            'green': 0x00FF00,
-            'red': 0xFF0000,
-            'orange': 0xFFA500,
-            'black': 0x000000
-        };
+        // Simple JS bridge to Go WASM functions
+        function handleRotate(face, clockwise) {
+            if (!wasmLoaded) {
+                console.warn("WebAssembly not loaded yet");
+                return;
+            }
+            
+            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
+            try {
+                wasmRotateFace(face, clockwise);
+            } catch (e) {
+                console.error("Error calling wasmRotateFace:", e);
+            }
+        }
         
-        // Setup ThreeJS scene
-        function initThree() {
+        function handleReset() {
+            if (!wasmLoaded) {
+                console.warn("WebAssembly not loaded yet");
+                return;
+            }
+            
+            console.log("Resetting cube");
+            try {
+                wasmResetCube();
+            } catch (e) {
+                console.error("Error calling wasmResetCube:", e);
+            }
+        }
+        
+        // Debug logging for WebAssembly global scope
+        function debugGlobalScope() {
+            console.log("Global scope keys:", Object.keys(window).filter(key => key.startsWith("wasm")));
+        }
+        
+        // Initialize Three.js with JavaScript if WebAssembly setup fails
+        function initThreeFallback() {
+            console.warn("Using JavaScript fallback for Three.js initialization");
+            
+            // ThreeJS variables
+            let scene, camera, renderer, controls;
+            let cubeGroup;
+            const cubeSize = 1;
+            const gap = 0.05;
+            
             // Create scene
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0xf0f0f0);
@@ -171,250 +138,63 @@
             scene.add(cubeGroup);
             
             // Start animation loop
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                renderer.render(scene, camera);
+            }
+            
             animate();
-        }
-        
-        // Animation loop
-        function animate() {
-            requestAnimationFrame(animate);
-            controls.update();
-            renderer.render(scene, camera);
-        }
-        
-        // Create a cube based on the state
-        function createCube(state) {
-            // Clear existing cube
-            while(cubeGroup.children.length > 0) {
-                cubeGroup.remove(cubeGroup.children[0]);
-            }
             
-            // Create small cubes
-            for(let x = -1; x <= 1; x++) {
-                for(let y = -1; y <= 1; y++) {
-                    for(let z = -1; z <= 1; z++) {
-                        // Skip center cube
-                        if(x === 0 && y === 0 && z === 0) continue;
-                        
-                        createCubePiece(x, y, z, state);
-                    }
-                }
-            }
-        }
-        
-        // Create a single cube piece
-        function createCubePiece(x, y, z, state) {
-            const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
-            const materials = [];
-            
-            // Define the colors for each face (right, left, top, bottom, front, back)
-            for(let i = 0; i < 6; i++) {
-                materials.push(new THREE.MeshStandardMaterial({ color: 0x000000 }));
-            }
-            
-            // Right face (x = 1)
-            if(x === 1) {
-                materials[0].color.setHex(colorMap[state[5][y+1][z+1]] || colorMap.black);
-            }
-            
-            // Left face (x = -1)
-            if(x === -1) {
-                materials[1].color.setHex(colorMap[state[4][y+1][-z+1]] || colorMap.black);
-            }
-            
-            // Top face (y = 1)
-            if(y === 1) {
-                materials[2].color.setHex(colorMap[state[2][1-z][x+1]] || colorMap.black);
-            }
-            
-            // Bottom face (y = -1)
-            if(y === -1) {
-                materials[3].color.setHex(colorMap[state[3][z+1][x+1]] || colorMap.black);
-            }
-            
-            // Front face (z = 1)
-            if(z === 1) {
-                materials[4].color.setHex(colorMap[state[0][y+1][x+1]] || colorMap.black);
-            }
-            
-            // Back face (z = -1)
-            if(z === -1) {
-                materials[5].color.setHex(colorMap[state[1][y+1][-x+1]] || colorMap.black);
-            }
-            
-            const cube = new THREE.Mesh(geometry, materials);
-            cube.position.set(
-                x * (cubeSize + gap),
-                y * (cubeSize + gap),
-                z * (cubeSize + gap)
-            );
-            
-            // Add position and coordinates as custom properties 
-            // for animation selection
-            cube.userData = {
-                posX: x,
-                posY: y,
-                posZ: z
-            };
-            
-            cubeGroup.add(cube);
-        }
-        
-        // Reset the cube
-        function resetCube() {
-            if (isAnimating) return; // Prevent rotation during animation
-            
-            fetch('/api/reset', { method: 'POST' })
-                .then(response => response.json())
-                .then(data => {
-                    createCube(data.state);
-                })
-                .catch(error => console.error('Error resetting cube:', error));
-        }
-        
-        // Load the WebAssembly module
-        const go = new Go();
-        WebAssembly.instantiateStreaming(fetch("main.wasm"), go.importObject)
-            .then((result) => {
-                go.run(result.instance);
-                console.log("WebAssembly loaded successfully");
-                
-                // Initialize with the current state
-                getStateFromAPI();
-                
-                // Initialize Three.js after WASM is loaded
-                initThree();
-            })
-            .catch(err => {
-                console.error("Failed to load WebAssembly:", err);
-                
-                // Try to initialize with API state anyway
-                getStateFromAPI();
-                initThree();
-            });
-        
-        // Get state from API
-        function getStateFromAPI() {
+            // Fetch initial state
             fetch('/api/state')
                 .then(response => response.json())
                 .then(data => {
-                    createCube(data.state);
+                    console.log("Loaded cube state from API");
                 })
                 .catch(error => console.error('Error fetching cube state:', error));
         }
         
-        // Rotate a face with animation
-        function rotateFace(face, clockwise) {
-            if (isAnimating) return; // Prevent multiple rotations during animation
-            isAnimating = true;
-            
-            // Create a rotation group for the face
-            const rotationGroup = new THREE.Group();
-            scene.add(rotationGroup);
-            
-            // Determine which cubes belong to the rotating face
-            const cubesToRotate = [];
-            cubeGroup.children.forEach(cube => {
-                if (shouldRotateWithFace(cube, face)) {
-                    // Add to the list of cubes to rotate
-                    cubesToRotate.push(cube);
+        // Load the WebAssembly module with better error handling
+        async function loadWasm() {
+            try {
+                console.log("Attempting to load WebAssembly module...");
+                const go = new Go();
+                
+                // Try to fetch the module
+                const result = await WebAssembly.instantiateStreaming(
+                    fetch("main.wasm"),
+                    go.importObject
+                );
+                
+                // Run the instance
+                console.log("WebAssembly fetched, running instance...");
+                go.run(result.instance);
+                
+                // Check if the functions are registered
+                setTimeout(() => {
+                    console.log("Checking for WASM functions...");
+                    debugGlobalScope();
                     
-                    // Remove from the main cube group and add to rotation group
-                    cubeGroup.remove(cube);
-                    rotationGroup.add(cube);
-                }
-            });
-            
-            // Set the axis and direction for rotation
-            const rotationAxis = getRotationAxis(face);
-            const rotationAngle = clockwise ? Math.PI / 2 : -Math.PI / 2;
-            const rotationSpeed = 0.05; // Speed of rotation animation
-            
-            // Animation function
-            let angle = 0;
-            const rotateAnimation = () => {
-                if (Math.abs(angle) < Math.abs(rotationAngle)) {
-                    // Continue the animation
-                    const step = rotationSpeed * Math.sign(rotationAngle);
-                    angle += step;
-                    rotationGroup.rotateOnAxis(rotationAxis, step);
-                    requestAnimationFrame(rotateAnimation);
-                } else {
-                    // Animation complete, make API call
-                    // Remove from rotation group and add back to main cube group
-                    while (rotationGroup.children.length > 0) {
-                        const cube = rotationGroup.children[0];
-                        rotationGroup.remove(cube);
+                    // Try to initialize Three.js through WebAssembly
+                    if (typeof wasmInitThreeScene === 'function') {
+                        console.log("Calling wasmInitThreeScene...");
+                        wasmInitThreeScene();
+                        wasmLoaded = true;
+                    } else {
+                        console.error("wasmInitThreeScene function not found");
+                        initThreeFallback();
                     }
-                    scene.remove(rotationGroup);
-                    
-                    // Make the API call to actually update the cube state
-                    fetch('/api/rotate', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            face: face,
-                            clockwise: clockwise
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        createCube(data.state);
-                        isAnimating = false;
-                    })
-                    .catch(error => {
-                        console.error('Error rotating cube face:', error);
-                        isAnimating = false;
-                    });
-                }
-            };
-            
-            // Start the animation
-            rotateAnimation();
-        }
-        
-        // Determine if a cube should rotate with the face
-        function shouldRotateWithFace(cube, face) {
-            const { posX, posY, posZ } = cube.userData;
-            
-            switch(face) {
-                case 0: // Front (White)
-                    return posZ === 1;
-                case 1: // Back (Yellow)
-                    return posZ === -1;
-                case 2: // Up (Blue)
-                    return posY === 1;
-                case 3: // Down (Green)
-                    return posY === -1;
-                case 4: // Left (Red)
-                    return posX === -1;
-                case 5: // Right (Orange)
-                    return posX === 1;
-                default:
-                    return false;
+                }, 500);
+                
+            } catch (err) {
+                console.error("Failed to load WebAssembly:", err);
+                initThreeFallback();
             }
         }
         
-        // Get the axis for rotation based on the face
-        function getRotationAxis(face) {
-            switch(face) {
-                case 0: // Front (White)
-                    return new THREE.Vector3(0, 0, 1);
-                case 1: // Back (Yellow)
-                    return new THREE.Vector3(0, 0, -1);
-                case 2: // Up (Blue)
-                    return new THREE.Vector3(0, 1, 0);
-                case 3: // Down (Green)
-                    return new THREE.Vector3(0, -1, 0);
-                case 4: // Left (Red)
-                    return new THREE.Vector3(-1, 0, 0);
-                case 5: // Right (Orange)
-                    return new THREE.Vector3(1, 0, 0);
-                default:
-                    return new THREE.Vector3(0, 1, 0);
-            }
-        }
+        // Start loading when the page is ready
+        document.addEventListener('DOMContentLoaded', loadWasm);
     </script>
 </body>
 </html>

@@ -92,53 +92,53 @@ func (c *Cube) updateAdjacentFaces(face Face, clockwise Direction) {
 
 // Helper functions to rotate adjacent face edges
 func (c *Cube) rotateFrontAdjacents(clockwise Direction) {
-	temp := [3]string{}
-
-	// Save top row of Down face
-	for i := 0; i < 3; i++ {
-		temp[i] = c.State[Up][2][i]
-	}
+	// Save the edges that will be modified
+	topRow := [3]string{c.State[Up][2][0], c.State[Up][2][1], c.State[Up][2][2]}
+	rightCol := [3]string{c.State[Right][0][0], c.State[Right][1][0], c.State[Right][2][0]}
+	bottomRow := [3]string{c.State[Down][0][0], c.State[Down][0][1], c.State[Down][0][2]}
+	leftCol := [3]string{c.State[Left][0][2], c.State[Left][1][2], c.State[Left][2][2]}
 
 	if clockwise {
-		// Up -> Right
-		for i := 0; i < 3; i++ {
-			c.State[Up][2][i] = c.State[Left][2-i][2]
-		}
+		// Up bottom row → Right left column (top to bottom)
+		c.State[Right][0][0] = topRow[2]
+		c.State[Right][1][0] = topRow[1]
+		c.State[Right][2][0] = topRow[0]
 
-		// Left -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Left][i][2] = c.State[Down][0][i]
-		}
+		// Right left column → Down top row (right to left)
+		c.State[Down][0][2] = rightCol[0]
+		c.State[Down][0][1] = rightCol[1]
+		c.State[Down][0][0] = rightCol[2]
 
-		// Down -> Right
-		for i := 0; i < 3; i++ {
-			c.State[Down][0][i] = c.State[Right][2-i][0]
-		}
+		// Down top row → Left right column (bottom to top)
+		c.State[Left][2][2] = bottomRow[0]
+		c.State[Left][1][2] = bottomRow[1]
+		c.State[Left][0][2] = bottomRow[2]
 
-		// Temp (original Up) -> Right
-		for i := 0; i < 3; i++ {
-			c.State[Right][i][0] = temp[i]
-		}
+		// Left right column → Up bottom row (left to right)
+		c.State[Up][2][0] = leftCol[2]
+		c.State[Up][2][1] = leftCol[1]
+		c.State[Up][2][2] = leftCol[0]
 	} else {
-		// Up -> Left
-		for i := 0; i < 3; i++ {
-			c.State[Up][2][i] = c.State[Right][i][0]
-		}
+			// Counterclockwise rotation
+		// Up bottom row → Left right column (left to right becomes bottom to top)
+		c.State[Left][2][2] = topRow[0]
+		c.State[Left][1][2] = topRow[1]
+		c.State[Left][0][2] = topRow[2]
 
-		// Right -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Right][i][0] = c.State[Down][0][2-i]
-		}
+		// Left right column → Down top row (bottom to top becomes right to left)
+		c.State[Down][0][2] = leftCol[0]
+		c.State[Down][0][1] = leftCol[1]
+		c.State[Down][0][0] = leftCol[2]
 
-		// Down -> Left
-		for i := 0; i < 3; i++ {
-			c.State[Down][0][i] = c.State[Left][i][2]
-		}
+		// Down top row → Right left column (right to left becomes top to bottom)
+		c.State[Right][0][0] = bottomRow[2]
+		c.State[Right][1][0] = bottomRow[1]
+		c.State[Right][2][0] = bottomRow[0]
 
-		// Temp (original Up) -> Left
-		for i := 0; i < 3; i++ {
-			c.State[Left][2-i][2] = temp[i]
-		}
+		// Right left column → Up bottom row (top to bottom becomes left to right)
+		c.State[Up][2][0] = rightCol[2]
+		c.State[Up][2][1] = rightCol[1]
+		c.State[Up][2][2] = rightCol[0]
 	}
 }
 
@@ -355,26 +355,6 @@ func (c *Cube) rotateRightAdjacents(clockwise Direction) {
 	}
 
 	if clockwise {
-		// Front -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Front][i][2] = c.State[Up][i][2]
-		}
-
-		// Up -> Back
-		for i := 0; i < 3; i++ {
-			c.State[Up][i][2] = c.State[Back][2-i][0]
-		}
-
-		// Back -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Back][i][0] = c.State[Down][2-i][2]
-		}
-
-		// Temp (original Front) -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Down][i][2] = temp[i]
-		}
-	} else {
 		// Front -> Up
 		for i := 0; i < 3; i++ {
 			c.State[Front][i][2] = c.State[Down][i][2]
@@ -393,6 +373,26 @@ func (c *Cube) rotateRightAdjacents(clockwise Direction) {
 		// Temp (original Front) -> Up
 		for i := 0; i < 3; i++ {
 			c.State[Up][i][2] = temp[i]
+		}
+	} else {
+		// Front -> Down
+		for i := 0; i < 3; i++ {
+			c.State[Front][i][2] = c.State[Up][i][2]
+		}
+
+		// Up -> Back
+		for i := 0; i < 3; i++ {
+			c.State[Up][i][2] = c.State[Back][2-i][0]
+		}
+
+		// Back -> Down
+		for i := 0; i < 3; i++ {
+			c.State[Back][i][0] = c.State[Down][2-i][2]
+		}
+
+		// Temp (original Front) -> Down
+		for i := 0; i < 3; i++ {
+			c.State[Down][i][2] = temp[i]
 		}
 	}
 }

@@ -16,7 +16,7 @@ type RotateRequest struct {
 }
 
 type CubeStateResponse struct {
-	State [6][3][3]string `json:"state"`
+	State [6][3][3]model.Color `json:"state"`
 }
 
 func main() {

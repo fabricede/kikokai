@@ -62,6 +62,26 @@
         // Global flag to track WebAssembly loading status
         let wasmLoaded = false;
         
+        // Color mapping from Color enum (integer) to hex color
+        const colorEnumToHex = {
+            0: 0xFFFFFF, // White
+            1: 0xFFFF00, // Yellow
+            2: 0x0000FF, // Blue
+            3: 0x00FF00, // Green
+            4: 0xFF0000, // Red
+            5: 0xFFA500  // Orange
+        };
+        
+        // Color mapping from Color enum (integer) to color name 
+        const colorEnumToName = {
+            0: "white",  // White
+            1: "yellow", // Yellow
+            2: "blue",   // Blue
+            3: "green",  // Green
+            4: "red",    // Red
+            5: "orange"  // Orange
+        };
+        
         // Simple JS bridge to Go WASM functions
         function handleRotate(face, clockwise) {
             if (!wasmLoaded) {

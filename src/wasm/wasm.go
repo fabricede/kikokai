@@ -22,15 +22,14 @@ var (
 	cubeSize float64 = 1
 	gap      float64 = 0.05
 
-	// Color mapping
-	colorMap = map[string]uint32{
-		"white":  0xFFFFFF,
-		"yellow": 0xFFFF00,
-		"blue":   0x0000FF,
-		"green":  0x00FF00,
-		"red":    0xFF0000,
-		"orange": 0xFFA500,
-		"black":  0x000000,
+	// Color mapping from Color enum to hex values
+	colorMap = map[model.Color]uint32{
+		model.White:  0xFFFFFF,
+		model.Yellow: 0xFFFF00,
+		model.Blue:   0x0000FF,
+		model.Green:  0x00FF00,
+		model.Red:    0xFF0000,
+		model.Orange: 0xFFA500,
 	}
 
 	// THREE.js references

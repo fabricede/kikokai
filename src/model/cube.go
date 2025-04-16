@@ -22,13 +22,13 @@ const (
 
 // Cube represents a Rubik's cube with 6 faces, each face is a 3x3 grid
 type Cube struct {
-	State [6][3][3]string // 6 faces, 3x3 grid per face
+	State [6][3][3]Color // 6 faces, 3x3 grid per face, using Color enum instead of string
 }
 
 // NewCube creates and initializes a new Rubik's cube
 func NewCube() *Cube {
 	c := &Cube{}
-	colors := [6]string{"white", "yellow", "blue", "green", "red", "orange"}
+	colors := [6]Color{White, Yellow, Blue, Green, Red, Orange}
 	for i, color := range colors {
 		for row := 0; row < 3; row++ {
 			for col := 0; col < 3; col++ {
@@ -53,7 +53,7 @@ func (c *Cube) RotateFace(face Face, clockwise Direction) {
 }
 
 // rotateMatrixClockwise rotates a 3x3 matrix clockwise in place
-func rotateMatrixClockwise(matrix *[3][3]string) {
+func rotateMatrixClockwise(matrix *[3][3]Color) {
 	temp := *matrix
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
@@ -63,7 +63,7 @@ func rotateMatrixClockwise(matrix *[3][3]string) {
 }
 
 // rotateMatrixCounterClockwise rotates a 3x3 matrix counter-clockwise in place
-func rotateMatrixCounterClockwise(matrix *[3][3]string) {
+func rotateMatrixCounterClockwise(matrix *[3][3]Color) {
 	temp := *matrix
 	for i := 0; i < 3; i++ {
 		for j := 0; j < 3; j++ {
@@ -93,10 +93,10 @@ func (c *Cube) updateAdjacentFaces(face Face, clockwise Direction) {
 // Helper functions to rotate adjacent face edges
 func (c *Cube) rotateFrontAdjacents(clockwise Direction) {
 	// Save the edges that will be modified
-	topRow := [3]string{c.State[Up][2][0], c.State[Up][2][1], c.State[Up][2][2]}
-	rightCol := [3]string{c.State[Right][0][0], c.State[Right][1][0], c.State[Right][2][0]}
-	bottomRow := [3]string{c.State[Down][0][0], c.State[Down][0][1], c.State[Down][0][2]}
-	leftCol := [3]string{c.State[Left][0][2], c.State[Left][1][2], c.State[Left][2][2]}
+	topRow := [3]Color{c.State[Up][2][0], c.State[Up][2][1], c.State[Up][2][2]}
+	rightCol := [3]Color{c.State[Right][0][0], c.State[Right][1][0], c.State[Right][2][0]}
+	bottomRow := [3]Color{c.State[Down][0][0], c.State[Down][0][1], c.State[Down][0][2]}
+	leftCol := [3]Color{c.State[Left][0][2], c.State[Left][1][2], c.State[Left][2][2]}
 
 	if clockwise {
 		// Up bottom row → Right left column (top to bottom)
@@ -143,7 +143,7 @@ func (c *Cube) rotateFrontAdjacents(clockwise Direction) {
 }
 
 func (c *Cube) rotateBackAdjacents(clockwise Direction) {
-	temp := [3]string{}
+	temp := [3]Color{}
 
 	// Save bottom row of Up face
 	for i := 0; i < 3; i++ {
@@ -194,7 +194,7 @@ func (c *Cube) rotateBackAdjacents(clockwise Direction) {
 }
 
 func (c *Cube) rotateUpAdjacents(clockwise Direction) {
-	temp := [3]string{}
+	temp := [3]Color{}
 
 	// Save top row of Front face
 	for i := 0; i < 3; i++ {
@@ -245,7 +245,7 @@ func (c *Cube) rotateUpAdjacents(clockwise Direction) {
 }
 
 func (c *Cube) rotateDownAdjacents(clockwise Direction) {
-	temp := [3]string{}
+	temp := [3]Color{}
 
 	// Save bottom row of Front face
 	for i := 0; i < 3; i++ {
@@ -296,7 +296,7 @@ func (c *Cube) rotateDownAdjacents(clockwise Direction) {
 }
 
 func (c *Cube) rotateLeftAdjacents(clockwise Direction) {
-	temp := [3]string{}
+	temp := [3]Color{}
 
 	// Save leftmost column of Front face
 	for i := 0; i < 3; i++ {
@@ -347,7 +347,7 @@ func (c *Cube) rotateLeftAdjacents(clockwise Direction) {
 }
 
 func (c *Cube) rotateRightAdjacents(clockwise Direction) {
-	temp := [3]string{}
+	temp := [3]Color{}
 
 	// Save rightmost column of Front face
 	for i := 0; i < 3; i++ {

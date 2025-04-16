@@ -18,8 +18,8 @@ type MCPRequest struct {
 }
 
 type MCPResponse struct {
-	State [6][3][3]string `json:"state"`
-	Error string          `json:"error,omitempty"`
+	State [6][3][3]model.Color `json:"state"`
+	Error string               `json:"error,omitempty"`
 }
 
 // MCP Command constants

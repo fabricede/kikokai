@@ -93,10 +93,10 @@ func (c *Cube) updateAdjacentFaces(face Face, clockwise Direction) {
 // Helper functions to rotate adjacent face edges
 func (c *Cube) rotateFrontAdjacents(clockwise Direction) {
 	// Save the edges that will be modified
-	topRow := [3]Color{c.State[Up][2][0], c.State[Up][2][1], c.State[Up][2][2]}
-	rightCol := [3]Color{c.State[Right][0][0], c.State[Right][1][0], c.State[Right][2][0]}
-	bottomRow := [3]Color{c.State[Down][0][0], c.State[Down][0][1], c.State[Down][0][2]}
-	leftCol := [3]Color{c.State[Left][0][2], c.State[Left][1][2], c.State[Left][2][2]}
+	topRow := [3]Color{c.State[Up][0][0], c.State[Up][0][1], c.State[Up][0][2]}
+	rightCol := [3]Color{c.State[Right][0][2], c.State[Right][1][2], c.State[Right][2][2]}
+	bottomRow := [3]Color{c.State[Down][2][0], c.State[Down][2][1], c.State[Down][2][2]}
+	leftCol := [3]Color{c.State[Left][0][0], c.State[Left][1][0], c.State[Left][2][0]}
 
 	if clockwise {
 		// Up bottom row → Right left column (top to bottom)

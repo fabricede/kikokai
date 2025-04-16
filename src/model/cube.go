@@ -119,7 +119,7 @@ func (c *Cube) rotateFrontAdjacents(clockwise Direction) {
 		c.State[Up][2][1] = leftCol[1]
 		c.State[Up][2][2] = leftCol[0]
 	} else {
-			// Counterclockwise rotation
+		// Counterclockwise rotation
 		// Up bottom row → Left right column (left to right becomes bottom to top)
 		c.State[Left][2][2] = topRow[0]
 		c.State[Left][1][2] = topRow[1]

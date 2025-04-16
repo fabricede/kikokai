@@ -302,17 +302,18 @@ func animateFaceRotation(face model.Face, clockwise model.Direction) {
 	// Get rotation axis
 	rotationAxis := getRotationAxis(face)
 
-	// Animate rotation
-	rotationAngle := float64(0.1)
+	// Animate rotation - FIX: Inverting rotation angle to match expected direction
+	// In 3D graphics, clockwise is typically negative around the axis pointing toward the viewer
+	rotationAngle := float64(-0.1) // Changed from 0.1 to -0.1
 	if !clockwise {
-		rotationAngle = -rotationAngle
+		rotationAngle = -rotationAngle // This now gives 0.1 for counter-clockwise
 	}
 
 	totalRotation := float64(0)
-	targetRotation := 3.14159 / 2 // 90 degrees in radians
+	targetRotation := -3.14159 / 2 // Changed from 3.14159/2 to -3.14159/2 for clockwise
 
 	if !clockwise {
-		targetRotation = -targetRotation
+		targetRotation = -targetRotation // This gives 3.14159/2 for counter-clockwise
 	}
 
 	// Set up animation callback

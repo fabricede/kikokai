@@ -3,17 +3,10 @@ package mcp
 import (
 	"encoding/json"
 	"kikokai/src/model"
+	"kikokai/src/shared"
 	"log"
 	"net"
 )
-
-// Global cube instance
-var cube *model.Cube
-
-func init() {
-	// Initialize a new cube
-	cube = model.NewCube()
-}
 
 // MCP Protocol structures
 type MCPRequest struct {
@@ -54,7 +47,7 @@ func handleMCPConnection(conn net.Conn) {
 
 	// Process the request based on the command
 	var resp MCPResponse
-	resp.State = cube.State
+	resp.State = shared.Cube.State
 
 	switch req.Command {
 	case CommandRotate:
@@ -64,13 +57,13 @@ func handleMCPConnection(conn net.Conn) {
 		if face < 0 || face > 5 {
 			resp.Error = "Invalid face index"
 		} else {
-			cube.RotateFace(face, direction)
-			resp.State = cube.State
+			shared.Cube.RotateFace(face, direction)
+			resp.State = shared.Cube.State
 		}
 
 	case CommandReset:
-		cube = model.NewCube()
-		resp.State = cube.State
+		shared.ResetCube()
+		resp.State = shared.Cube.State
 
 	case CommandState:
 		// Just return the current state
@@ -92,6 +85,7 @@ func sendErrorResponse(conn net.Conn, errMsg string) {
 	json.NewEncoder(conn).Encode(resp)
 }
 
+// StartMCPServer starts a TCP server for MCP communication
 func StartMCPServer() {
 	ln, err := net.Listen("tcp", ":9001")
 	if err != nil {

@@ -4,17 +4,10 @@ import (
 	"encoding/json"
 	"kikokai/src/mcp"
 	"kikokai/src/model"
+	"kikokai/src/shared"
 	"log"
 	"net/http"
 )
-
-// Global cube instance
-var cube *model.Cube
-
-func init() {
-	// Initialize a new cube
-	cube = model.NewCube()
-}
 
 // API Request and Response types
 type RotateRequest struct {
@@ -33,11 +26,11 @@ func main() {
 	http.HandleFunc("/api/rotate", rotateHandler)
 	http.HandleFunc("/api/reset", resetHandler)
 
-	// Start MCP server in a separate process
+	// Start MCP server in a goroutine
 	go mcp.StartMCPServer()
 
 	// Start the HTTP server
-	log.Println("Server started at http://localhost:8090")
+	log.Println("HTTP server started at http://localhost:8090")
 	log.Fatal(http.ListenAndServe(":8090", nil))
 }
 
@@ -48,7 +41,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
 }
 
 func rotateHandler(w http.ResponseWriter, r *http.Request) {
@@ -71,10 +64,10 @@ func rotateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cube.RotateFace(face, clockwise)
+	shared.Cube.RotateFace(face, clockwise)
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
 }
 
 func resetHandler(w http.ResponseWriter, r *http.Request) {
@@ -83,8 +76,8 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cube = model.NewCube()
+	shared.ResetCube()
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
 }

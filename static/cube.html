@@ -84,31 +84,83 @@
         
         // Simple JS bridge to Go WASM functions
         function handleRotate(face, clockwise) {
-            if (!wasmLoaded) {
-                console.warn("WebAssembly not loaded yet");
-                return;
+            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
+            
+            // Create request data
+            const requestData = {
+                face: face,
+                clockwise: clockwise
+            };
+            
+            // Flag to track animation status
+            let isAnimating = false;
+            
+            // Start animation immediately for better user experience
+            if (!wasmLoaded && window.animateRotation) {
+                isAnimating = true;
+                window.animateRotation(face, clockwise, () => {
+                    // Animation complete, we'll update state from API response
+                    isAnimating = false;
+                });
             }
             
-            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
-            try {
-                wasmRotateFace(face, clockwise);
-            } catch (e) {
-                console.error("Error calling wasmRotateFace:", e);
-            }
+            // Call the API directly
+            fetch('/api/rotate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Rotation successful, updated state received");
+                
+                if (wasmLoaded && typeof wasmRotateFace === 'function') {
+                    // For WebAssembly implementation, trigger the animation directly
+                    wasmRotateFace(face, clockwise);
+                } else if (!isAnimating && window.updateCubeFromAPI) {
+                    // If animation didn't start or already completed, update from API
+                    window.updateCubeFromAPI();
+                }
+            })
+            .catch(error => {
+                console.error('Error rotating cube:', error);
+            });
         }
         
         function handleReset() {
-            if (!wasmLoaded) {
-                console.warn("WebAssembly not loaded yet");
-                return;
-            }
-            
             console.log("Resetting cube");
-            try {
-                wasmResetCube();
-            } catch (e) {
-                console.error("Error calling wasmResetCube:", e);
-            }
+            
+            // Call the API directly
+            fetch('/api/reset', {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Reset successful, updated state received");
+                
+                // If WebAssembly is loaded, refresh the cube visualization
+                if (wasmLoaded && typeof wasmGetState === 'function') {
+                    wasmGetState();
+                } else if (typeof initThreeFallback === 'function') {
+                    // Reinitialize the fallback visualization
+                    initThreeFallback();
+                }
+            })
+            .catch(error => {
+                console.error('Error resetting cube:', error);
+            });
         }
         
         // Debug logging for WebAssembly global scope
@@ -125,6 +177,7 @@
             let cubeGroup;
             const cubeSize = 1;
             const gap = 0.05;
+            let cubeState; // Store the cube state locally
             
             // Create scene
             scene = new THREE.Scene();
@@ -166,13 +219,173 @@
             
             animate();
             
-            // Fetch initial state
-            fetch('/api/state')
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Loaded cube state from API");
-                })
-                .catch(error => console.error('Error fetching cube state:', error));
+            // Create a single cube piece
+            function createCubePiece(x, y, z) {
+                const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
+                const materials = [];
+                
+                // Create array of 6 materials for each side of the cube
+                for (let i = 0; i < 6; i++) {
+                    materials.push(new THREE.MeshStandardMaterial({ 
+                        color: 0x333333,  // Default dark gray
+                        side: THREE.DoubleSide
+                    }));
+                }
+                
+                // Right face (x = 1) - Orange (Face 5)
+                if(x === 1) {
+                    materials[0].color.setHex(colorEnumToHex[cubeState[5][y+1][z+1]]);
+                }
+                
+                // Left face (x = -1) - Red (Face 4)
+                if(x === -1) {
+                    materials[1].color.setHex(colorEnumToHex[cubeState[4][y+1][2-z]]);
+                }
+                
+                // Top face (y = 1) - Blue (Face 2)
+                if(y === 1) {
+                    materials[2].color.setHex(colorEnumToHex[cubeState[2][2-z][x+1]]);
+                }
+                
+                // Bottom face (y = -1) - Green (Face 3)
+                if(y === -1) {
+                    materials[3].color.setHex(colorEnumToHex[cubeState[3][z+1][x+1]]);
+                }
+                
+                // Front face (z = 1) - White (Face 0)
+                if(z === 1) {
+                    materials[4].color.setHex(colorEnumToHex[cubeState[0][y+1][x+1]]);
+                }
+                
+                // Back face (z = -1) - Yellow (Face 1)
+                if(z === -1) {
+                    materials[5].color.setHex(colorEnumToHex[cubeState[1][y+1][2-x]]);
+                }
+                
+                const cube = new THREE.Mesh(geometry, materials);
+                cube.position.set(
+                    x * (cubeSize + gap),
+                    y * (cubeSize + gap),
+                    z * (cubeSize + gap)
+                );
+                
+                // Add position as custom properties for animation selection
+                cube.userData = { posX: x, posY: y, posZ: z };
+                
+                // Add black lines around edges to make cubies stand out
+                const edgeGeometry = new THREE.EdgesGeometry(geometry);
+                const edgeMaterial = new THREE.LineBasicMaterial({ color: 0x000000, linewidth: 1 });
+                const edges = new THREE.LineSegments(edgeGeometry, edgeMaterial);
+                cube.add(edges);
+                
+                cubeGroup.add(cube);
+            }
+            
+            // Create the cube with the current state
+            function createCube() {
+                // Clear existing cube
+                while(cubeGroup.children.length > 0) {
+                    cubeGroup.remove(cubeGroup.children[0]);
+                }
+                
+                // Create small cubes
+                for(let x = -1; x <= 1; x++) {
+                    for(let y = -1; y <= 1; y++) {
+                        for(let z = -1; z <= 1; z++) {
+                            // Skip center cube
+                            if(x === 0 && y === 0 && z === 0) continue;
+                            
+                            createCubePiece(x, y, z);
+                        }
+                    }
+                }
+            }
+            
+            // Function to update the cube visualization from API state
+            function updateCubeFromAPI() {
+                fetch('/api/state')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log("Loaded cube state from API");
+                        cubeState = data.state;
+                        createCube();
+                    })
+                    .catch(error => console.error('Error fetching cube state:', error));
+            }
+            
+            // Function to animate rotation
+            function animateRotation(face, clockwise, callback) {
+                const duration = 500; // Duration of the animation in milliseconds
+                const start = performance.now();
+                
+                const axis = new THREE.Vector3();
+                const angle = clockwise ? -Math.PI / 2 : Math.PI / 2;
+                
+                switch(face) {
+                    case 0: // Front face
+                        axis.set(0, 0, 1);
+                        break;
+                    case 1: // Back face
+                        axis.set(0, 0, -1);
+                        break;
+                    case 2: // Up face
+                        axis.set(0, 1, 0);
+                        break;
+                    case 3: // Down face
+                        axis.set(0, -1, 0);
+                        break;
+                    case 4: // Left face
+                        axis.set(-1, 0, 0);
+                        break;
+                    case 5: // Right face
+                        axis.set(1, 0, 0);
+                        break;
+                }
+                
+                const affectedCubes = cubeGroup.children.filter(cube => {
+                    switch(face) {
+                        case 0: return cube.userData.posZ === 1;
+                        case 1: return cube.userData.posZ === -1;
+                        case 2: return cube.userData.posY === 1;
+                        case 3: return cube.userData.posY === -1;
+                        case 4: return cube.userData.posX === -1;
+                        case 5: return cube.userData.posX === 1;
+                    }
+                });
+                
+                function animate() {
+                    const now = performance.now();
+                    const elapsed = now - start;
+                    const t = Math.min(elapsed / duration, 1);
+                    
+                    affectedCubes.forEach(cube => {
+                        cube.rotation.set(0, 0, 0);
+                        cube.rotateOnAxis(axis, t * angle);
+                    });
+                    
+                    if (t < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        callback();
+                    }
+                }
+                
+                animate();
+            }
+            
+            // Initialize by fetching the state from the server
+            updateCubeFromAPI();
+            
+            // Expose functions globally for access by the rotation handler
+            window.animateRotation = animateRotation;
+            window.updateCubeFromAPI = updateCubeFromAPI;
+            
+            return updateCubeFromAPI;
         }
         
         // Load the WebAssembly module with better error handling

@@ -6,6 +6,7 @@ import (
 	"kikokai/src/model"
 	"kikokai/src/shared"
 	"log"
+	"math/rand"
 	"net/http"
 )
 
@@ -25,6 +26,7 @@ func main() {
 	http.HandleFunc("/api/state", getStateHandler)
 	http.HandleFunc("/api/rotate", rotateHandler)
 	http.HandleFunc("/api/reset", resetHandler)
+	http.HandleFunc("/api/scramble", scrambleHandler)
 
 	// Start MCP server in a goroutine
 	go mcp.StartMCPServer()
@@ -77,6 +79,28 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	shared.ResetCube()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
+}
+
+// scrambleHandler randomly scrambles the cube
+func scrambleHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Scramble the cube with 20-25 random moves
+	numMoves := 20 + rand.Intn(6) // Random number between 20 and 25
+	log.Printf("Scrambling cube with %d random moves", numMoves)
+
+	for i := 0; i < numMoves; i++ {
+		face := model.Face(rand.Intn(6))                // Random face (0-5)
+		clockwise := model.Direction(rand.Intn(2) == 1) // Random direction
+		shared.Cube.RotateFace(face, clockwise)
+		log.Printf("Scramble move %d: Face %d, Clockwise: %v", i+1, face, clockwise)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})

@@ -55,6 +55,7 @@
             </div>
             
             <button class="reset" onclick="handleReset()">Reset Cube</button>
+            <button class="scramble" onclick="handleScramble()">Scramble Cube</button>
         </div>
     </div>
     
@@ -150,16 +151,45 @@
             .then(data => {
                 console.log("Reset successful, updated state received");
                 
-                // If WebAssembly is loaded, refresh the cube visualization
+                // Update the cube visualization with the reset state
                 if (wasmLoaded && typeof wasmGetState === 'function') {
                     wasmGetState();
-                } else if (typeof initThreeFallback === 'function') {
-                    // Reinitialize the fallback visualization
-                    initThreeFallback();
+                } else if (window.updateCubeFromAPI) {
+                    // Use the global updateCubeFromAPI function
+                    window.updateCubeFromAPI();
                 }
             })
             .catch(error => {
                 console.error('Error resetting cube:', error);
+            });
+        }
+
+        function handleScramble() {
+            console.log("Scrambling cube");
+            
+            // Call the API directly
+            fetch('/api/scramble', {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Scramble successful, updated state received");
+                
+                // Update the cube visualization with the scrambled state
+                if (wasmLoaded && typeof wasmGetState === 'function') {
+                    wasmGetState();
+                } else if (window.updateCubeFromAPI) {
+                    // Use the global updateCubeFromAPI function
+                    window.updateCubeFromAPI();
+                }
+            })
+            .catch(error => {
+                console.error('Error scrambling cube:', error);
             });
         }
         

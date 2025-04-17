@@ -28,13 +28,13 @@ func GetNorthFace(face Face) Face {
 	case Up:
 		return Back
 	case Back:
-		return Down
+		return Up
 	case Down:
-		return Front
+		return Back
 	case Left:
-		return Left
+		return Up
 	case Right:
-		return Right
+		return Up
 	default:
 		return face
 	}
@@ -48,13 +48,13 @@ func GetSouthFace(face Face) Face {
 	case Up:
 		return Front
 	case Back:
-		return Up
+		return Down
 	case Down:
 		return Back
 	case Left:
-		return Left
+		return Down
 	case Right:
-		return Right
+		return Down
 	default:
 		return face
 	}
@@ -66,11 +66,11 @@ func GetEastFace(face Face) Face {
 	case Front:
 		return Right
 	case Up:
-		return Up
+		return Right
 	case Back:
 		return Left
 	case Down:
-		return Down
+		return Back
 	case Left:
 		return Front
 	case Right:

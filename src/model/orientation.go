@@ -1,5 +1,25 @@
 package model
 
+// Face represents the position of a face on the cube
+type Face int
+
+// Direction for rotation
+type Direction bool
+
+const (
+	// Face constants
+	Front Face = iota
+	Back
+	Up
+	Down
+	Left
+	Right
+
+	// Direction constants
+	Clockwise        Direction = true
+	CounterClockwise Direction = false
+)
+
 // GetNorthFace returns the face that is up to the given face when the cube's face is facing us
 func GetNorthFace(face Face) Face {
 	switch face {

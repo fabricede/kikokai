@@ -355,17 +355,37 @@ func (c *Cube) rotateRightAdjacents(clockwise Direction) {
 	}
 
 	if clockwise {
+		// Front -> Down
+		for i := 0; i < 3; i++ {
+			c.State[Front][i][2] = c.State[Up][i][2]
+		}
+
+		// Up -> Back (reversed)
+		for i := 0; i < 3; i++ {
+			c.State[Up][i][2] = c.State[Back][2-i][0]
+		}
+
+		// Back -> Down (reversed)
+		for i := 0; i < 3; i++ {
+			c.State[Back][i][0] = c.State[Down][2-i][2]
+		}
+
+		// Temp (original Front) -> Up
+		for i := 0; i < 3; i++ {
+			c.State[Down][i][2] = temp[i]
+		}
+	} else {
 		// Front -> Up
 		for i := 0; i < 3; i++ {
 			c.State[Front][i][2] = c.State[Down][i][2]
 		}
 
-		// Down -> Back
+		// Down -> Back (reversed)
 		for i := 0; i < 3; i++ {
 			c.State[Down][i][2] = c.State[Back][2-i][0]
 		}
 
-		// Back -> Up
+		// Back -> Up (reversed)
 		for i := 0; i < 3; i++ {
 			c.State[Back][i][0] = c.State[Up][2-i][2]
 		}
@@ -373,26 +393,6 @@ func (c *Cube) rotateRightAdjacents(clockwise Direction) {
 		// Temp (original Front) -> Up
 		for i := 0; i < 3; i++ {
 			c.State[Up][i][2] = temp[i]
-		}
-	} else {
-		// Front -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Front][i][2] = c.State[Up][i][2]
-		}
-
-		// Up -> Back
-		for i := 0; i < 3; i++ {
-			c.State[Up][i][2] = c.State[Back][2-i][0]
-		}
-
-		// Back -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Back][i][0] = c.State[Down][2-i][2]
-		}
-
-		// Temp (original Front) -> Down
-		for i := 0; i < 3; i++ {
-			c.State[Down][i][2] = temp[i]
 		}
 	}
 }

@@ -152,8 +152,9 @@
                 console.log("Reset successful, updated state received");
                 
                 // Update the cube visualization with the reset state
-                if (wasmLoaded && typeof wasmGetState === 'function') {
-                    wasmGetState();
+                if (wasmLoaded && typeof wasmResetCube === 'function') {
+                    // Call the WASM function directly to reset the cube
+                    wasmResetCube();
                 } else if (window.updateCubeFromAPI) {
                     // Use the global updateCubeFromAPI function
                     window.updateCubeFromAPI();
@@ -181,8 +182,9 @@
                 console.log("Scramble successful, updated state received");
                 
                 // Update the cube visualization with the scrambled state
-                if (wasmLoaded && typeof wasmGetState === 'function') {
-                    wasmGetState();
+                if (wasmLoaded && typeof wasmScrambleCube === 'function') {
+                    // Call the WASM function directly to scramble the cube
+                    wasmScrambleCube();
                 } else if (window.updateCubeFromAPI) {
                     // Use the global updateCubeFromAPI function
                     window.updateCubeFromAPI();

@@ -1,2 +1,2 @@
 server.exe
-*.wasm
+static/main.wasm

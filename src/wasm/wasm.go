@@ -248,7 +248,13 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 	}
 
 	face := model.Face(args[0].Int())
-	clockwise := model.Direction(args[1].Bool())
+	// Convert boolean to the proper Direction type constant
+	var clockwise model.Direction
+	if args[1].Bool() {
+		clockwise = model.Clockwise
+	} else {
+		clockwise = model.CounterClockwise
+	}
 
 	if face < 0 || face > 5 {
 		return js.ValueOf("Invalid face index")
@@ -266,7 +272,7 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 func animateFaceRotation(face model.Face, clockwise model.Direction) {
 	// Log start of animation
 	dirStr := "clockwise"
-	if !clockwise {
+	if clockwise == model.CounterClockwise {
 		dirStr = "counter-clockwise"
 	}
 	println("Starting rotation of face", int(face), dirStr)
@@ -302,18 +308,17 @@ func animateFaceRotation(face model.Face, clockwise model.Direction) {
 	// Get rotation axis
 	rotationAxis := getRotationAxis(face)
 
-	// Animate rotation - FIX: Inverting rotation angle to match expected direction
-	// In 3D graphics, clockwise is typically negative around the axis pointing toward the viewer
-	rotationAngle := float64(-0.1) // Changed from 0.1 to -0.1
-	if !clockwise {
-		rotationAngle = -rotationAngle // This now gives 0.1 for counter-clockwise
+	// Animate rotation - setting rotation angle based on direction
+	rotationAngle := float64(-0.1) // Default for clockwise
+	if clockwise == model.CounterClockwise {
+		rotationAngle = float64(0.1) // For counter-clockwise
 	}
 
 	totalRotation := float64(0)
-	targetRotation := -3.14159 / 2 // Changed from 3.14159/2 to -3.14159/2 for clockwise
+	targetRotation := -3.14159 / 2 // Default for clockwise
 
-	if !clockwise {
-		targetRotation = -targetRotation // This gives 3.14159/2 for counter-clockwise
+	if clockwise == model.CounterClockwise {
+		targetRotation = 3.14159 / 2 // For counter-clockwise
 	}
 
 	// Set up animation callback
@@ -449,6 +454,18 @@ func resetCube(this js.Value, args []js.Value) interface{} {
 	return js.ValueOf("Cube reset")
 }
 
+// Scramble the cube
+func scrambleCube(this js.Value, args []js.Value) interface{} {
+	if isAnimating {
+		return js.ValueOf("Animation in progress")
+	}
+
+	// Scramble the cube with a standard number of random moves
+	cube.Scramble(20) // Scramble with 20 random moves
+	createCube()
+	return js.ValueOf("Cube scrambled")
+}
+
 // Register JavaScript callbacks with proper debug output
 func registerCallbacks() {
 	// Create functions that will persist (avoid garbage collection)
@@ -456,12 +473,14 @@ func registerCallbacks() {
 	getStateFunc := js.FuncOf(getState)
 	rotateFaceFunc := js.FuncOf(rotateFace)
 	resetCubeFunc := js.FuncOf(resetCube)
+	scrambleCubeFunc := js.FuncOf(scrambleCube)
 
 	// Register functions in the global namespace
 	js.Global().Set("wasmInitThreeScene", initThreeSceneFunc)
 	js.Global().Set("wasmGetState", getStateFunc)
 	js.Global().Set("wasmRotateFace", rotateFaceFunc)
 	js.Global().Set("wasmResetCube", resetCubeFunc)
+	js.Global().Set("wasmScrambleCube", scrambleCubeFunc)
 
 	// Add a debug function to verify registration
 	debugFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -471,10 +490,10 @@ func registerCallbacks() {
 
 	// Store functions to prevent garbage collection
 	// This is crucial - functions will be garbage collected if not stored
-	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc, resetCubeFunc, debugFunc)
+	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc, resetCubeFunc, scrambleCubeFunc, debugFunc)
 
 	// Print to console that functions are registered
-	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube")
+	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube, wasmScrambleCube")
 }
 
 func main() {

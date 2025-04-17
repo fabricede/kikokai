@@ -82,7 +82,7 @@ func (m *Matrix5x5) SetCube(c *Cube, face Face) {
 }
 
 // RotateFace rotates a specific face of the cube
-func RotateFace(c *Cube, face Face, clockwise bool) {
+func RotateFace(c *Cube, face Face, clockwise Direction) {
 	var m Matrix5x5
 	m.Init(c, face)
 	// Rotate the matrix
@@ -92,5 +92,4 @@ func RotateFace(c *Cube, face Face, clockwise bool) {
 		m = m.RotateCounterClockwise()
 	}
 	m.SetCube(c, face)
-	return
 }

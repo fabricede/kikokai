@@ -249,7 +249,7 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 
 	face := model.Face(args[0].Int())
 	// Convert boolean to the proper Direction type constant
-	var clockwise model.Direction
+	var clockwise model.TurningDirection
 	if args[1].Bool() {
 		clockwise = model.Clockwise
 	} else {
@@ -269,7 +269,7 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 }
 
 // Animate the rotation of a face
-func animateFaceRotation(face model.Face, clockwise model.Direction) {
+func animateFaceRotation(face model.Face, clockwise model.TurningDirection) {
 	// Log start of animation
 	dirStr := "clockwise"
 	if clockwise == model.CounterClockwise {

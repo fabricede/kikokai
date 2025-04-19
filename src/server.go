@@ -59,7 +59,7 @@ func rotateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	face := model.Face(req.Face)
-	clockwise := model.Direction(req.Clockwise)
+	clockwise := model.TurningDirection(req.Clockwise)
 
 	if face < 0 || face > 5 {
 		http.Error(w, "Invalid face index", http.StatusBadRequest)
@@ -96,8 +96,8 @@ func scrambleHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Scrambling cube with %d random moves", numMoves)
 
 	for i := 0; i < numMoves; i++ {
-		face := model.Face(rand.Intn(6))                // Random face (0-5)
-		clockwise := model.Direction(rand.Intn(2) == 1) // Random direction
+		face := model.Face(rand.Intn(6))                       // Random face (0-5)
+		clockwise := model.TurningDirection(rand.Intn(2) == 1) // Random direction
 		shared.Cube.RotateFace(face, clockwise)
 		log.Printf("Scramble move %d: Face %d, Clockwise: %v", i+1, face, clockwise)
 	}

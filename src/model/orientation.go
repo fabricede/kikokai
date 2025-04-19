@@ -1,169 +1,169 @@
 package model
 
-// Face represents the position of a face on the cube
-type Face int
+// Orientation represents the orientation of a face on the cube
+// It is used to determine the position of the faces relative to each other
+// For exemple, from the perspective of the cube's Front face
+// North is the top face, South is the bottom face, East is the right face, and West is the left face
+// Relative to Front face, it's North face is rotated 90 degrees counter-clockwise, It's South face is rotated 90 degrees clockwise
+// therefore:
+// - it's North border is the Est Border of the North face
+// - it's East Border is the North border of the East face
+// - it's South border is the West border of the South face
+// - it's West border is the East border of the West face
 
-// Direction for rotation
-type Direction bool
+// FaceIndex represents the order of representation of faces on the cube
+type FaceIndex int
+
+type Orientation int
+
+// TurningDirection for rotation
+type TurningDirection bool
 
 const (
 	// Face constants
-	Front Face = iota
+	Front FaceIndex = iota
 	Back
 	Up
 	Down
 	Left
 	Right
 
-	// Direction constants
-	Clockwise        Direction = true
-	CounterClockwise Direction = false
+	// Orientation constants
+	North Orientation = iota
+	East
+	Center
+	West
+	South
+
+	// Turning direction
+	Clockwise        TurningDirection = true
+	CounterClockwise TurningDirection = false
 )
 
 // GetNorthFace returns the face that is up to the given face when the cube's face is facing us
-func GetNorthFace(face Face) Face {
+func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
-		return Up
+		return Up, West
 	case Up:
-		return Back
+		return Left, East
 	case Back:
-		return Up
+		return Down, West
 	case Down:
-		return Back
+		return Right, West
 	case Left:
-		return Up
+		return Back, East
 	case Right:
-		return Up
+		return Front, East
 	default:
-		return face
+		return face, Center
 	}
 }
 
 // GetSouthFace returns the face that is down to the given face when the cube's face is facing us
-func GetSouthFace(face Face) Face {
+func GetSouthFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
-		return Down
+		return Down, East
 	case Up:
-		return Front
+		return Right, East
 	case Back:
-		return Down
+		return Up, East
 	case Down:
-		return Back
+		return Left, East
 	case Left:
-		return Down
+		return Front, West
 	case Right:
-		return Down
+		return Back, West
 	default:
-		return face
+		return face, Center
 	}
 }
 
 // GetEastFace returns the face that is right to the given face when the cube's face is facing us
-func GetEastFace(face Face) Face {
+func GetEastFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
-		return Right
+		return Right, North
 	case Up:
-		return Right
+		return Back, South
 	case Back:
-		return Left
+		return Left, North
 	case Down:
-		return Back
+		return Front, South
 	case Left:
-		return Front
+		return Down, South
 	case Right:
-		return Back
+		return Up, South
 	default:
-		return face
+		return face, Center
 	}
 }
 
 // GetWestFace returns the face that is left to the given face when the cube's face is facing us
-func GetWestFace(face Face) Face {
+func GetWestFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
-		return Left
+		return Left, South
 	case Up:
-		return Up
+		return Front, North
 	case Back:
-		return Right
+		return Right, South
 	case Down:
-		return Down
+		return Back, North
 	case Left:
-		return Back
+		return Up, North
 	case Right:
-		return Front
+		return Down, North
 	default:
-		return face
+		return face, Center
 	}
 }
 
 // GetNorthFace returns the edge that is up to the given face when the cube's face is facing us
-func GetNorthEdge(cube *Cube, face Face) (edge [3]Color) {
-	north := GetNorthFace(face)
-	edge[0] = cube.State[north][0][0]
-	edge[1] = cube.State[north][1][0]
-	edge[2] = cube.State[north][2][0]
-	return edge
+func GetNorthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
+	north, border := GetNorthFace(face)
+	return cube.GetEdge(north, border)
 }
 
 // GetSouthFace returns the edge that is down to the given face when the cube's face is facing us
-func GetSouthEdge(cube *Cube, face Face) (edge [3]Color) {
-	south := GetSouthFace(face)
-	edge[0] = cube.State[south][2][0]
-	edge[1] = cube.State[south][2][1]
-	edge[2] = cube.State[south][2][2]
-	return edge
+func GetSouthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
+	south, border := GetSouthFace(face)
+	return cube.GetEdge(south, border)
 }
 
 // GetEastFace returns the edge that is right to the given face when the cube's face is facing us
-func GetEastEdge(cube *Cube, face Face) (edge [3]Color) {
-	east := GetEastFace(face)
-	edge[0] = cube.State[east][0][2]
-	edge[1] = cube.State[east][1][2]
-	edge[2] = cube.State[east][2][2]
-	return edge
+func GetEastEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
+	east, border := GetEastFace(face)
+	return cube.GetEdge(east, border)
 }
 
 // GetWestFace returns the edge that is left to the given face when the cube's face is facing us
-func GetWestEdge(cube *Cube, face Face) (edge [3]Color) {
-	west := GetWestFace(face)
-	edge[0] = cube.State[west][0][0]
-	edge[1] = cube.State[west][1][0]
-	edge[2] = cube.State[west][2][0]
-	return edge
+func GetWestEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
+	west, border := GetWestFace(face)
+	return cube.GetEdge(west, border)
 }
 
 // SetNorthEdge sets the edge that is up to the given face when the cube's face is facing us
-func SetNorthEdge(cube *Cube, face Face, edge [3]Color) {
-	north := GetNorthFace(face)
-	cube.State[north][0][0] = edge[0]
-	cube.State[north][1][0] = edge[1]
-	cube.State[north][2][0] = edge[2]
+func SetNorthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
+	north, border := GetNorthFace(face)
+	cube.SetEdge(north, border, edge)
 }
 
 // SetSouthEdge sets the edge that is down to the given face when the cube's face is facing us
-func SetSouthEdge(cube *Cube, face Face, edge [3]Color) {
-	south := GetSouthFace(face)
-	cube.State[south][2][0] = edge[0]
-	cube.State[south][2][1] = edge[1]
-	cube.State[south][2][2] = edge[2]
+func SetSouthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
+	south, border := GetSouthFace(face)
+	cube.SetEdge(south, border, edge)
 }
 
 // SetEastEdge sets the edge that is right to the given face when the cube's face is facing us
-func SetEastEdge(cube *Cube, face Face, edge [3]Color) {
-	east := GetEastFace(face)
-	cube.State[east][0][2] = edge[0]
-	cube.State[east][1][2] = edge[1]
-	cube.State[east][2][2] = edge[2]
+func SetEastEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
+	east, border := GetEastFace(face)
+	cube.SetEdge(east, border, edge)
 }
 
 // SetWestEdge sets the edge that is left to the given face when the cube's face is facing us
-func SetWestEdge(cube *Cube, face Face, edge [3]Color) {
-	west := GetWestFace(face)
-	cube.State[west][0][0] = edge[0]
-	cube.State[west][1][0] = edge[1]
-	cube.State[west][2][0] = edge[2]
+func SetWestEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
+	west, border := GetWestFace(face)
+	cube.SetEdge(west, border, edge)
 }

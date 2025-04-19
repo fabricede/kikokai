@@ -52,7 +52,7 @@ func handleMCPConnection(conn net.Conn) {
 	switch req.Command {
 	case CommandRotate:
 		face := model.Face(req.Params.Face)
-		direction := model.Direction(req.Params.Clockwise)
+		direction := model.TurningDirection(req.Params.Clockwise)
 
 		if face < 0 || face > 5 {
 			resp.Error = "Invalid face index"

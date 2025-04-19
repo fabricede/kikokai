@@ -8,7 +8,7 @@ import (
 func TestCube_RotateFront(t *testing.T) {
 	tests := []struct {
 		name      string
-		clockwise Direction
+		clockwise TurningDirection
 		expected  [6][3][3]Color
 	}{
 		{

@@ -177,43 +177,43 @@ func createCubePiece(x, y, z int) {
 
 	// Right face (x = 1)
 	if x == 1 {
-		color := colorMap[cube.State[5][y+1][z+1]]
-		println("Right face color at", x, y, z, ":", cube.State[5][y+1][z+1], "mapped to hex:", color)
+		color := colorMap[cube.State[5].Stickers[y+1][z+1].Color]
+		println("Right face color at", x, y, z, ":", cube.State[5].Stickers[y+1][z+1].GetName(), "mapped to hex:", color)
 		materials.Index(0).Get("color").Call("setHex", color)
 	}
 
 	// Left face (x = -1)
 	if x == -1 {
-		color := colorMap[cube.State[4][y+1][1-z]]
-		println("Left face color at", x, y, z, ":", cube.State[4][y+1][1-z], "mapped to hex:", color)
+		color := colorMap[cube.State[4].Stickers[y+1][1-z].Color]
+		println("Left face color at", x, y, z, ":", cube.State[4].Stickers[y+1][1-z].GetName(), "mapped to hex:", color)
 		materials.Index(1).Get("color").Call("setHex", color)
 	}
 
 	// Top face (y = 1)
 	if y == 1 {
-		color := colorMap[cube.State[2][1-z][x+1]]
-		println("Top face color at", x, y, z, ":", cube.State[2][1-z][x+1], "mapped to hex:", color)
+		color := colorMap[cube.State[2].Stickers[1-z][x+1].Color]
+		println("Top face color at", x, y, z, ":", cube.State[2].Stickers[1-z][x+1].GetName(), "mapped to hex:", color)
 		materials.Index(2).Get("color").Call("setHex", color)
 	}
 
 	// Bottom face (y = -1)
 	if y == -1 {
-		color := colorMap[cube.State[3][z+1][x+1]]
-		println("Bottom face color at", x, y, z, ":", cube.State[3][z+1][x+1], "mapped to hex:", color)
+		color := colorMap[cube.State[3].Stickers[z+1][x+1].Color]
+		println("Bottom face color at", x, y, z, ":", cube.State[3].Stickers[z+1][x+1].GetName(), "mapped to hex:", color)
 		materials.Index(3).Get("color").Call("setHex", color)
 	}
 
 	// Front face (z = 1)
 	if z == 1 {
-		color := colorMap[cube.State[0][y+1][x+1]]
-		println("Front face color at", x, y, z, ":", cube.State[0][y+1][x+1], "mapped to hex:", color)
+		color := colorMap[cube.State[0].Stickers[y+1][x+1].Color]
+		println("Front face color at", x, y, z, ":", cube.State[0].Stickers[y+1][x+1].GetName(), "mapped to hex:", color)
 		materials.Index(4).Get("color").Call("setHex", color)
 	}
 
 	// Back face (z = -1)
 	if z == -1 {
-		color := colorMap[cube.State[1][y+1][1-x]]
-		println("Back face color at", x, y, z, ":", cube.State[1][y+1][1-x], "mapped to hex:", color)
+		color := colorMap[cube.State[1].Stickers[y+1][1-x].Color]
+		println("Back face color at", x, y, z, ":", cube.State[1].Stickers[y+1][1-x].GetName(), "mapped to hex:", color)
 		materials.Index(5).Get("color").Call("setHex", color)
 	}
 
@@ -247,7 +247,7 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 		return js.ValueOf("Invalid arguments or animation in progress")
 	}
 
-	face := model.Face(args[0].Int())
+	face := model.FaceIndex(args[0].Int())
 	// Convert boolean to the proper Direction type constant
 	var clockwise model.TurningDirection
 	if args[1].Bool() {
@@ -269,7 +269,7 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 }
 
 // Animate the rotation of a face
-func animateFaceRotation(face model.Face, clockwise model.TurningDirection) {
+func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection) {
 	// Log start of animation
 	dirStr := "clockwise"
 	if clockwise == model.CounterClockwise {
@@ -373,7 +373,7 @@ func animateFaceRotation(face model.Face, clockwise model.TurningDirection) {
 }
 
 // Determine if a cube should rotate with the face
-func shouldRotateWithFace(cube js.Value, face model.Face) bool {
+func shouldRotateWithFace(cube js.Value, face model.FaceIndex) bool {
 	// Verify that cube and userData exist
 	if cube.IsUndefined() || cube.IsNull() {
 		println("Warning: Undefined or null cube in shouldRotateWithFace")
@@ -424,7 +424,7 @@ func shouldRotateWithFace(cube js.Value, face model.Face) bool {
 }
 
 // Get the axis for rotation based on the face
-func getRotationAxis(face model.Face) js.Value {
+func getRotationAxis(face model.FaceIndex) js.Value {
 	switch face {
 	case model.Front:
 		return vector3.New(0, 0, 1)

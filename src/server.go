@@ -6,7 +6,6 @@ import (
 	"kikokai/src/model"
 	"kikokai/src/shared"
 	"log"
-	"math/rand"
 	"net/http"
 )
 
@@ -17,7 +16,7 @@ type RotateRequest struct {
 }
 
 type CubeStateResponse struct {
-	State [6][3][3]model.Color `json:"state"`
+	State [6]model.Face `json:"state"`
 }
 
 func main() {
@@ -58,8 +57,14 @@ func rotateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	face := model.Face(req.Face)
-	clockwise := model.TurningDirection(req.Clockwise)
+	face := model.FaceIndex(req.Face)
+	// Convert boolean to Direction type
+	var clockwise model.TurningDirection
+	if req.Clockwise {
+		clockwise = model.Clockwise
+	} else {
+		clockwise = model.CounterClockwise
+	}
 
 	if face < 0 || face > 5 {
 		http.Error(w, "Invalid face index", http.StatusBadRequest)
@@ -91,16 +96,8 @@ func scrambleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Scramble the cube with 20-25 random moves
-	numMoves := 20 + rand.Intn(6) // Random number between 20 and 25
-	log.Printf("Scrambling cube with %d random moves", numMoves)
-
-	for i := 0; i < numMoves; i++ {
-		face := model.Face(rand.Intn(6))                       // Random face (0-5)
-		clockwise := model.TurningDirection(rand.Intn(2) == 1) // Random direction
-		shared.Cube.RotateFace(face, clockwise)
-		log.Printf("Scramble move %d: Face %d, Clockwise: %v", i+1, face, clockwise)
-	}
+	// Use the new Scramble method from the refactored cube model
+	shared.Cube.Scramble(20) // Scramble with 20 random moves
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})

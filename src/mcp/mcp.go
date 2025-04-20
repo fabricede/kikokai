@@ -18,15 +18,16 @@ type MCPRequest struct {
 }
 
 type MCPResponse struct {
-	State [6][3][3]model.Color `json:"state"`
-	Error string               `json:"error,omitempty"`
+	State [6]model.Face `json:"state"`
+	Error string        `json:"error,omitempty"`
 }
 
 // MCP Command constants
 const (
-	CommandRotate = "rotate"
-	CommandReset  = "reset"
-	CommandState  = "state"
+	CommandRotate   = "rotate"
+	CommandReset    = "reset"
+	CommandState    = "state"
+	CommandScramble = "scramble"
 )
 
 func handleMCPConnection(conn net.Conn) {
@@ -51,18 +52,29 @@ func handleMCPConnection(conn net.Conn) {
 
 	switch req.Command {
 	case CommandRotate:
-		face := model.Face(req.Params.Face)
-		direction := model.TurningDirection(req.Params.Clockwise)
+		face := model.FaceIndex(req.Params.Face)
+		// Convert boolean to TurningDirection type
+		var clockwise model.TurningDirection
+		if req.Params.Clockwise {
+			clockwise = model.Clockwise
+		} else {
+			clockwise = model.CounterClockwise
+		}
 
 		if face < 0 || face > 5 {
 			resp.Error = "Invalid face index"
 		} else {
-			shared.Cube.RotateFace(face, direction)
+			shared.Cube.RotateFace(face, clockwise)
 			resp.State = shared.Cube.State
 		}
 
 	case CommandReset:
 		shared.ResetCube()
+		resp.State = shared.Cube.State
+
+	case CommandScramble:
+		// Add scramble support to the MCP server
+		shared.Cube.Scramble(20) // Scramble with 20 random moves
 		resp.State = shared.Cube.State
 
 	case CommandState:

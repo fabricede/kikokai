@@ -53,8 +53,8 @@ func NewCube() *Cube {
 
 		// Initialize stickers for each face
 		stickerIndex := 0
-		for row := 0; row < 3; row++ {
-			for col := 0; col < 3; col++ {
+		for row := range 3 {
+			for col := range 3 {
 				face.Stickers[row][col] = Sticker{
 					Color: Color(i),                         // Use the face index as the color
 					Index: StickerIndex(i*9 + stickerIndex), // Calculate the correct sticker index

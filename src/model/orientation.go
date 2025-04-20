@@ -40,7 +40,7 @@ const (
 	CounterClockwise TurningDirection = false
 )
 
-// GetNorthFace returns the face that is up to the given face when the cube's face is facing us
+// GetNorthFace returns the face that is North to the given face when the cube's face is facing us
 func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
@@ -60,7 +60,7 @@ func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
 	}
 }
 
-// GetSouthFace returns the face that is down to the given face when the cube's face is facing us
+// GetSouthFace returns the face that is South to the given face when the cube's face is facing us
 func GetSouthFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
@@ -80,7 +80,7 @@ func GetSouthFace(face FaceIndex) (FaceIndex, Orientation) {
 	}
 }
 
-// GetEastFace returns the face that is right to the given face when the cube's face is facing us
+// GetEastFace returns the face that is East to the given face when the cube's face is facing us
 func GetEastFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
@@ -100,7 +100,7 @@ func GetEastFace(face FaceIndex) (FaceIndex, Orientation) {
 	}
 }
 
-// GetWestFace returns the face that is left to the given face when the cube's face is facing us
+// GetWestFace returns the face that is West to the given face when the cube's face is facing us
 func GetWestFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
@@ -120,49 +120,49 @@ func GetWestFace(face FaceIndex) (FaceIndex, Orientation) {
 	}
 }
 
-// GetNorthFace returns the edge that is up to the given face when the cube's face is facing us
+// GetNorthEdge returns the edge that is North to the given face when the cube's face is facing us
 func GetNorthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
 	north, border := GetNorthFace(face)
 	return cube.GetEdge(north, border)
 }
 
-// GetSouthFace returns the edge that is down to the given face when the cube's face is facing us
+// GetSouthEdge returns the edge that is South to the given face when the cube's face is facing us
 func GetSouthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
 	south, border := GetSouthFace(face)
 	return cube.GetEdge(south, border)
 }
 
-// GetEastFace returns the edge that is right to the given face when the cube's face is facing us
+// GetEastEdge returns the edge that is East to the given face when the cube's face is facing us
 func GetEastEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
 	east, border := GetEastFace(face)
 	return cube.GetEdge(east, border)
 }
 
-// GetWestFace returns the edge that is left to the given face when the cube's face is facing us
+// GetWestEdge returns the edge that is West to the given face when the cube's face is facing us
 func GetWestEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
 	west, border := GetWestFace(face)
 	return cube.GetEdge(west, border)
 }
 
-// SetNorthEdge sets the edge that is up to the given face when the cube's face is facing us
+// SetNorthEdge sets the edge that is Notrh to the given face when the cube's face is facing us
 func SetNorthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 	north, border := GetNorthFace(face)
 	cube.SetEdge(north, border, edge)
 }
 
-// SetSouthEdge sets the edge that is down to the given face when the cube's face is facing us
+// SetSouthEdge sets the edge that is South to the given face when the cube's face is facing us
 func SetSouthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 	south, border := GetSouthFace(face)
 	cube.SetEdge(south, border, edge)
 }
 
-// SetEastEdge sets the edge that is right to the given face when the cube's face is facing us
+// SetEastEdge sets the edge that is East to the given face when the cube's face is facing us
 func SetEastEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 	east, border := GetEastFace(face)
 	cube.SetEdge(east, border, edge)
 }
 
-// SetWestEdge sets the edge that is left to the given face when the cube's face is facing us
+// SetWestEdge sets the edge that is West to the given face when the cube's face is facing us
 func SetWestEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 	west, border := GetWestFace(face)
 	cube.SetEdge(west, border, edge)

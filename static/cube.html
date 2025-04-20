@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rubik's Cube</title>
-    <link rel="stylesheet" href="cube.css">
+    <link rel="stylesheet" href="cube.css?v=1">
+    <!-- Cache busting with version parameter -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <!-- Required for Go's WebAssembly runtime -->
-    <script src="wasm_exec.js"></script>
+    <script src="wasm_exec.js?v=1"></script>
     <!-- Three.js library for 3D rendering -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/build/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
@@ -56,6 +60,7 @@
             
             <button class="reset" onclick="handleReset()">Reset Cube</button>
             <button class="scramble" onclick="handleScramble()">Scramble Cube</button>
+            <div id="version">Version: 1.1</div>
         </div>
     </div>
     
@@ -100,12 +105,12 @@
             if (!wasmLoaded && window.animateRotation) {
                 isAnimating = true;
                 window.animateRotation(face, clockwise, () => {
-                    // Animation complete, we'll update state from API response
+                    // Animation complete, but we don't update the state visually
                     isAnimating = false;
                 });
             }
             
-            // Call the API directly
+            // Call the API directly to update the internal state
             fetch('/api/rotate', {
                 method: 'POST',
                 headers: {
@@ -125,10 +130,9 @@
                 if (wasmLoaded && typeof wasmRotateFace === 'function') {
                     // For WebAssembly implementation, trigger the animation directly
                     wasmRotateFace(face, clockwise);
-                } else if (!isAnimating && window.updateCubeFromAPI) {
-                    // If animation didn't start or already completed, update from API
-                    window.updateCubeFromAPI();
                 }
+                // Remove the updateCubeFromAPI call to avoid re-rendering the cube
+                // with the new state which might have orientation issues
             })
             .catch(error => {
                 console.error('Error rotating cube:', error);
@@ -251,12 +255,18 @@
             
             animate();
             
-            // Create a single cube piece
+            // Debug function to log the current cube state
+            function logCubeState() {
+                console.log("Current cube state:", cubeState);
+            }
+            
+            // Create a single cube piece with orientation matching the internal model
             function createCubePiece(x, y, z) {
                 const geometry = new THREE.BoxGeometry(cubeSize, cubeSize, cubeSize);
                 const materials = [];
                 
                 // Create array of 6 materials for each side of the cube
+                // Order: [+x, -x, +y, -y, +z, -z]
                 for (let i = 0; i < 6; i++) {
                     materials.push(new THREE.MeshStandardMaterial({ 
                         color: 0x333333,  // Default dark gray
@@ -264,34 +274,44 @@
                     }));
                 }
                 
-                // Right face (x = 1) - Orange (Face 5)
+                /*
+                  Les conventions d'orientation du modèle interne (orientation.go) sont les suivantes :
+                  - Le bord Nord de Front touche le bord Ouest de Up
+                  - Le bord Est de Front touche le bord Nord de Right
+                  - Le bord Sud de Front touche le bord Est de Down
+                  - Le bord Ouest de Front touche le bord Sud de Left
+                  
+                  Nous devons aligner notre rendu 3D avec ces conventions.
+                */
+                
+                // RIGHT face (x = 1) - Orange (Face 5)
                 if(x === 1) {
-                    materials[0].color.setHex(colorEnumToHex[cubeState[5][y+1][z+1]]);
+                    materials[0].color.setHex(colorEnumToHex[cubeState[5][2-y][2-z]]);
                 }
                 
-                // Left face (x = -1) - Red (Face 4)
+                // LEFT face (x = -1) - Red (Face 4)
                 if(x === -1) {
-                    materials[1].color.setHex(colorEnumToHex[cubeState[4][y+1][2-z]]);
+                    materials[1].color.setHex(colorEnumToHex[cubeState[4][2-y][2-z]]);
                 }
                 
-                // Top face (y = 1) - Blue (Face 2)
+                // UP face (y = 1) - Blue (Face 2)
                 if(y === 1) {
                     materials[2].color.setHex(colorEnumToHex[cubeState[2][2-z][x+1]]);
                 }
                 
-                // Bottom face (y = -1) - Green (Face 3)
+                // DOWN face (y = -1) - Green (Face 3)
                 if(y === -1) {
-                    materials[3].color.setHex(colorEnumToHex[cubeState[3][z+1][x+1]]);
+                    materials[3].color.setHex(colorEnumToHex[cubeState[3][z][x+1]]);
                 }
                 
-                // Front face (z = 1) - White (Face 0)
+                // FRONT face (z = 1) - White (Face 0)
                 if(z === 1) {
-                    materials[4].color.setHex(colorEnumToHex[cubeState[0][y+1][x+1]]);
+                    materials[4].color.setHex(colorEnumToHex[cubeState[0][2-y][x+1]]);
                 }
                 
-                // Back face (z = -1) - Yellow (Face 1)
+                // BACK face (z = -1) - Yellow (Face 1)
                 if(z === -1) {
-                    materials[5].color.setHex(colorEnumToHex[cubeState[1][y+1][2-x]]);
+                    materials[5].color.setHex(colorEnumToHex[cubeState[1][2-y][2-x]]);
                 }
                 
                 const cube = new THREE.Mesh(geometry, materials);
@@ -319,6 +339,9 @@
                 while(cubeGroup.children.length > 0) {
                     cubeGroup.remove(cubeGroup.children[0]);
                 }
+                
+                // Debug the current state before rendering
+                console.log("Creating cube with state:", cubeState);
                 
                 // Create small cubes
                 for(let x = -1; x <= 1; x++) {
@@ -403,6 +426,7 @@
                     if (t < 1) {
                         requestAnimationFrame(animate);
                     } else {
+                        // Animation terminée, mais on ne fait rien d'autre
                         callback();
                     }
                 }
@@ -416,6 +440,7 @@
             // Expose functions globally for access by the rotation handler
             window.animateRotation = animateRotation;
             window.updateCubeFromAPI = updateCubeFromAPI;
+            window.logCubeState = logCubeState;
             
             return updateCubeFromAPI;
         }
@@ -428,7 +453,7 @@
                 
                 // Try to fetch the module
                 const result = await WebAssembly.instantiateStreaming(
-                    fetch("main.wasm"),
+                    fetch("main.wasm?v=1"),
                     go.importObject
                 );
                 

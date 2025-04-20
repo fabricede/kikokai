@@ -46,23 +46,22 @@ type Cube struct {
 // NewCube creates and initializes a new Rubik's cube
 func NewCube() *Cube {
 	c := &Cube{}
-	for i, face := range c.State {
+	for i := range c.State {
+		face := &c.State[i]
 		face.Index = FaceIndex(i)
 		face.Name = GetFaceNameFromIndex(face.Index)
-		stickers := [3][3]Sticker{}
+
 		// Initialize stickers for each face
 		stickerIndex := 0
 		for row := 0; row < 3; row++ {
 			for col := 0; col < 3; col++ {
 				face.Stickers[row][col] = Sticker{
-					Color: Color(i),
-					Index: StickerIndex(stickerIndex),
+					Color: Color(i),                         // Use the face index as the color
+					Index: StickerIndex(i*9 + stickerIndex), // Calculate the correct sticker index
 				}
 				stickerIndex++
 			}
 		}
-		face.Stickers = stickers
-		c.State[i] = face
 	}
 	return c
 }

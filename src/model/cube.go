@@ -89,8 +89,8 @@ func (c *Cube) GetEdge(face FaceIndex, orientation Orientation) (edge [3]Sticker
 	switch orientation {
 	case North:
 		edge[0] = c.State[face].Stickers[0][0]
-		edge[1] = c.State[face].Stickers[1][0]
-		edge[2] = c.State[face].Stickers[2][0]
+		edge[1] = c.State[face].Stickers[0][1]
+		edge[2] = c.State[face].Stickers[0][2]
 	case South:
 		edge[0] = c.State[face].Stickers[2][0]
 		edge[1] = c.State[face].Stickers[2][1]
@@ -118,8 +118,8 @@ func (cube *Cube) SetEdge(face FaceIndex, orientation Orientation, edge [3]Stick
 	switch orientation {
 	case North:
 		stickers[0][0] = edge[0]
-		stickers[1][0] = edge[1]
-		stickers[2][0] = edge[2]
+		stickers[0][1] = edge[1]
+		stickers[0][2] = edge[2]
 	case South:
 		stickers[2][0] = edge[0]
 		stickers[2][1] = edge[1]

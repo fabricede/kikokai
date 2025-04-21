@@ -478,7 +478,7 @@ func createAxisLabel(text string, x, y, z float64, color string) {
 	canvas.Set("height", 32)
 
 	// Draw the background
-	context.Set("fillStyle", "rgba(255, 255, 255, 0.8)")
+	context.Set("fillStyle", "rgba(100, 98, 98, 0.16)")
 	context.Call("fillRect", 0, 0, canvas.Get("width").Int(), canvas.Get("height").Int())
 
 	// Draw the text
@@ -498,17 +498,44 @@ func createAxisLabel(text string, x, y, z float64, color string) {
 	sprite := three.Get("Sprite").New(material)
 
 	// Set the sprite position
-	sprite.Get("position").Set("x", x)
-	sprite.Get("position").Set("y", y)
 	sprite.Get("position").Set("z", z)
+	sprite.Get("position").Set("y", y)
+	sprite.Get("position").Set("x", x)
 
 	// Set the sprite scale
-	sprite.Get("scale").Set("x", 0.5)
+	sprite.Get("scale").Set("z", 0.5)
 	sprite.Get("scale").Set("y", 0.25)
-	sprite.Get("scale").Set("z", 1)
+	sprite.Get("scale").Set("x", 1)
 
 	// Add the sprite to the scene
 	scene.Call("add", sprite)
+}
+
+// Add coordinate axes to the scene
+func addCoordinateAxes(this js.Value, args []js.Value) interface{} {
+	if scene.IsUndefined() || scene.IsNull() {
+		println("Scene not initialized")
+		return js.ValueOf("Scene not initialized")
+	}
+
+	// Default axis length
+	axisLength := 3.0
+	if len(args) > 0 && !args[0].IsUndefined() && !args[0].IsNull() {
+		axisLength = args[0].Float()
+	}
+
+	println("Adding coordinate axes with length:", axisLength)
+
+	// Create axes helper
+	axesHelper := three.Get("AxesHelper").New(axisLength)
+	scene.Call("add", axesHelper)
+
+	// Create text labels for axes
+	createAxisLabel("Z", axisLength+0.2, 0, 0, "#ff0000") // Red for Z axis
+	createAxisLabel("Y", 0, axisLength+0.2, 0, "#00ff00") // Green for Y axis
+	createAxisLabel("X", 0, 0, axisLength+0.2, "#ffff00") // Yellow for X axis
+
+	return js.ValueOf("Coordinate axes added")
 }
 
 // Register JavaScript callbacks with proper debug output
@@ -519,6 +546,7 @@ func registerCallbacks() {
 	rotateFaceFunc := js.FuncOf(rotateFace)
 	resetCubeFunc := js.FuncOf(resetCube)
 	scrambleCubeFunc := js.FuncOf(scrambleCube)
+	addCoordinateAxesFunc := js.FuncOf(addCoordinateAxes)
 
 	// Register functions in the global namespace
 	js.Global().Set("wasmInitThreeScene", initThreeSceneFunc)
@@ -526,6 +554,7 @@ func registerCallbacks() {
 	js.Global().Set("wasmRotateFace", rotateFaceFunc)
 	js.Global().Set("wasmResetCube", resetCubeFunc)
 	js.Global().Set("wasmScrambleCube", scrambleCubeFunc)
+	js.Global().Set("wasmAddCoordinateAxes", addCoordinateAxesFunc)
 
 	// Add a debug function to verify registration
 	debugFunc := js.FuncOf(func(this js.Value, args []js.Value) interface{} {
@@ -536,7 +565,7 @@ func registerCallbacks() {
 	// Store functions to prevent garbage collection
 	// This is crucial - functions will be garbage collected if not stored
 	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc,
-		resetCubeFunc, scrambleCubeFunc,
+		resetCubeFunc, scrambleCubeFunc, addCoordinateAxesFunc,
 		debugFunc)
 
 	// Print to console that functions are registered

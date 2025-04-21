@@ -5,8 +5,8 @@ type Matrix5x5 [5][5]Sticker
 
 func SetMatrix(init [5][5]StickerIndex) (m *Matrix5x5) {
 	m = &Matrix5x5{}
-	for i := 0; i < 5; i++ {
-		for j := 0; j < 5; j++ {
+	for i := range 5 {
+		for j := range 5 {
 			m[i][j] = Sticker{Index: init[i][j]}
 		}
 	}
@@ -16,8 +16,8 @@ func SetMatrix(init [5][5]StickerIndex) (m *Matrix5x5) {
 // RotateClockwise rotates the 5x5 matrix 90 degrees clockwise
 func (m Matrix5x5) RotateClockwise() Matrix5x5 {
 	var result Matrix5x5
-	for i := 0; i < 5; i++ {
-		for j := 0; j < 5; j++ {
+	for i := range 5 {
+		for j := range 5 {
 			result[j][4-i] = m[i][j]
 		}
 	}
@@ -27,8 +27,8 @@ func (m Matrix5x5) RotateClockwise() Matrix5x5 {
 // RotateCounterClockwise rotates the 5x5 matrix 90 degrees counter-clockwise
 func (m Matrix5x5) RotateCounterClockwise() Matrix5x5 {
 	var result Matrix5x5
-	for i := 0; i < 5; i++ {
-		for j := 0; j < 5; j++ {
+	for i := range 5 {
+		for j := range 5 {
 			result[4-j][i] = m[i][j]
 		}
 	}
@@ -38,9 +38,9 @@ func (m Matrix5x5) RotateCounterClockwise() Matrix5x5 {
 // Init initializes the matrix from the cube's face point of view
 func (m *Matrix5x5) Init(c *Cube, face FaceIndex) {
 	// Copy the face's state into the matrix center
-	for i := 1; i < 4; i++ {
-		for j := 1; j < 4; j++ {
-			m[i][j] = c.State[face].Stickers[i-1][j-1]
+	for i := range 3 {
+		for j := range 3 {
+			m[i+1][j+1] = c.State[face].Stickers[i][j]
 		}
 	}
 	// Get the north edge
@@ -72,13 +72,11 @@ func (m *Matrix5x5) Init(c *Cube, face FaceIndex) {
 // SetCube updates the cube's state from the matrix
 func (m *Matrix5x5) SetCube(c *Cube, face FaceIndex) {
 	// Copy the matrix back to the cube's face
-	stickers := c.State[face].Stickers
-	for i := 1; i < 4; i++ {
-		for j := 1; j < 4; j++ {
-			c.State[face].Stickers[i-1][j-1] = m[i][j]
+	for i := range 3 {
+		for j := range 3 {
+			c.State[face].Stickers[i][j] = m[i+1][j+1]
 		}
 	}
-	c.State[face].Stickers = stickers
 	// Copy the north edge back to the cube
 	northEdge := [3]Sticker{m[0][1], m[0][2], m[0][3]}
 	SetNorthEdge(c, face, northEdge)

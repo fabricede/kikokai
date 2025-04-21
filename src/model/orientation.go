@@ -22,8 +22,8 @@ type TurningDirection bool
 // CubeCoordinate represents a position in 3D space (x,y,z)
 // where:
 // - x-axis: Back (x=-1) to Front (x=1)
-// - y-axis: Left (y=-1) to Right (y=1)
-// - z-axis: Down (z=-1) to Up (z=1)
+// - y-axis: Down (y=-1) to Up (y=1)
+// - z-axis: Left (z=-1) to Right (z=1)
 type CubeCoordinate struct {
 	X, Y, Z int
 }
@@ -53,10 +53,10 @@ const (
 var (
 	FrontCoord = CubeCoordinate{X: 1, Y: 0, Z: 0}
 	BackCoord  = CubeCoordinate{X: -1, Y: 0, Z: 0}
-	UpCoord    = CubeCoordinate{X: 0, Y: 0, Z: 1}
-	DownCoord  = CubeCoordinate{X: 0, Y: 0, Z: -1}
-	LeftCoord  = CubeCoordinate{X: 0, Y: -1, Z: 0}
-	RightCoord = CubeCoordinate{X: 0, Y: 1, Z: 0}
+	UpCoord    = CubeCoordinate{X: 0, Y: 1, Z: 0}
+	DownCoord  = CubeCoordinate{X: 0, Y: -1, Z: 0}
+	LeftCoord  = CubeCoordinate{X: 0, Y: 0, Z: -1}
+	RightCoord = CubeCoordinate{X: 0, Y: 0, Z: 1}
 )
 
 // FaceToCoordinate converts a FaceIndex to its corresponding CubeCoordinate
@@ -82,17 +82,17 @@ func FaceToCoordinate(face FaceIndex) CubeCoordinate {
 // CoordinateToFace converts a CubeCoordinate to its corresponding FaceIndex
 func CoordinateToFace(coord CubeCoordinate) FaceIndex {
 	switch {
-	case coord.X == 1 && coord.Y == 0 && coord.Z == 0:
+	case coord.X == 1:
 		return Front
-	case coord.X == -1 && coord.Y == 0 && coord.Z == 0:
+	case coord.X == -1:
 		return Back
-	case coord.X == 0 && coord.Y == 0 && coord.Z == 1:
+	case coord.Y == -1:
 		return Up
-	case coord.X == 0 && coord.Y == 0 && coord.Z == -1:
+	case coord.Y == 1:
 		return Down
-	case coord.X == 0 && coord.Y == -1 && coord.Z == 0:
+	case coord.Z == -1:
 		return Left
-	case coord.X == 0 && coord.Y == 1 && coord.Z == 0:
+	case coord.Z == 1:
 		return Right
 	default:
 		// Invalid coordinate, return Front as default
@@ -108,11 +108,11 @@ func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
 	case Up:
 		return Left, East
 	case Back:
-		return Down, West
+		return Down, East
 	case Down:
 		return Right, West
 	case Left:
-		return Back, East
+		return Back, West
 	case Right:
 		return Front, East
 	default:
@@ -124,17 +124,17 @@ func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
 func GetSouthFace(face FaceIndex) (FaceIndex, Orientation) {
 	switch face {
 	case Front:
-		return Down, East
+		return Down, West
 	case Up:
 		return Right, East
 	case Back:
 		return Up, East
 	case Down:
-		return Left, East
+		return Left, West
 	case Left:
 		return Front, West
 	case Right:
-		return Back, West
+		return Back, East
 	default:
 		return face, Center
 	}
@@ -148,11 +148,11 @@ func GetEastFace(face FaceIndex) (FaceIndex, Orientation) {
 	case Up:
 		return Back, South
 	case Back:
-		return Left, North
+		return Right, South
 	case Down:
-		return Front, South
+		return Back, North
 	case Left:
-		return Down, South
+		return Up, North
 	case Right:
 		return Up, South
 	default:
@@ -168,11 +168,11 @@ func GetWestFace(face FaceIndex) (FaceIndex, Orientation) {
 	case Up:
 		return Front, North
 	case Back:
-		return Right, South
+		return Left, North
 	case Down:
-		return Back, North
+		return Front, South
 	case Left:
-		return Up, North
+		return Down, South
 	case Right:
 		return Down, North
 	default:
@@ -229,9 +229,9 @@ func SetWestEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 }
 
 // GetStickerCoordinate returns the row and column coordinates of a sticker on a face based on its 3D position
-func GetStickerCoordinate(face FaceIndex, position CubeCoordinate) (row, col int) {
+func GetStickerCoordinate(position CubeCoordinate) (face FaceIndex, row, col int) {
 	// Get the face coordinate (the normal vector of the face)
-	//faceCoord := FaceToCoordinate(face)
+	face = CoordinateToFace(position)
 
 	// Calculate the local coordinates on the face
 	// We need to project the 3D position onto the 2D face
@@ -256,7 +256,7 @@ func GetStickerCoordinate(face FaceIndex, position CubeCoordinate) (row, col int
 		col = 1 + position.X // Front (x=1) is col 0, Back (x=-1) is col 2
 	}
 
-	return row, col
+	return face, row, col
 }
 
 // GetCubePosition returns the 3D position of a sticker based on its face and row/column coordinates
@@ -299,7 +299,7 @@ func GetSticker(cube *Cube, position CubeCoordinate) Sticker {
 	face := CoordinateToFace(position)
 
 	// Get the row and column on that face
-	row, col := GetStickerCoordinate(face, position)
+	face, row, col := GetStickerCoordinate(position)
 
 	// Return the sticker at that position
 	return cube.State[face].Stickers[row][col]
@@ -311,7 +311,7 @@ func SetSticker(cube *Cube, position CubeCoordinate, sticker Sticker) {
 	face := CoordinateToFace(position)
 
 	// Get the row and column on that face
-	row, col := GetStickerCoordinate(face, position)
+	face, row, col := GetStickerCoordinate(position)
 
 	// Set the sticker at that position
 	cube.State[face].Stickers[row][col] = sticker

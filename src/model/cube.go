@@ -48,7 +48,7 @@ func (f *Face) GetColor() Color {
 	return f.Stickers[1][1].GetColor()
 }
 func GetFaceNameFromIndex(i FaceIndex) string {
-	return []string{"Front", "Back", "Up", "Down", "Left", "Right"}[i]
+	return []string{"White", "Yellow", "Blue", "Green", "Red", "Orange"}[i]
 }
 
 // Cube represents a Rubik's cube with 6 faces

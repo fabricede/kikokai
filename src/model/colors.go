@@ -12,7 +12,8 @@ const (
 	Green
 	Red
 	Orange
-
+)
+const (
 	// Sticker Colors
 	// Front Face
 	Front_NW StickerIndex = iota

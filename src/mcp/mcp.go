@@ -3,7 +3,6 @@ package mcp
 import (
 	"encoding/json"
 	"kikokai/src/model"
-	"kikokai/src/shared"
 	"log"
 	"net"
 )
@@ -48,7 +47,7 @@ func handleMCPConnection(conn net.Conn) {
 
 	// Process the request based on the command
 	var resp MCPResponse
-	resp.State = shared.Cube.State
+	resp.State = model.SharedCube.State
 
 	switch req.Command {
 	case CommandRotate:
@@ -64,18 +63,18 @@ func handleMCPConnection(conn net.Conn) {
 		if face < 0 || face > 5 {
 			resp.Error = "Invalid face index"
 		} else {
-			shared.Cube.RotateFace(face, clockwise)
-			resp.State = shared.Cube.State
+			model.SharedCube.RotateFace(face, clockwise)
+			resp.State = model.SharedCube.State
 		}
 
 	case CommandReset:
-		shared.ResetCube()
-		resp.State = shared.Cube.State
+		model.ResetCube()
+		resp.State = model.SharedCube.State
 
 	case CommandScramble:
 		// Add scramble support to the MCP server
-		shared.Cube.Scramble(20) // Scramble with 20 random moves
-		resp.State = shared.Cube.State
+		model.SharedCube.Scramble(20) // Scramble with 20 random moves
+		resp.State = model.SharedCube.State
 
 	case CommandState:
 		// Just return the current state

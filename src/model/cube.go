@@ -4,6 +4,19 @@ import (
 	"math/rand"
 )
 
+// SharedCube is the global cube instance to be shared across servers
+var SharedCube *Cube
+
+func init() {
+	// Initialize a new cube
+	SharedCube = NewCube()
+}
+
+// ResetCube resets the cube to its initial state
+func ResetCube() {
+	SharedCube = NewCube()
+}
+
 type Sticker struct {
 	Color Color
 	Index StickerIndex

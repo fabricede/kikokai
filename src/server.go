@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"kikokai/src/mcp"
 	"kikokai/src/model"
-	"kikokai/src/shared"
 	"log"
 	"mime"
 	"net/http"
@@ -118,7 +117,7 @@ func (eb *EventBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Send initial state event
 	initialState, _ := json.Marshal(CubeEvent{
 		Type:  "state",
-		State: shared.Cube.State,
+		State: model.SharedCube.State,
 	})
 	fmt.Fprintf(w, "data: %s\n\n", initialState)
 	w.(http.Flusher).Flush()
@@ -179,7 +178,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
 }
 
 func rotateHandler(w http.ResponseWriter, r *http.Request) {
@@ -221,11 +220,11 @@ func rotateHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Apply rotation to the server-side cube after broadcasting event
 	// This ensures the animation happens first, then state is updated
-	shared.Cube.RotateFace(face, clockwise)
+	model.SharedCube.RotateFace(face, clockwise)
 
 	// Send the response with updated state
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
 }
 
 func resetHandler(w http.ResponseWriter, r *http.Request) {
@@ -235,7 +234,7 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	shared.ResetCube()
+	model.ResetCube()
 
 	// Broadcast the reset event
 	broker.BroadcastEvent(CubeEvent{
@@ -243,7 +242,7 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
 }
 
 // scrambleHandler randomly scrambles the cube
@@ -255,7 +254,7 @@ func scrambleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Use the new Scramble method from the refactored cube model
-	shared.Cube.Scramble(20) // Scramble with 20 random moves
+	model.SharedCube.Scramble(20) // Scramble with 20 random moves
 
 	// Broadcast the scramble event
 	broker.BroadcastEvent(CubeEvent{
@@ -263,5 +262,5 @@ func scrambleHandler(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: shared.Cube.State})
+	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
 }

@@ -16,6 +16,7 @@ func registerCallbacks() {
 	resetCubeFunc := js.FuncOf(resetCube)
 	scrambleCubeFunc := js.FuncOf(scrambleCube)
 	addCoordinateAxesFunc := js.FuncOf(addCoordinateAxes)
+	updateCubeFromStateFunc := js.FuncOf(updateCubeFromState)
 
 	// Register functions in the global namespace
 	js.Global().Set("wasmInitThreeScene", initThreeSceneFunc)
@@ -24,6 +25,7 @@ func registerCallbacks() {
 	js.Global().Set("wasmResetCube", resetCubeFunc)
 	js.Global().Set("wasmScrambleCube", scrambleCubeFunc)
 	js.Global().Set("wasmAddCoordinateAxes", addCoordinateAxesFunc)
+	js.Global().Set("wasmUpdateCubeFromState", updateCubeFromStateFunc)
 
 	// Add a debug function to verify registration
 	debugFunc := js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -35,8 +37,8 @@ func registerCallbacks() {
 	// This is crucial - functions will be garbage collected if not stored
 	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc,
 		resetCubeFunc, scrambleCubeFunc, addCoordinateAxesFunc,
-		debugFunc)
+		updateCubeFromStateFunc, debugFunc)
 
 	// Print to console that functions are registered
-	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube, wasmScrambleCube, wasmAddCoordinateAxes")
+	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube, wasmScrambleCube, wasmAddCoordinateAxes, wasmUpdateCubeFromState")
 }

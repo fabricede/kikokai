@@ -86,13 +86,25 @@
                     switch(data.type) {
                         case 'rotate':
                             // Handle rotation event with animation
-                            if (typeof wasmRotateFace === 'function' && data.face !== undefined) {
-                                // Ensure clockwise is strictly a boolean value
-                                const isClockwise = data.clockwise === true;
-                                console.log("Animating rotation:", data.face, isClockwise, "Raw clockwise value:", data.clockwise);
-                                wasmRotateFace(data.face, isClockwise);
+                            if (typeof wasmRotateFace === 'function') {
+                                // Check if both face and clockwise parameters exist
+                                if (data.face !== undefined) {
+                                    // If face exists but clockwise doesn't, default to true
+                                    const isClockwise = data.clockwise !== undefined ? 
+                                        Boolean(data.clockwise) : true;
+                                    
+                                    console.log("Animating rotation:", data.face, isClockwise);
+                                    wasmRotateFace(data.face, isClockwise);
+                                } else {
+                                    console.warn("Rotation event missing face parameter, falling back to state update");
+                                    // If we have state data, use it to update the cube
+                                    if (data.state && typeof wasmUpdateCubeFromState === 'function') {
+                                        wasmUpdateCubeFromState(typeof data.state === 'string' ? 
+                                            data.state : JSON.stringify(data.state));
+                                    }
+                                }
                             } else {
-                                console.error("Rotation event missing required parameters:", data);
+                                console.error("wasmRotateFace function not available");
                             }
                             break;
                             
@@ -116,7 +128,8 @@
                             // Fall back to state update
                             if (data.state && typeof wasmUpdateCubeFromState === 'function') {
                                 console.log("Updating cube state");
-                                wasmUpdateCubeFromState(JSON.stringify(data.state));
+                                wasmUpdateCubeFromState(typeof data.state === 'string' ? 
+                                    data.state : JSON.stringify(data.state));
                             }
                             break;
                             

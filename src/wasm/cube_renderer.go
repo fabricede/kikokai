@@ -33,8 +33,6 @@ func createCube() {
 
 // Create a single cube piece
 func createCubePiece(x, y, z int) {
-	println("Creating cube piece at position:", x, y, z)
-
 	// Create geometry
 	geometry := box.New(cubeSize, cubeSize, cubeSize)
 
@@ -43,50 +41,56 @@ func createCubePiece(x, y, z int) {
 
 	for i := 0; i < 6; i++ {
 		material := three.Get("MeshStandardMaterial").New(map[string]any{
-			"color": 0x000000,
+			"color": 0x111111, // Dark gray for non-visible sides
 		})
 		materials.SetIndex(i, material)
 	}
 
 	// Right face (x = 1)
 	if x == 1 {
-		color := colorMap[cube.State[5].Stickers[y+1][z+1].Color]
-		println("Right face color at", x, y, z, ":", cube.State[5].Stickers[y+1][z+1].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Right].Stickers[y+1][z+1].Color
+		color := colorMap[colorIdx]
+		println("Right face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(0).Get("color").Call("setHex", color)
 	}
 
 	// Left face (x = -1)
 	if x == -1 {
-		color := colorMap[cube.State[4].Stickers[y+1][1-z].Color]
-		println("Left face color at", x, y, z, ":", cube.State[4].Stickers[y+1][1-z].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Left].Stickers[y+1][1-z].Color
+		color := colorMap[colorIdx]
+		println("Left face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(1).Get("color").Call("setHex", color)
 	}
 
 	// Top face (y = 1)
 	if y == 1 {
-		color := colorMap[cube.State[2].Stickers[1-z][x+1].Color]
-		println("Top face color at", x, y, z, ":", cube.State[2].Stickers[1-z][x+1].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Up].Stickers[1-z][x+1].Color
+		color := colorMap[colorIdx]
+		println("Top face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(2).Get("color").Call("setHex", color)
 	}
 
 	// Bottom face (y = -1)
 	if y == -1 {
-		color := colorMap[cube.State[3].Stickers[z+1][x+1].Color]
-		println("Bottom face color at", x, y, z, ":", cube.State[3].Stickers[z+1][x+1].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Down].Stickers[z+1][x+1].Color
+		color := colorMap[colorIdx]
+		println("Bottom face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(3).Get("color").Call("setHex", color)
 	}
 
 	// Front face (z = 1)
 	if z == 1 {
-		color := colorMap[cube.State[0].Stickers[y+1][x+1].Color]
-		println("Front face color at", x, y, z, ":", cube.State[0].Stickers[y+1][x+1].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Front].Stickers[y+1][x+1].Color
+		color := colorMap[colorIdx]
+		println("Front face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(4).Get("color").Call("setHex", color)
 	}
 
 	// Back face (z = -1)
 	if z == -1 {
-		color := colorMap[cube.State[1].Stickers[y+1][1-x].Color]
-		println("Back face color at", x, y, z, ":", cube.State[1].Stickers[y+1][1-x].GetName(), "mapped to hex:", color)
+		colorIdx := cube.State[model.Back].Stickers[y+1][1-x].Color
+		color := colorMap[colorIdx]
+		println("Back face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(5).Get("color").Call("setHex", color)
 	}
 
@@ -112,6 +116,35 @@ func createCubePiece(x, y, z int) {
 func getState(this js.Value, args []js.Value) any {
 	stateJSON, _ := json.Marshal(cube.State)
 	return js.ValueOf(string(stateJSON))
+}
+
+// Update the cube state from a JSON string
+func updateCubeFromState(this js.Value, args []js.Value) any {
+	if isAnimating {
+		return js.ValueOf("Animation in progress")
+	}
+
+	if len(args) < 1 {
+		return js.ValueOf("Error: Missing state parameter")
+	}
+
+	stateJSON := args[0].String()
+
+	// Parse the JSON string into cube state
+	var state [6]model.Face
+	err := json.Unmarshal([]byte(stateJSON), &state)
+	if err != nil {
+		println("Error parsing cube state:", err.Error())
+		return js.ValueOf("Error: Invalid state format")
+	}
+
+	// Update the cube state
+	cube.State = state
+
+	// Rebuild the cube visualization
+	createCube()
+
+	return js.ValueOf("Cube state updated")
 }
 
 // Reset the cube

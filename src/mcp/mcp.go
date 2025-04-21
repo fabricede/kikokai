@@ -21,6 +21,22 @@ type MCPResponse struct {
 	Error string        `json:"error,omitempty"`
 }
 
+// Event types for SSE (copied from server.go to maintain consistency)
+type CubeEvent struct {
+	Type      string        `json:"type"`
+	Face      int           `json:"face,omitempty"`
+	Clockwise bool          `json:"clockwise,omitempty"`
+	State     [6]model.Face `json:"state,omitempty"`
+}
+
+// Interface for broadcasting events
+type EventBroadcaster interface {
+	BroadcastEvent(event interface{})
+}
+
+// Global broadcaster that will be set by the main package
+var Broadcaster EventBroadcaster
+
 // MCP Command constants
 const (
 	CommandRotate   = "rotate"
@@ -63,15 +79,39 @@ func handleMCPConnection(conn net.Conn) {
 		if face < 0 || face > 5 {
 			resp.Error = "Invalid face index"
 		} else {
+			// Broadcast the rotation event to browser clients if broadcaster is set
+			if Broadcaster != nil {
+				log.Printf("Broadcasting MCP rotation event: face=%d, clockwise=%t", req.Params.Face, req.Params.Clockwise)
+				Broadcaster.BroadcastEvent(CubeEvent{
+					Type:      "rotate",
+					Face:      req.Params.Face,
+					Clockwise: req.Params.Clockwise,
+				})
+			}
+
 			model.SharedCube.RotateFace(face, clockwise)
 			resp.State = model.SharedCube.State
 		}
 
 	case CommandReset:
+		// Broadcast the reset event
+		if Broadcaster != nil {
+			Broadcaster.BroadcastEvent(CubeEvent{
+				Type: "reset",
+			})
+		}
+
 		model.ResetCube()
 		resp.State = model.SharedCube.State
 
 	case CommandScramble:
+		// Broadcast the scramble event
+		if Broadcaster != nil {
+			Broadcaster.BroadcastEvent(CubeEvent{
+				Type: "scramble",
+			})
+		}
+
 		// Add scramble support to the MCP server
 		model.SharedCube.Scramble(20) // Scramble with 20 random moves
 		resp.State = model.SharedCube.State

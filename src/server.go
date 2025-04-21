@@ -147,6 +147,12 @@ func (eb *EventBroker) BroadcastEvent(event interface{}) {
 // Create a global event broker
 var broker = NewEventBroker()
 
+// Connect the MCP broadcaster to our broker
+func init() {
+	// Set the MCP broadcaster to use our event broker
+	mcp.Broadcaster = broker
+}
+
 func main() {
 	// Set the correct MIME type for WebAssembly files
 	mime.AddExtensionType(".wasm", "application/wasm")

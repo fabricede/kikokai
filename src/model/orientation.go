@@ -227,3 +227,92 @@ func SetWestEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
 	west, border := GetWestFace(face)
 	cube.SetEdge(west, border, edge)
 }
+
+// GetStickerCoordinate returns the row and column coordinates of a sticker on a face based on its 3D position
+func GetStickerCoordinate(face FaceIndex, position CubeCoordinate) (row, col int) {
+	// Get the face coordinate (the normal vector of the face)
+	//faceCoord := FaceToCoordinate(face)
+
+	// Calculate the local coordinates on the face
+	// We need to project the 3D position onto the 2D face
+	switch face {
+	case Front: // x = 1
+		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
+		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2
+	case Back: // x = -1
+		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
+		col = 1 - position.Y // Right (y=1) is col 0, Left (y=-1) is col 2
+	case Up: // z = 1
+		row = 1 - position.X // Back (x=-1) is row 0, Front (x=1) is row 2
+		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2
+	case Down: // z = -1
+		row = 1 + position.X // Front (x=1) is row 0, Back (x=-1) is row 2
+		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2
+	case Left: // y = -1
+		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
+		col = 1 - position.X // Back (x=-1) is col 0, Front (x=1) is col 2
+	case Right: // y = 1
+		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
+		col = 1 + position.X // Front (x=1) is col 0, Back (x=-1) is col 2
+	}
+
+	return row, col
+}
+
+// GetCubePosition returns the 3D position of a sticker based on its face and row/column coordinates
+func GetCubePosition(face FaceIndex, row, col int) CubeCoordinate {
+	// Start with the face normal vector
+	position := FaceToCoordinate(face)
+
+	// Calculate the offsets from the center of the face
+	rowOffset := 1 - row // row 0 is top, row 2 is bottom
+	colOffset := col - 1 // col 0 is left, col 2 is right
+
+	// Apply the offsets based on the face
+	switch face {
+	case Front: // x = 1
+		position.Y += colOffset // Left to Right
+		position.Z -= rowOffset // Up to Down
+	case Back: // x = -1
+		position.Y -= colOffset // Right to Left (mirrored)
+		position.Z -= rowOffset // Up to Down
+	case Up: // z = 1
+		position.X += rowOffset // Back to Front
+		position.Y += colOffset // Left to Right
+	case Down: // z = -1
+		position.X -= rowOffset // Front to Back (mirrored)
+		position.Y += colOffset // Left to Right
+	case Left: // y = -1
+		position.X -= colOffset // Back to Front (mirrored)
+		position.Z -= rowOffset // Up to Down
+	case Right: // y = 1
+		position.X += colOffset // Front to Back
+		position.Z -= rowOffset // Up to Down
+	}
+
+	return position
+}
+
+// GetSticker returns the sticker at the given 3D position
+func GetSticker(cube *Cube, position CubeCoordinate) Sticker {
+	// Find which face the position is on
+	face := CoordinateToFace(position)
+
+	// Get the row and column on that face
+	row, col := GetStickerCoordinate(face, position)
+
+	// Return the sticker at that position
+	return cube.State[face].Stickers[row][col]
+}
+
+// SetSticker sets the sticker at the given 3D position
+func SetSticker(cube *Cube, position CubeCoordinate, sticker Sticker) {
+	// Find which face the position is on
+	face := CoordinateToFace(position)
+
+	// Get the row and column on that face
+	row, col := GetStickerCoordinate(face, position)
+
+	// Set the sticker at that position
+	cube.State[face].Stickers[row][col] = sticker
+}

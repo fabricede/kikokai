@@ -19,6 +19,15 @@ type Orientation int
 // TurningDirection for rotation
 type TurningDirection bool
 
+// CubeCoordinate represents a position in 3D space (x,y,z)
+// where:
+// - x-axis: Back (x=-1) to Front (x=1)
+// - y-axis: Left (y=-1) to Right (y=1)
+// - z-axis: Down (z=-1) to Up (z=1)
+type CubeCoordinate struct {
+	X, Y, Z int
+}
+
 const (
 	// Face constants
 	Front FaceIndex = iota
@@ -39,6 +48,57 @@ const (
 	Clockwise        TurningDirection = true
 	CounterClockwise TurningDirection = false
 )
+
+// Face coordinate constants
+var (
+	FrontCoord = CubeCoordinate{X: 1, Y: 0, Z: 0}
+	BackCoord  = CubeCoordinate{X: -1, Y: 0, Z: 0}
+	UpCoord    = CubeCoordinate{X: 0, Y: 0, Z: 1}
+	DownCoord  = CubeCoordinate{X: 0, Y: 0, Z: -1}
+	LeftCoord  = CubeCoordinate{X: 0, Y: -1, Z: 0}
+	RightCoord = CubeCoordinate{X: 0, Y: 1, Z: 0}
+)
+
+// FaceToCoordinate converts a FaceIndex to its corresponding CubeCoordinate
+func FaceToCoordinate(face FaceIndex) CubeCoordinate {
+	switch face {
+	case Front:
+		return FrontCoord
+	case Back:
+		return BackCoord
+	case Up:
+		return UpCoord
+	case Down:
+		return DownCoord
+	case Left:
+		return LeftCoord
+	case Right:
+		return RightCoord
+	default:
+		return CubeCoordinate{0, 0, 0}
+	}
+}
+
+// CoordinateToFace converts a CubeCoordinate to its corresponding FaceIndex
+func CoordinateToFace(coord CubeCoordinate) FaceIndex {
+	switch {
+	case coord.X == 1 && coord.Y == 0 && coord.Z == 0:
+		return Front
+	case coord.X == -1 && coord.Y == 0 && coord.Z == 0:
+		return Back
+	case coord.X == 0 && coord.Y == 0 && coord.Z == 1:
+		return Up
+	case coord.X == 0 && coord.Y == 0 && coord.Z == -1:
+		return Down
+	case coord.X == 0 && coord.Y == -1 && coord.Z == 0:
+		return Left
+	case coord.X == 0 && coord.Y == 1 && coord.Z == 0:
+		return Right
+	default:
+		// Invalid coordinate, return Front as default
+		return Front
+	}
+}
 
 // GetNorthFace returns the face that is North to the given face when the cube's face is facing us
 func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {

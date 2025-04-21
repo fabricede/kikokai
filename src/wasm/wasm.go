@@ -6,6 +6,7 @@ package main
 import (
 	"encoding/json"
 	"kikokai/src/model"
+	"math"
 	"syscall/js"
 )
 
@@ -243,23 +244,50 @@ func getState(this js.Value, args []js.Value) interface{} {
 
 // Rotate a face of the cube
 func rotateFace(this js.Value, args []js.Value) interface{} {
-	if len(args) != 2 || isAnimating {
-		return js.ValueOf("Invalid arguments or animation in progress")
+	// Enhanced parameter validation
+	if isAnimating {
+		println("Animation already in progress, ignoring rotation request")
+		return js.ValueOf("Animation in progress")
+	}
+
+	if len(args) < 2 {
+		println("Error: Not enough arguments to rotateFace, expected 2, got", len(args))
+		return js.ValueOf("Invalid arguments: expected face index and clockwise boolean")
+	}
+
+	// Verify face parameter exists and is valid
+	if args[0].IsUndefined() || args[0].IsNull() {
+		println("Error: Face parameter is undefined or null")
+		return js.ValueOf("Invalid face parameter")
 	}
 
 	face := model.FaceIndex(args[0].Int())
-	// Convert boolean to the proper Direction type constant
-	var clockwise model.TurningDirection
-	if args[1].Bool() {
-		clockwise = model.Clockwise
-	} else {
-		clockwise = model.CounterClockwise
-	}
 
 	if face < 0 || face > 5 {
+		println("Error: Invalid face index:", int(face))
 		return js.ValueOf("Invalid face index")
 	}
 
+	// Verify clockwise parameter exists and is a boolean
+	var clockwise model.TurningDirection
+	if args[1].IsUndefined() || args[1].IsNull() {
+		println("Warning: Clockwise parameter is undefined or null, defaulting to clockwise")
+		clockwise = model.Clockwise
+	} else {
+		// Explicitly log the raw value first
+		println("Raw clockwise value received:", args[1].String(), "as bool:", args[1].Bool())
+
+		// Use Bool() only when we know the value is defined
+		if args[1].Bool() {
+			clockwise = model.Clockwise
+			println("Setting direction to CLOCKWISE")
+		} else {
+			clockwise = model.CounterClockwise
+			println("Setting direction to COUNTER-CLOCKWISE")
+		}
+	}
+
+	println("Starting rotation of face", int(face), "with clockwise value:", clockwise == model.Clockwise)
 	isAnimating = true
 
 	// Start animation
@@ -272,10 +300,12 @@ func rotateFace(this js.Value, args []js.Value) interface{} {
 func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection) {
 	// Log start of animation
 	dirStr := "clockwise"
+	dirValue := 1
 	if clockwise == model.CounterClockwise {
 		dirStr = "counter-clockwise"
+		dirValue = 0
 	}
-	println("Starting rotation of face", int(face), dirStr)
+	println("Starting rotation of face", int(face), dirStr, "direction value:", dirValue)
 
 	// Create a rotation group
 	rotationGroup := group.New()
@@ -308,23 +338,26 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 	// Get rotation axis
 	rotationAxis := getRotationAxis(face)
 
-	// Animate rotation - setting rotation angle based on direction
-	rotationAngle := float64(-0.1) // Default for clockwise
-	if clockwise == model.CounterClockwise {
-		rotationAngle = float64(0.1) // For counter-clockwise
+	// Define rotation parameters based on direction
+	var rotationAngle float64
+	var targetRotation float64
+
+	// Always use positive values and adjust sign based on direction
+	if clockwise == model.Clockwise {
+		rotationAngle = -0.1          // Negative for clockwise
+		targetRotation = -math.Pi / 2 // -90 degrees
+	} else {
+		rotationAngle = 0.1          // Positive for counter-clockwise
+		targetRotation = math.Pi / 2 // +90 degrees
 	}
 
 	totalRotation := float64(0)
-	targetRotation := -3.14159 / 2 // Default for clockwise
-
-	if clockwise == model.CounterClockwise {
-		targetRotation = 3.14159 / 2 // For counter-clockwise
-	}
 
 	// Set up animation callback
 	var animateFrame js.Func
 	animateFrame = js.FuncOf(func(this js.Value, args []js.Value) interface{} {
-		if float64(js.Global().Get("Math").Call("abs", totalRotation).Float()) < float64(js.Global().Get("Math").Call("abs", targetRotation).Float()) {
+		// Check if we've reached the target rotation amount
+		if math.Abs(totalRotation) < math.Abs(targetRotation) {
 			// Continue animation
 			rotationGroup.Call("rotateOnAxis", rotationAxis, rotationAngle)
 			totalRotation += rotationAngle

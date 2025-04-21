@@ -72,17 +72,73 @@
         
         // Function to check for incoming messages to update the cube
         function listenForApiUpdates() {
-            // Use EventSource for server-sent events (not implemented yet)
-            // This could be implemented later for real-time updates without polling
+            console.log("Setting up Server-Sent Events for real-time cube updates");
             
-            // For now, poll for updates every 1 second
-            setInterval(() => {
-                // Refresh cube state from server if needed
-                // This would usually be handled by the WASM code directly
+            // Use EventSource for server-sent events
+            const eventSource = new EventSource('/api/events');
+            
+            // Handle incoming events
+            eventSource.onmessage = function(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    console.log("Received update event:", data);
+                    
+                    switch(data.type) {
+                        case 'rotate':
+                            // Handle rotation event with animation
+                            if (typeof wasmRotateFace === 'function' && data.face !== undefined) {
+                                // Ensure clockwise is strictly a boolean value
+                                const isClockwise = data.clockwise === true;
+                                console.log("Animating rotation:", data.face, isClockwise, "Raw clockwise value:", data.clockwise);
+                                wasmRotateFace(data.face, isClockwise);
+                            } else {
+                                console.error("Rotation event missing required parameters:", data);
+                            }
+                            break;
+                            
+                        case 'reset':
+                            // Handle reset event
+                            if (typeof wasmResetCube === 'function') {
+                                console.log("Resetting cube");
+                                wasmResetCube();
+                            }
+                            break;
+                            
+                        case 'scramble':
+                            // Handle scramble event
+                            if (typeof wasmScrambleCube === 'function') {
+                                console.log("Scrambling cube");
+                                wasmScrambleCube();
+                            }
+                            break;
+                            
+                        case 'state':
+                            // Fall back to state update
+                            if (data.state && typeof wasmUpdateCubeFromState === 'function') {
+                                console.log("Updating cube state");
+                                wasmUpdateCubeFromState(JSON.stringify(data.state));
+                            }
+                            break;
+                            
+                        default:
+                            console.log("Unknown event type:", data.type);
+                    }
+                } catch (error) {
+                    console.error("Error processing event:", error);
+                }
+            };
+            
+            eventSource.onerror = function(error) {
+                console.error("EventSource error:", error);
+                // Try to reconnect after 5 seconds on error
+                setTimeout(() => {
+                    console.log("Attempting to reconnect to event stream...");
+                    listenForApiUpdates();
+                }, 5000);
                 
-                // The APIs that update the WebAssembly function will automatically 
-                // trigger rendering updates from the controls.html
-            }, 1000);
+                // Close the current connection
+                eventSource.close();
+            };
         }
         
         // Load the WebAssembly module

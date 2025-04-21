@@ -7,7 +7,7 @@ cp "$(go env GOROOT)/lib/wasm/wasm_exec.js" ./static/wasm_exec.js
 rm -f ./static/main.wasm
 
 # Build the WebAssembly binary directly to the static directory
-GOOS=js GOARCH=wasm go build -o ./static/main.wasm ./src/wasm/wasm.go
+GOOS=js GOARCH=wasm go build -o ./static/main.wasm ./src/wasm/
 
 # Verify the build
 if [ -f "./static/main.wasm" ]; then

@@ -36,6 +36,7 @@ func main() {
 }
 
 func getStateHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request for cube state")
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -46,6 +47,7 @@ func getStateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func rotateHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request to rotate cube face")
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -78,6 +80,7 @@ func rotateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func resetHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request to reset cube")
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -91,6 +94,7 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 
 // scrambleHandler randomly scrambles the cube
 func scrambleHandler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Received request to scramble cube")
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return

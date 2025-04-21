@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rubik's Cube</title>
-    <link rel="stylesheet" href="cube.css?v=1">
+    <title>Rubik's Cube Visualization</title>
+    <link rel="stylesheet" href="cube.css?v=2">
     <!-- Cache busting with version parameter -->
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
@@ -16,52 +16,15 @@
     <script src="https://cdn.jsdelivr.net/npm/three@0.132.2/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
-    <h1>Rubik's Cube</h1>
+    <h1>Rubik's Cube Visualization</h1>
     
     <div id="container">
         <div id="cubeCanvas"></div>
-        
-        <div class="controls">
-            <div class="face-controls">
-                <div class="face-label">Front Face (White)</div>
-                <button onclick="handleRotate(0, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(0, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <div class="face-controls">
-                <div class="face-label">Back Face (Yellow)</div>
-                <button onclick="handleRotate(1, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(1, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <div class="face-controls">
-                <div class="face-label">Up Face (Blue)</div>
-                <button onclick="handleRotate(2, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(2, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <div class="face-controls">
-                <div class="face-label">Down Face (Green)</div>
-                <button onclick="handleRotate(3, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(3, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <div class="face-controls">
-                <div class="face-label">Left Face (Red)</div>
-                <button onclick="handleRotate(4, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(4, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <div class="face-controls">
-                <div class="face-label">Right Face (Orange)</div>
-                <button onclick="handleRotate(5, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(5, false)">Rotate Counter-Clockwise</button>
-            </div>
-            
-            <button class="reset" onclick="handleReset()">Reset Cube</button>
-            <button class="scramble" onclick="handleScramble()">Scramble Cube</button>
-            <div id="version">Version: 1.1</div>
+        <div class="action-buttons">
+            <button class="refresh" onclick="handleRefresh()">Refresh Visualization</button>
         </div>
+        <a id="controls-link" href="controls.html" target="_blank">Open Control Panel</a>
+        <div id="version">Version: 1.1</div>
     </div>
     
     <script>
@@ -75,104 +38,51 @@
             5: 0xFFA500  // Orange
         };
         
-        // Color mapping from Color enum (integer) to color name 
-        const colorEnumToName = {
-            0: "white",  // White
-            1: "yellow", // Yellow
-            2: "blue",   // Blue
-            3: "green",  // Green
-            4: "red",    // Red
-            5: "orange"  // Orange
-        };
-        
-        // Simple JS bridge to Go WASM functions
-        function handleRotate(face, clockwise) {
-            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
-            
-            // Create request data
-            const requestData = {
-                face: face,
-                clockwise: clockwise
-            };
-            
-            // Call the API directly to update the internal state
-            fetch('/api/rotate', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Rotation successful, updated state received");
-                
-                if (typeof wasmRotateFace === 'function') {
-                    // Call the WebAssembly function to animate the rotation
-                    wasmRotateFace(face, clockwise);
-                }
-            })
-            .catch(error => {
-                console.error('Error rotating cube:', error);
-            });
-        }
-        
-        function handleReset() {
-            console.log("Resetting cube");
-            
-            fetch('/api/reset', {
-                method: 'POST'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Reset successful, updated state received");
-                
-                if (typeof wasmResetCube === 'function') {
-                    wasmResetCube();
-                }
-            })
-            .catch(error => {
-                console.error('Error resetting cube:', error);
-            });
-        }
-
-        function handleScramble() {
-            console.log("Scrambling cube");
-            
-            fetch('/api/scramble', {
-                method: 'POST'
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Scramble successful, updated state received");
-                
-                if (typeof wasmScrambleCube === 'function') {
-                    wasmScrambleCube();
-                }
-            })
-            .catch(error => {
-                console.error('Error scrambling cube:', error);
-            });
-        }
-        
         // Debug logging for WebAssembly global scope
         function debugGlobalScope() {
             console.log("Global scope keys:", Object.keys(window).filter(key => key.startsWith("wasm")));
+        }
+        
+        // Function to refresh the visualization with the current server state
+        function handleRefresh() {
+            console.log("Refreshing cube state from server");
+            
+            fetch('/api/state')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log("Retrieved current cube state from server");
+                    
+                    // Check if the WebAssembly function is available
+                    if (typeof wasmUpdateCubeFromState === 'function') {
+                        wasmUpdateCubeFromState(data.state);
+                        console.log("Cube visualization synchronized with server state");
+                    } else {
+                        console.error("wasmUpdateCubeFromState function not found");
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching cube state:', error);
+                });
+        }
+        
+        // Function to check for incoming messages to update the cube
+        function listenForApiUpdates() {
+            // Use EventSource for server-sent events (not implemented yet)
+            // This could be implemented later for real-time updates without polling
+            
+            // For now, poll for updates every 1 second
+            setInterval(() => {
+                // Refresh cube state from server if needed
+                // This would usually be handled by the WASM code directly
+                
+                // The APIs that update the WebAssembly function will automatically 
+                // trigger rendering updates from the controls.html
+            }, 1000);
         }
         
         // Load the WebAssembly module
@@ -199,6 +109,14 @@
                     if (typeof wasmInitThreeScene === 'function') {
                         console.log("Initializing Three.js scene...");
                         wasmInitThreeScene();
+                        
+                        // Add coordinate axes to the scene
+                        if (typeof wasmAddCoordinateAxes === 'function') {
+                            wasmAddCoordinateAxes(3); // 3 units length axes
+                        }
+                        
+                        // Start listening for API updates
+                        listenForApiUpdates();
                     } else {
                         console.error("wasmInitThreeScene function not found");
                     }

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rubik's Cube Controls</title>
+    <link rel="stylesheet" href="cube.css?v=2">
+    <!-- Cache busting with version parameter -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+</head>
+<body>
+    <h1>Rubik's Cube Controls</h1>
+    
+    <a id="cube-link" href="cube.html" target="_blank">Open Cube Visualization</a>
+    
+    <div class="controls-container">
+        <div class="face-controls">
+            <div class="face-label">Front Face (White)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(0, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(0, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="face-controls">
+            <div class="face-label">Back Face (Yellow)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(1, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(1, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="face-controls">
+            <div class="face-label">Up Face (Blue)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(2, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(2, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="face-controls">
+            <div class="face-label">Down Face (Green)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(3, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(3, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="face-controls">
+            <div class="face-label">Left Face (Red)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(4, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(4, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="face-controls">
+            <div class="face-label">Right Face (Orange)</div>
+            <div class="button-group">
+                <button onclick="handleRotate(5, true)">Rotate Clockwise</button>
+                <button onclick="handleRotate(5, false)">Rotate Counter-Clockwise</button>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button class="reset" onclick="handleReset()">Reset Cube</button>
+            <button class="scramble" onclick="handleScramble()">Scramble Cube</button>
+        </div>
+        
+        <div id="version">Version: 1.1</div>
+    </div>
+    
+    <script>
+        // Color mapping from Color enum (integer) to color name 
+        const colorEnumToName = {
+            0: "white",  // White
+            1: "yellow", // Yellow
+            2: "blue",   // Blue
+            3: "green",  // Green
+            4: "red",    // Red
+            5: "orange"  // Orange
+        };
+        
+        // Simple JS bridge to Go WASM functions
+        function handleRotate(face, clockwise) {
+            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
+            
+            // Create request data
+            const requestData = {
+                face: face,
+                clockwise: clockwise
+            };
+            
+            // Call the API directly to update the internal state
+            fetch('/api/rotate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Rotation successful, updated state received");
+            })
+            .catch(error => {
+                console.error('Error rotating cube:', error);
+            });
+        }
+        
+        function handleReset() {
+            console.log("Resetting cube");
+            
+            fetch('/api/reset', {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Reset successful, updated state received");
+            })
+            .catch(error => {
+                console.error('Error resetting cube:', error);
+            });
+        }
+
+        function handleScramble() {
+            console.log("Scrambling cube");
+            
+            fetch('/api/scramble', {
+                method: 'POST'
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Scramble successful, updated state received");
+            })
+            .catch(error => {
+                console.error('Error scrambling cube:', error);
+            });
+        }
+    </script>
+</body>
+</html>

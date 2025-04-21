@@ -466,6 +466,51 @@ func scrambleCube(this js.Value, args []js.Value) interface{} {
 	return js.ValueOf("Cube scrambled")
 }
 
+// Create a text label for an axis
+func createAxisLabel(text string, x, y, z float64, color string) {
+	// Create a canvas for the label
+	document := js.Global().Get("document")
+	canvas := document.Call("createElement", "canvas")
+	context := canvas.Call("getContext", "2d")
+
+	// Set canvas dimensions
+	canvas.Set("width", 64)
+	canvas.Set("height", 32)
+
+	// Draw the background
+	context.Set("fillStyle", "rgba(255, 255, 255, 0.8)")
+	context.Call("fillRect", 0, 0, canvas.Get("width").Int(), canvas.Get("height").Int())
+
+	// Draw the text
+	context.Set("font", "24px Arial")
+	context.Set("fillStyle", color)
+	context.Set("textAlign", "center")
+	context.Set("textBaseline", "middle")
+	context.Call("fillText", text, canvas.Get("width").Int()/2, canvas.Get("height").Int()/2)
+
+	// Create a texture from the canvas
+	texture := three.Get("CanvasTexture").New(canvas)
+	material := three.Get("SpriteMaterial").New(map[string]interface{}{
+		"map": texture,
+	})
+
+	// Create a sprite with the texture
+	sprite := three.Get("Sprite").New(material)
+
+	// Set the sprite position
+	sprite.Get("position").Set("x", x)
+	sprite.Get("position").Set("y", y)
+	sprite.Get("position").Set("z", z)
+
+	// Set the sprite scale
+	sprite.Get("scale").Set("x", 0.5)
+	sprite.Get("scale").Set("y", 0.25)
+	sprite.Get("scale").Set("z", 1)
+
+	// Add the sprite to the scene
+	scene.Call("add", sprite)
+}
+
 // Register JavaScript callbacks with proper debug output
 func registerCallbacks() {
 	// Create functions that will persist (avoid garbage collection)
@@ -490,10 +535,12 @@ func registerCallbacks() {
 
 	// Store functions to prevent garbage collection
 	// This is crucial - functions will be garbage collected if not stored
-	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc, resetCubeFunc, scrambleCubeFunc, debugFunc)
+	funcs = append(funcs, initThreeSceneFunc, getStateFunc, rotateFaceFunc,
+		resetCubeFunc, scrambleCubeFunc,
+		debugFunc)
 
 	// Print to console that functions are registered
-	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube, wasmScrambleCube")
+	println("WASM functions registered: wasmInitThreeScene, wasmGetState, wasmRotateFace, wasmResetCube, wasmScrambleCube, wasmUpdateCubeFromState, wasmAddCoordinateAxes")
 }
 
 func main() {

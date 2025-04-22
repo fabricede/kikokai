@@ -1,25 +1,14 @@
 package mcp
 
 import (
-	"encoding/json"
+	"context"
+	"errors"
+	"fmt"
 	"kikokai/src/model"
 	"log"
-	"net"
+
+	"github.com/mark3labs/mcp-go/mcp"
 )
-
-// MCP Protocol structures
-type MCPRequest struct {
-	Command string `json:"command"`
-	Params  struct {
-		Face      int  `json:"face"`
-		Clockwise bool `json:"clockwise"`
-	} `json:"params"`
-}
-
-type MCPResponse struct {
-	State [6]model.Face `json:"state"`
-	Error string        `json:"error,omitempty"`
-}
 
 // Event types for SSE (copied from server.go to maintain consistency)
 type CubeEvent struct {
@@ -31,7 +20,7 @@ type CubeEvent struct {
 
 // Interface for broadcasting events
 type EventBroadcaster interface {
-	BroadcastEvent(event interface{})
+	BroadcastEvent(event any)
 }
 
 // Global broadcaster that will be set by the main package
@@ -45,112 +34,70 @@ const (
 	CommandScramble = "scramble"
 )
 
-func handleMCPConnection(conn net.Conn) {
-	defer conn.Close()
+func stateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log.Printf("Received MCP request: %s", CommandState)
 
-	// Create a decoder for the connection
-	decoder := json.NewDecoder(conn)
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
+}
 
-	// Read the request
-	var req MCPRequest
-	if err := decoder.Decode(&req); err != nil {
-		log.Println("Failed to decode request:", err)
-		sendErrorResponse(conn, "Invalid request format")
-		return
+func rotateHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log.Printf("Received MCP request: %s", CommandRotate)
+	face, ok := request.Params.Arguments["face"].(int)
+	if !ok {
+		return nil, errors.New("face must be an int")
+	}
+	clockwise, ok := request.Params.Arguments["clockwise"].(bool)
+	if !ok {
+		return nil, errors.New("clockwise must be a bool")
 	}
 
-	log.Printf("Received MCP request: %s", req.Command)
-
-	// Process the request based on the command
-	var resp MCPResponse
-	resp.State = model.SharedCube.State
-
-	switch req.Command {
-	case CommandRotate:
-		face := model.FaceIndex(req.Params.Face)
-		// Convert boolean to TurningDirection type
-		var clockwise model.TurningDirection
-		if req.Params.Clockwise {
-			clockwise = model.Clockwise
-		} else {
-			clockwise = model.CounterClockwise
-		}
-
-		if face < 0 || face > 5 {
-			resp.Error = "Invalid face index"
-		} else {
-			// Broadcast the rotation event to browser clients if broadcaster is set
-			if Broadcaster != nil {
-				log.Printf("Broadcasting MCP rotation event: face=%d, clockwise=%t", req.Params.Face, req.Params.Clockwise)
-				Broadcaster.BroadcastEvent(CubeEvent{
-					Type:      "rotate",
-					Face:      req.Params.Face,
-					Clockwise: req.Params.Clockwise,
-				})
-			}
-
-			model.SharedCube.RotateFace(face, clockwise)
-			resp.State = model.SharedCube.State
-		}
-
-	case CommandReset:
-		// Broadcast the reset event
+	if face < 0 || face > 5 {
+		return nil, errors.New("Invalid face index")
+	} else {
+		// Broadcast the rotation event to browser clients if broadcaster is set
 		if Broadcaster != nil {
+			log.Printf("Broadcasting MCP rotation event: face=%d, clockwise=%t", face, clockwise)
 			Broadcaster.BroadcastEvent(CubeEvent{
-				Type: "reset",
+				Type:      "rotate",
+				Face:      face,
+				Clockwise: clockwise,
 			})
 		}
 
-		model.ResetCube()
-		resp.State = model.SharedCube.State
-
-	case CommandScramble:
-		// Broadcast the scramble event
-		if Broadcaster != nil {
-			Broadcaster.BroadcastEvent(CubeEvent{
-				Type: "scramble",
-			})
-		}
-
-		// Add scramble support to the MCP server
-		model.SharedCube.Scramble(20) // Scramble with 20 random moves
-		resp.State = model.SharedCube.State
-
-	case CommandState:
-		// Just return the current state
-
-	default:
-		resp.Error = "Unknown command"
+		model.SharedCube.RotateFace(model.FaceIndex(face), model.TurningDirection(clockwise))
 	}
 
 	// Send the response
-	if err := json.NewEncoder(conn).Encode(resp); err != nil {
-		log.Println("Failed to encode response:", err)
-	}
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
 }
 
-func sendErrorResponse(conn net.Conn, errMsg string) {
-	resp := MCPResponse{
-		Error: errMsg,
+func resetHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log.Printf("Received MCP request: %s", CommandReset)
+
+	// Broadcast the reset event
+	if Broadcaster != nil {
+		Broadcaster.BroadcastEvent(CubeEvent{
+			Type: "reset",
+		})
 	}
-	json.NewEncoder(conn).Encode(resp)
+
+	model.ResetCube()
+	// Send the response
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
 }
 
-// StartMCPServer starts a TCP server for MCP communication
-func StartMCPServer() {
-	ln, err := net.Listen("tcp", ":9001")
-	if err != nil {
-		log.Fatal("Failed to start MCP server:", err)
-	}
-	defer ln.Close()
-	log.Println("MCP server started on :9001")
+func scrambleHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
+	log.Printf("Received MCP request: %s", CommandScramble)
 
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Println("Failed to accept connection:", err)
-			continue
-		}
-		go handleMCPConnection(conn)
+	// Broadcast the scramble event
+	if Broadcaster != nil {
+		Broadcaster.BroadcastEvent(CubeEvent{
+			Type: "scramble",
+		})
 	}
+
+	// Add scramble support to the MCP server
+	model.SharedCube.Scramble(20) // Scramble with 20 random moves
+	// Send the response
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
 }

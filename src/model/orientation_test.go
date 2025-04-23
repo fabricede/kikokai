@@ -152,3 +152,32 @@ func TestGetNorthEdge(t *testing.T) {
 		})
 	}
 }
+
+func TestGetSticker(t *testing.T) {
+	type args struct {
+		cube     *Cube
+		position CubeCoordinate
+	}
+	tests := []struct {
+		name string
+		args args
+		want Sticker
+	}{
+		// TODO: Add test cases.
+		{
+			name: "Front NW sticker",
+			args: args{
+				cube:     NewCube(),
+				position: CubeCoordinate{X: 1, Y: 1, Z: 1},
+			},
+			want: Sticker{Index: Front_NE, Color: White},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := GetSticker(tt.args.cube, tt.args.position); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("GetSticker() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

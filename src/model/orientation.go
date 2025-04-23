@@ -86,9 +86,9 @@ func CoordinateToFace(coord CubeCoordinate) FaceIndex {
 		return Front
 	case coord.X == -1:
 		return Back
-	case coord.Y == -1:
-		return Up
 	case coord.Y == 1:
+		return Up
+	case coord.Y == -1:
 		return Down
 	case coord.Z == -1:
 		return Left

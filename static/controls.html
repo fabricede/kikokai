@@ -17,50 +17,32 @@
     
     <div class="controls-container">
         <div class="face-controls">
-            <div class="face-label">Front Face (White)</div>
+            <div class="face-label">X-Axis Rotations</div>
             <div class="button-group">
-                <button onclick="handleRotate(0, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(0, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('x', 1, 1)">Front (x=1) Clockwise</button>
+                <button onclick="handleAxisRotate('x', 1, -1)">Front (x=1) Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('x', -1, 1)">Back (x=-1) Clockwise</button>
+                <button onclick="handleAxisRotate('x', -1, -1)">Back (x=-1) Counter-Clockwise</button>
             </div>
         </div>
         
         <div class="face-controls">
-            <div class="face-label">Back Face (Yellow)</div>
+            <div class="face-label">Y-Axis Rotations</div>
             <div class="button-group">
-                <button onclick="handleRotate(1, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(1, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('y', 1, 1)">Up (y=1) Clockwise</button>
+                <button onclick="handleAxisRotate('y', 1, -1)">Up (y=1) Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('y', -1, 1)">Down (y=-1) Clockwise</button>
+                <button onclick="handleAxisRotate('y', -1, -1)">Down (y=-1) Counter-Clockwise</button>
             </div>
         </div>
         
         <div class="face-controls">
-            <div class="face-label">Up Face (Blue)</div>
+            <div class="face-label">Z-Axis Rotations</div>
             <div class="button-group">
-                <button onclick="handleRotate(2, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(2, false)">Rotate Counter-Clockwise</button>
-            </div>
-        </div>
-        
-        <div class="face-controls">
-            <div class="face-label">Down Face (Green)</div>
-            <div class="button-group">
-                <button onclick="handleRotate(3, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(3, false)">Rotate Counter-Clockwise</button>
-            </div>
-        </div>
-        
-        <div class="face-controls">
-            <div class="face-label">Left Face (Red)</div>
-            <div class="button-group">
-                <button onclick="handleRotate(4, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(4, false)">Rotate Counter-Clockwise</button>
-            </div>
-        </div>
-        
-        <div class="face-controls">
-            <div class="face-label">Right Face (Orange)</div>
-            <div class="button-group">
-                <button onclick="handleRotate(5, true)">Rotate Clockwise</button>
-                <button onclick="handleRotate(5, false)">Rotate Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('z', 1, 1)">Right (z=1) Clockwise</button>
+                <button onclick="handleAxisRotate('z', 1, -1)">Right (z=1) Counter-Clockwise</button>
+                <button onclick="handleAxisRotate('z', -1, 1)">Left (z=-1) Clockwise</button>
+                <button onclick="handleAxisRotate('z', -1, -1)">Left (z=-1) Counter-Clockwise</button>
             </div>
         </div>
         
@@ -69,7 +51,7 @@
             <button class="scramble" onclick="handleScramble()">Scramble Cube</button>
         </div>
         
-        <div id="version">Version: 1.1</div>
+        <div id="version">Version: 1.2</div>
     </div>
     
     <script>
@@ -83,17 +65,18 @@
             5: "orange"  // Orange
         };
         
-        // Simple JS bridge to Go WASM functions
-        function handleRotate(face, clockwise) {
-            console.log(`Rotating face ${face} ${clockwise ? "clockwise" : "counter-clockwise"}`);
+        // Handle rotation using the new axis-based API
+        function handleAxisRotate(axis, layer, direction) {
+            console.log(`Rotating on axis ${axis}, layer ${layer}, direction ${direction}`);
             
             // Create request data
             const requestData = {
-                face: face,
-                clockwise: clockwise
+                axis: axis,
+                layer: layer,
+                direction: direction
             };
             
-            // Call the API directly to update the internal state
+            // Call the API to update the internal state
             fetch('/api/rotate', {
                 method: 'POST',
                 headers: {

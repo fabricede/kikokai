@@ -38,6 +38,41 @@
             5: 0xFFA500  // Orange
         };
         
+        // Axis rotation mapping to face rotation
+        // Maps axis, layer and direction to face and clockwise values
+        const axisToFaceMapping = {
+            'x': {
+                '1': { // Front layer (x=1)
+                    '1': { face: 0, clockwise: true }, // Clockwise
+                    '-1': { face: 0, clockwise: false } // Counter-clockwise
+                },
+                '-1': { // Back layer (x=-1)
+                    '1': { face: 1, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 1, clockwise: true } // Counter-clockwise (inverted)
+                }
+            },
+            'y': {
+                '1': { // Up layer (y=1)
+                    '1': { face: 2, clockwise: true },
+                    '-1': { face: 2, clockwise: false }
+                },
+                '-1': { // Down layer (y=-1)
+                    '1': { face: 3, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 3, clockwise: true } // Counter-clockwise (inverted)
+                }
+            },
+            'z': {
+                '1': { // Right layer (z=1)
+                    '1': { face: 5, clockwise: true },
+                    '-1': { face: 5, clockwise: false }
+                },
+                '-1': { // Left layer (z=-1)
+                    '1': { face: 4, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 4, clockwise: true } // Counter-clockwise (inverted)
+                }
+            }
+        };
+        
         // Debug logging for WebAssembly global scope
         function debugGlobalScope() {
             console.log("Global scope keys:", Object.keys(window).filter(key => key.startsWith("wasm")));
@@ -95,8 +130,21 @@
                                     
                                     console.log("Animating rotation:", data.face, isClockwise);
                                     wasmRotateFace(data.face, isClockwise);
+                                } else if (data.axis !== undefined && data.layer !== undefined && data.direction !== undefined) {
+                                    // Handle axis rotation
+                                    const mapping = axisToFaceMapping[data.axis]?.[data.layer]?.[data.direction];
+                                    if (mapping) {
+                                        console.log("Animating axis rotation:", data.axis, data.layer, data.direction);
+                                        wasmRotateFace(mapping.face, mapping.clockwise);
+                                    } else {
+                                        console.warn("Invalid axis rotation parameters, falling back to state update");
+                                        if (data.state && typeof wasmUpdateCubeFromState === 'function') {
+                                            wasmUpdateCubeFromState(typeof data.state === 'string' ? 
+                                                data.state : JSON.stringify(data.state));
+                                        }
+                                    }
                                 } else {
-                                    console.warn("Rotation event missing face parameter, falling back to state update");
+                                    console.warn("Rotation event missing parameters, falling back to state update");
                                     // If we have state data, use it to update the cube
                                     if (data.state && typeof wasmUpdateCubeFromState === 'function') {
                                         wasmUpdateCubeFromState(typeof data.state === 'string' ? 

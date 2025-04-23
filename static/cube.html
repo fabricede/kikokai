@@ -122,15 +122,7 @@
                         case 'rotate':
                             // Handle rotation event with animation
                             if (typeof wasmRotateFace === 'function') {
-                                // Check if both face and clockwise parameters exist
-                                if (data.face !== undefined) {
-                                    // If face exists but clockwise doesn't, default to true
-                                    const isClockwise = data.clockwise !== undefined ? 
-                                        Boolean(data.clockwise) : true;
-                                    
-                                    console.log("Animating rotation:", data.face, isClockwise);
-                                    wasmRotateFace(data.face, isClockwise);
-                                } else if (data.axis !== undefined && data.layer !== undefined && data.direction !== undefined) {
+                                if (data.axis !== undefined && data.layer !== undefined && data.direction !== undefined) {
                                     // Handle axis rotation
                                     const mapping = axisToFaceMapping[data.axis]?.[data.layer]?.[data.direction];
                                     if (mapping) {

@@ -27,13 +27,12 @@ func StartMCPServer() {
 		"1.0.0",
 	)
 
-	httpTool := mcp.NewTool("cubeApi",
-		mcp.WithDescription(describes),
-		// Add parameters
+	httpTool := mcp.NewTool("http_request",
+		mcp.WithDescription("Send http API request to interact with a rubick's cube"),
 		mcp.WithString("url",
 			mcp.Required(),
-			mcp.Description("URL of the cube API"),
-			mcp.Pattern("^http:localhost:8090//api/(state|scramble|reset|rotate)?$"),
+			mcp.Description("URL of the cube API "),
+			mcp.Pattern("^http:localhost:8090//api/.*"),
 		),
 		mcp.WithString("method",
 			mcp.Required(),
@@ -85,62 +84,46 @@ func StartMCPServer() {
 		return mcp.NewToolResultText(fmt.Sprintf("Status: %d\nBody: %s", resp.StatusCode, string(respBody))), nil
 	})
 
-	/*
-		// Add state tool
-		getState := mcp.NewTool("state",
-			mcp.WithDescription("get the state of the cube"),
-		)
-		// Add tool handler
-		mcpServer.AddTool(getState, stateHandler)
+	// Add state tool
+	getState := mcp.NewTool("state",
+		mcp.WithDescription("get the state of the cube"),
+	)
+	// Add tool handler
+	mcpServer.AddTool(getState, stateHandler)
 
-		// Add rotate tool
-		rotate := mcp.NewTool("rotate",
-			mcp.WithDescription("rotate a face of the cube"),
-			mcp.WithNumber("face",
-				mcp.Required(),
-				mcp.Description("Face index (0-5)"),
-			),
-			mcp.WithBoolean("clockwise",
-				mcp.Required(),
-				mcp.Description("Rotate clockwise"),
-			),
-		)
-		// Add rotate tool handler
-		mcpServer.AddTool(rotate, rotateHandler)
+	// Add rotate-axis tool
+	rotateAxis := mcp.NewTool("rotate_axis",
+		mcp.WithDescription("rotate a cube layer based on axis, layer and direction"),
+		mcp.WithString("axis",
+			mcp.Required(),
+			mcp.Description("Rotation axis (x, y, z)"),
+		),
+		mcp.WithNumber("layer",
+			mcp.Required(),
+			mcp.Description("Layer to rotate (1 or -1)"),
+		),
+		mcp.WithNumber("direction",
+			mcp.Required(),
+			mcp.Description("Rotation direction (1 for clockwise, -1 for counter-clockwise)"),
+		),
+	)
+	// Add rotate-axis tool handler
+	mcpServer.AddTool(rotateAxis, rotateAxisHandler)
 
-		// Add rotate-axis tool (nouveau)
-		rotateAxis := mcp.NewTool("rotate_axis",
-			mcp.WithDescription("rotate a cube layer based on axis, layer and direction"),
-			mcp.WithString("axis",
-				mcp.Required(),
-				mcp.Description("Rotation axis (x, y, z)"),
-			),
-			mcp.WithNumber("layer",
-				mcp.Required(),
-				mcp.Description("Layer to rotate (1 or -1)"),
-			),
-			mcp.WithNumber("direction",
-				mcp.Required(),
-				mcp.Description("Rotation direction (1 for clockwise, -1 for counter-clockwise)"),
-			),
-		)
-		// Add rotate-axis tool handler
-		mcpServer.AddTool(rotateAxis, rotateAxisHandler)
+	// Add reset tool
+	reset := mcp.NewTool("reset",
+		mcp.WithDescription("reset the cube"),
+	)
+	// Add reset tool handler
+	mcpServer.AddTool(reset, resetHandler)
 
-		// Add reset tool
-		reset := mcp.NewTool("reset",
-			mcp.WithDescription("reset the cube"),
-		)
-		// Add reset tool handler
-		mcpServer.AddTool(reset, resetHandler)
+	// Add scramble tool
+	scramble := mcp.NewTool("scramble",
+		mcp.WithDescription("scramble the cube"),
+	)
+	// Add scramble tool handler
+	mcpServer.AddTool(scramble, scrambleHandler)
 
-		// Add scramble tool
-		scramble := mcp.NewTool("scramble",
-			mcp.WithDescription("scramble the cube"),
-		)
-		// Add scramble tool handler
-		mcpServer.AddTool(scramble, scrambleHandler)
-	*/
 	// Starts the sse server
 	sseServer := server.NewSSEServer(mcpServer, server.WithBaseURL("http://localhost:9001"))
 	log.Printf("SSE server listening on :9001")

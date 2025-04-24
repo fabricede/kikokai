@@ -154,28 +154,53 @@ func TestGetNorthEdge(t *testing.T) {
 }
 
 func TestGetSticker(t *testing.T) {
-	type args struct {
-		cube     *Cube
-		position CubeCoordinate
-	}
 	tests := []struct {
-		name string
-		args args
-		want Sticker
+		name     string
+		position CubeCoordinate
+		want     Sticker
 	}{
 		// TODO: Add test cases.
 		{
-			name: "Front NW sticker",
-			args: args{
-				cube:     NewCube(),
-				position: CubeCoordinate{X: 1, Y: 1, Z: 1},
-			},
-			want: Sticker{Index: Front_NE, Color: White},
+			name:     "Front NE sticker",
+			position: CubeCoordinate{X: 1, Y: 1, Z: 1},
+			want:     Sticker{Index: Front_NE, Color: White},
 		},
+		{
+			name:     "Front SE sticker",
+			position: CubeCoordinate{X: 1, Y: 1, Z: -1},
+			want:     Sticker{Index: Front_SE, Color: White},
+		},
+		{
+			name:     "Front SW sticker",
+			position: CubeCoordinate{X: 1, Y: -1, Z: -1},
+			want:     Sticker{Index: Front_SW, Color: White},
+		},
+		{
+			name:     "Front NW sticker",
+			position: CubeCoordinate{X: 1, Y: -1, Z: 1},
+			want:     Sticker{Index: Front_NW, Color: White},
+		},
+		{
+			name:     "Back NE sticker",
+			position: CubeCoordinate{X: -1, Y: 1, Z: 1},
+			want:     Sticker{Index: Back_NE, Color: Yellow},
+		}, /*
+			{
+				name:     "Back NW sticker",
+				position: CubeCoordinate{X: -1, Y: 1, Z: -1},
+				want:     Sticker{Index: Back_NW, Color: Yellow},
+			},
+			{
+				name:     "Back SW sticker",
+				position: CubeCoordinate{X: -1, Y: -1, Z: -1},
+				want:     Sticker{Index: Back_SW, Color: Yellow},
+			},*/
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := GetSticker(tt.args.cube, tt.args.position); !reflect.DeepEqual(got, tt.want) {
+			// Define the colors for the cube
+			cube := NewCube()
+			if got := GetSticker(cube, tt.position); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("GetSticker() = %v, want %v", got, tt.want)
 			}
 		})

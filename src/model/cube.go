@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"math/rand"
 )
 
@@ -68,6 +69,9 @@ func NewCube() *Cube {
 		stickerIndex := 0
 		for row := range 3 {
 			for col := range 3 {
+				stickerindexname := StickerColorName[StickerIndex(i*9+stickerIndex)]
+				log.Printf("Initializing sticker %d,%d on face %s : stickerindexname %s", row, col, face.Name, stickerindexname)
+				// Assign colors based on the face index
 				face.Stickers[row][col] = Sticker{
 					Color: Color(i),                         // Use the face index as the color
 					Index: StickerIndex(i*9 + stickerIndex), // Calculate the correct sticker index

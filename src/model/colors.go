@@ -88,7 +88,7 @@ var FaceColorName = map[FaceIndex]string{
 }
 
 var StickerColorName = map[StickerIndex]string{
-	// Front Face
+	// Front Face (x=2)
 	// row = 1 + position.Z // Down /South (z=-1) is row 0, Up   /North (z=1) is row 2
 	// col = 1 + position.Y // Left/West  (y=-1)  is col 0, Right/East  (y=1) is col 2
 	Front_2_0_0: "white_red_green",    // row 0, col 0

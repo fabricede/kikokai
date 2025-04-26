@@ -133,7 +133,7 @@ func TestGetNorthEdge(t *testing.T) {
 				cube: cube,
 				face: Front,
 			},
-			wantEdge: [3]Sticker{{Index: Up_NW, Color: Blue}, {Index: Up_W, Color: Blue}, {Index: Up_SW, Color: Blue}},
+			wantEdge: [3]Sticker{{Index: Up_0_0_2, Color: Blue}, {Index: Up_1_0_2, Color: Blue}, {Index: Up_2_0_2, Color: Blue}},
 		},
 		{
 			name: "back North edge",
@@ -141,7 +141,7 @@ func TestGetNorthEdge(t *testing.T) {
 				cube: cube,
 				face: Back,
 			},
-			wantEdge: [3]Sticker{{Index: Down_NE, Color: Green}, {Index: Down_E, Color: Green}, {Index: Down_SE, Color: Green}},
+			wantEdge: [3]Sticker{{Index: Down_2_0_0, Color: Green}, {Index: Down_1_0_0, Color: Green}, {Index: Down_0_0_0, Color: Green}},
 		},
 	}
 	for _, tt := range tests {
@@ -183,22 +183,22 @@ func TestGetSticker(t *testing.T) {
 		{
 			name:     "Back NE sticker",
 			position: CubeCoordinate{X: -1, Y: 1, Z: 1},
-			want:     Sticker{Index: Back_NE, Color: Yellow},
-		},
-		{
-			name:     "Back NW sticker",
-			position: CubeCoordinate{X: -1, Y: 1, Z: -1},
-			want:     Sticker{Index: Back_NW, Color: Yellow},
-		},
-		{
-			name:     "Back SW sticker",
-			position: CubeCoordinate{X: -1, Y: -1, Z: -1},
-			want:     Sticker{Index: Back_SW, Color: Yellow},
+			want:     Sticker{Index: Back_0_2_2, Color: Yellow},
 		},
 		{
 			name:     "Back SE sticker",
 			position: CubeCoordinate{X: -1, Y: -1, Z: 1},
-			want:     Sticker{Index: Back_SE, Color: Yellow},
+			want:     Sticker{Index: Back_0_2_0, Color: Yellow},
+		},
+		{
+			name:     "Back SW sticker",
+			position: CubeCoordinate{X: -1, Y: -1, Z: -1},
+			want:     Sticker{Index: Back_0_0_0, Color: Yellow},
+		},
+		{
+			name:     "Back NW sticker",
+			position: CubeCoordinate{X: -1, Y: 1, Z: -1},
+			want:     Sticker{Index: Back_0_0_2, Color: Yellow},
 		},
 	}
 	for _, tt := range tests {

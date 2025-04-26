@@ -16,15 +16,15 @@ const (
 const (
 	// Sticker Colors
 	// Front Face
-	Front_SW StickerIndex = iota
-	Front_S
-	Front_SE
-	Front_W
-	Front_Center
-	Front_E
-	Front_NW
-	Front_N
-	Front_NE
+	Front_2_0_0 StickerIndex = iota
+	Front_2_0_1
+	Front_2_0_2
+	Front_2_1_0
+	Front_2_1_1
+	Front_2_1_2
+	Front_2_2_0
+	Front_2_2_1
+	Front_2_2_2
 	// Back Face
 	Back_SW
 	Back_S
@@ -91,15 +91,15 @@ var StickerColorName = map[StickerIndex]string{
 	// Front Face
 	// row = 1 + position.Z // Down /South (z=-1) is row 0, Up   /North (z=1) is row 2
 	// col = 1 + position.Y // Left/West  (y=-1)  is col 0, Right/East  (y=1) is col 2
-	Front_SW:     "white_red_green",    // row 0, col 0
-	Front_S:      "white_green",        // row 0, col 1
-	Front_SE:     "white_green_orange", // row 0, col 2
-	Front_W:      "white_red",          // row 1, col 0
-	Front_Center: "white",              // row 1, col 1
-	Front_E:      "white_orange",       // row 1, col 2
-	Front_NW:     "white_red_blue",     // row 2, col 0
-	Front_N:      "white_blue",         // row 2, col 1
-	Front_NE:     "white_blue_orange",  // row 2, col 2
+	Front_2_0_0: "white_red_green",    // row 0, col 0
+	Front_2_0_1: "white_green",        // row 0, col 1
+	Front_2_0_2: "white_green_orange", // row 0, col 2
+	Front_2_1_0: "white_red",          // row 1, col 0
+	Front_2_1_1: "white",              // row 1, col 1
+	Front_2_1_2: "white_orange",       // row 1, col 2
+	Front_2_2_0: "white_red_blue",     // row 2, col 0
+	Front_2_2_1: "white_blue",         // row 2, col 1
+	Front_2_2_2: "white_blue_orange",  // row 2, col 2
 	// Back Face
 	Back_NW:     "yellow_red_blue",
 	Back_N:      "yellow_blue",

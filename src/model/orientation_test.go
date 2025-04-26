@@ -163,38 +163,43 @@ func TestGetSticker(t *testing.T) {
 		{
 			name:     "Front NE sticker",
 			position: CubeCoordinate{X: 1, Y: 1, Z: 1},
-			want:     Sticker{Index: Front_NE, Color: White},
+			want:     Sticker{Index: Front_2_2_2, Color: White},
 		},
 		{
 			name:     "Front SE sticker",
 			position: CubeCoordinate{X: 1, Y: 1, Z: -1},
-			want:     Sticker{Index: Front_SE, Color: White},
+			want:     Sticker{Index: Front_2_0_2, Color: White},
 		},
 		{
 			name:     "Front SW sticker",
 			position: CubeCoordinate{X: 1, Y: -1, Z: -1},
-			want:     Sticker{Index: Front_SW, Color: White},
+			want:     Sticker{Index: Front_2_0_0, Color: White},
 		},
 		{
 			name:     "Front NW sticker",
 			position: CubeCoordinate{X: 1, Y: -1, Z: 1},
-			want:     Sticker{Index: Front_NW, Color: White},
+			want:     Sticker{Index: Front_2_2_0, Color: White},
 		},
 		{
 			name:     "Back NE sticker",
 			position: CubeCoordinate{X: -1, Y: 1, Z: 1},
 			want:     Sticker{Index: Back_NE, Color: Yellow},
-		}, /*
-			{
-				name:     "Back NW sticker",
-				position: CubeCoordinate{X: -1, Y: 1, Z: -1},
-				want:     Sticker{Index: Back_NW, Color: Yellow},
-			},
-			{
-				name:     "Back SW sticker",
-				position: CubeCoordinate{X: -1, Y: -1, Z: -1},
-				want:     Sticker{Index: Back_SW, Color: Yellow},
-			},*/
+		},
+		{
+			name:     "Back NW sticker",
+			position: CubeCoordinate{X: -1, Y: 1, Z: -1},
+			want:     Sticker{Index: Back_NW, Color: Yellow},
+		},
+		{
+			name:     "Back SW sticker",
+			position: CubeCoordinate{X: -1, Y: -1, Z: -1},
+			want:     Sticker{Index: Back_SW, Color: Yellow},
+		},
+		{
+			name:     "Back SE sticker",
+			position: CubeCoordinate{X: -1, Y: -1, Z: 1},
+			want:     Sticker{Index: Back_SE, Color: Yellow},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

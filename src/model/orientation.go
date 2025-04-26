@@ -237,11 +237,11 @@ func GetStickerCoordinate(position CubeCoordinate) (face FaceIndex, row, col int
 	// We need to project the 3D position onto the 2D face
 	switch face {
 	case Front: // x = 1
-		row = 1 + position.Z // Down /South (z=-1) is row 0, Up   /North (z=1) is row 2
-		col = 1 + position.Y // Left/West  (y=-1)  is col 0, Right/East  (y=1)  is col 2
+		col = 1 + position.Y // Down/South (z=-1) is row 0, Up   /North (z=1) is row 2
+		row = 1 + position.Z // Left/West  (y=-1) is col 0, Right/East  (y=1) is col 2
 	case Back: // x = -1
-		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
-		col = 1 - position.Y // Right (y=1) is col 0, Left (y=-1) is col 2
+		row = 1 - position.Z // Right/West  (y=-1) is col 0, Left/East  (y=1) is col 2
+		col = 1 + position.Y // Down /South (z=-1) is row 0, Up  /North (z=1) is row 2
 	case Up: // z = 1
 		row = 1 - position.X // Back (x=-1) is row 0, Front (x=1) is row 2
 		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2

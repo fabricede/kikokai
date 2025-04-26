@@ -16,7 +16,7 @@ func Test_NewCube(t *testing.T) {
 				State: [6]Face{
 					// Front - white
 					{
-						Name:  "White",
+						Name:  "white",
 						Index: Front,
 						Stickers: [3][3]Sticker{
 							{{Color: White, Index: Front_2_0_0},
@@ -32,7 +32,7 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Back - yellow
 					{
-						Name:  "Yellow",
+						Name:  "yellow",
 						Index: Back,
 						Stickers: [3][3]Sticker{
 							{{Color: Yellow, Index: Back_0_0_0},
@@ -48,7 +48,7 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Up - blue
 					{
-						Name:  "Blue",
+						Name:  "blue",
 						Index: Up,
 						Stickers: [3][3]Sticker{
 							{{Color: Blue, Index: Up_0_0_2},
@@ -64,7 +64,7 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Down - green
 					{
-						Name:  "Green",
+						Name:  "green",
 						Index: Down,
 						Stickers: [3][3]Sticker{
 							{{Color: Green, Index: Down_0_0_0},
@@ -80,7 +80,7 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Left - red
 					{
-						Name:  "Red",
+						Name:  "red",
 						Index: Left,
 						Stickers: [3][3]Sticker{
 							{{Color: Red, Index: Left_0_0_0},
@@ -96,7 +96,7 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Right - orange
 					{
-						Name:  "Orange",
+						Name:  "orange",
 						Index: Right,
 						Stickers: [3][3]Sticker{
 							{{Color: Orange, Index: Right_0_2_0},
@@ -136,13 +136,13 @@ func TestCube_RotateFront(t *testing.T) {
 			expected: [6][3][3]Sticker{
 				// Front - white (rotated clockwise)
 				{
-					{{Color: White, Index: Front_2_0_0},
-						{Color: White, Index: Front_2_1_0},
-						{Color: White, Index: Front_2_2_0}},
-					{{Color: White, Index: Front_2_0_1},
+					{{Color: White, Index: Front_2_1_0},
+						{Color: White, Index: Front_2_0_0},
+						{Color: White, Index: Front_2_0_1}},
+					{{Color: White, Index: Front_2_2_0},
 						{Color: White, Index: Front_2_1_1},
-						{Color: White, Index: Front_2_2_1}},
-					{{Color: White, Index: Front_2_0_2},
+						{Color: White, Index: Front_2_0_2}},
+					{{Color: White, Index: Front_2_2_1},
 						{Color: White, Index: Front_2_1_2},
 						{Color: White, Index: Front_2_2_2}},
 				},
@@ -158,7 +158,7 @@ func TestCube_RotateFront(t *testing.T) {
 						{Color: Yellow, Index: Back_0_2_1},
 						{Color: Yellow, Index: Back_0_2_2}},
 				},
-				// Up - blue with Left column changed Red From Left south
+				// Up - blue with bottom row changed
 				{
 					{{Color: Blue, Index: Up_0_0_2},
 						{Color: Blue, Index: Up_0_1_2},
@@ -166,15 +166,15 @@ func TestCube_RotateFront(t *testing.T) {
 					{{Color: Blue, Index: Up_1_0_2},
 						{Color: Blue, Index: Up_1_1_2},
 						{Color: Blue, Index: Up_1_2_2}},
-					{{Color: Blue, Index: Up_2_0_2},
-						{Color: Blue, Index: Up_2_1_2},
-						{Color: Blue, Index: Up_2_2_2}},
+					{{Color: Red, Index: Left_2_0_2},
+						{Color: Red, Index: Left_2_0_1},
+						{Color: Red, Index: Left_2_0_0}},
 				},
-				// Down - green with top row changed Orange From Right north
+				// Down - green with top row changed
 				{
-					{{Color: Green, Index: Down_0_0_0},
-						{Color: Green, Index: Down_0_1_0},
-						{Color: Green, Index: Down_0_2_0}},
+					{{Color: Orange, Index: Right_0_2_0},
+						{Color: Orange, Index: Right_1_2_0},
+						{Color: Orange, Index: Right_2_2_0}},
 					{{Color: Green, Index: Down_1_0_0},
 						{Color: Green, Index: Down_1_1_0},
 						{Color: Green, Index: Down_1_2_0}},
@@ -182,74 +182,110 @@ func TestCube_RotateFront(t *testing.T) {
 						{Color: Green, Index: Down_2_1_0},
 						{Color: Green, Index: Down_2_2_0}},
 				},
-				// Left - red with bottom row changed Green From Down west
+				// Left - red with right edge changed
 				{
 					{{Color: Red, Index: Left_0_0_0},
 						{Color: Red, Index: Left_0_0_1},
-						{Color: Red, Index: Left_0_0_2}},
+						{Color: Green, Index: Down_0_0_0}},
 					{{Color: Red, Index: Left_1_0_0},
 						{Color: Red, Index: Left_1_0_1},
-						{Color: Red, Index: Left_1_0_2}},
+						{Color: Green, Index: Down_0_1_0}},
 					{{Color: Red, Index: Left_2_0_0},
 						{Color: Red, Index: Left_2_0_1},
-						{Color: Red, Index: Left_2_0_2}},
+						{Color: Green, Index: Down_0_2_0}},
 				},
-				// Right - orange with Up row changed Blue From Up west
+				// Right - orange with left column changed
 				{
-					{{Color: Orange, Index: Right_0_2_0},
+					{{Color: Blue, Index: Up_2_0_2},
 						{Color: Orange, Index: Right_0_2_1},
 						{Color: Orange, Index: Right_0_2_2}},
-					{{Color: Orange, Index: Right_1_2_0},
+					{{Color: Blue, Index: Up_2_1_2},
 						{Color: Orange, Index: Right_1_2_1},
 						{Color: Orange, Index: Right_1_2_2}},
-					{{Color: Orange, Index: Right_2_2_0},
+					{{Color: Blue, Index: Up_2_2_2},
 						{Color: Orange, Index: Right_2_2_1},
 						{Color: Orange, Index: Right_2_2_2}},
 				},
 			},
 		},
-		/*{
+		{
 			name:      "Front Face Counter-Clockwise Rotation",
 			clockwise: CounterClockwise,
-			expected: [6][3][3]Color{
+			expected: [6][3][3]Sticker{
 				// Front - white (rotated counter-clockwise)
 				{
-					{White, White, White},
-					{White, White, White},
-					{White, White, White},
+					{{Color: White, Index: Front_2_0_2},
+						{Color: White, Index: Front_2_1_2},
+						{Color: White, Index: Front_2_2_2}},
+					{{Color: White, Index: Front_2_0_1},
+						{Color: White, Index: Front_2_1_1},
+						{Color: White, Index: Front_2_2_1}},
+					{{Color: White, Index: Front_2_0_0},
+						{Color: White, Index: Front_2_1_0},
+						{Color: White, Index: Front_2_2_0}},
 				},
 				// Back - yellow (unchanged)
 				{
-					{Yellow, Yellow, Yellow},
-					{Yellow, Yellow, Yellow},
-					{Yellow, Yellow, Yellow},
+					{{Color: Yellow, Index: Back_0_0_0},
+						{Color: Yellow, Index: Back_0_0_1},
+						{Color: Yellow, Index: Back_0_0_2}},
+					{{Color: Yellow, Index: Back_0_1_0},
+						{Color: Yellow, Index: Back_0_1_1},
+						{Color: Yellow, Index: Back_0_1_2}},
+					{{Color: Yellow, Index: Back_0_2_0},
+						{Color: Yellow, Index: Back_0_2_1},
+						{Color: Yellow, Index: Back_0_2_2}},
 				},
 				// Up - blue with bottom row changed
 				{
-					{Blue, Blue, Blue},
-					{Blue, Blue, Blue},
-					{Orange, Orange, Orange}, // From Right
+					{{Color: Blue, Index: Up_0_0_2},
+						{Color: Blue, Index: Up_0_1_2},
+						{Color: Blue, Index: Up_0_2_2}},
+					{{Color: Blue, Index: Up_1_0_2},
+						{Color: Blue, Index: Up_1_1_2},
+						{Color: Blue, Index: Up_1_2_2}},
+					{{Color: Orange, Index: Right_0_2_0},
+						{Color: Orange, Index: Right_1_2_0},
+						{Color: Orange, Index: Right_2_2_0}},
 				},
 				// Down - green with top row changed
 				{
-					{Red, Red, Red}, // From Left
-					{Green, Green, Green},
-					{Green, Green, Green},
+					{{Color: Red, Index: Left_0_0_2},
+						{Color: Red, Index: Left_1_0_2},
+						{Color: Red, Index: Left_2_0_2}},
+					{{Color: Green, Index: Down_1_0_0},
+						{Color: Green, Index: Down_1_1_0},
+						{Color: Green, Index: Down_1_2_0}},
+					{{Color: Green, Index: Down_2_0_0},
+						{Color: Green, Index: Down_2_1_0},
+						{Color: Green, Index: Down_2_2_0}},
 				},
 				// Left - red with right column changed
 				{
-					{Red, Red, Blue},
-					{Red, Red, Blue},
-					{Red, Red, Blue}, // From Up
+					{{Color: Red, Index: Left_0_0_0},
+						{Color: Red, Index: Left_0_0_1},
+						{Color: Blue, Index: Up_2_0_2}},
+					{{Color: Red, Index: Left_1_0_0},
+						{Color: Red, Index: Left_1_0_1},
+						{Color: Blue, Index: Up_2_1_2}},
+					{{Color: Red, Index: Left_2_0_0},
+						{Color: Red, Index: Left_2_0_1},
+						{Color: Blue, Index: Up_2_2_2}},
 				},
 				// Right - orange with left column changed
 				{
-					{Green, Orange, Orange},
-					{Green, Orange, Orange},
-					{Green, Orange, Orange}, // From Down
+					{{Color: Green, Index: Down_0_0_0},
+						{Color: Orange, Index: Right_0_2_1},
+						{Color: Orange, Index: Right_0_2_2}},
+					{{Color: Green, Index: Down_0_1_0},
+						{Color: Orange, Index: Right_1_2_1},
+						{Color: Orange, Index: Right_1_2_2}},
+					{{Color: Green, Index: Down_0_2_0},
+						{Color: Orange, Index: Right_2_2_1},
+						{Color: Orange, Index: Right_2_2_2}},
 				},
 			},
-		},*/
+		},
 	}
 
 	for _, tt := range tests {

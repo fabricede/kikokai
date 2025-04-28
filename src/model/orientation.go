@@ -222,28 +222,24 @@ func GetCubePosition(face FaceIndex, row, col int) CubeCoordinate {
 // GetAdjacentXEdge returns the adjacent edge on the X direction for a given face and X coordinate
 // face could not already be on the x axis
 func GetAdjacentXEdge(cube *Cube, face FaceIndex, x int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
-	// fisrt determine the adjacent face based on the x coordinate
-	if x == 1 {
-		adjacentFace = Front
-	} else if x == -1 {
-		adjacentFace = Back
-	}
+	// first determine the adjacent face based on the x coordinate
+	adjacentFace = GetAdjacentFace(face, x, 0, 0)
 	switch face {
 	case Up: // (y=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: 1, Z: i - 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: x, Y: 1, Z: i - 1})
 		}
 	case Down: // (y=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: -1, Z: i - 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: x, Y: -1, Z: i - 1})
 		}
 	case Left: // (z=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: -1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: x, Y: i - 1, Z: -1})
 		}
 	case Right: // (z=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: x, Y: i - 1, Z: 1})
 		}
 	default:
 		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)
@@ -256,27 +252,23 @@ func GetAdjacentXEdge(cube *Cube, face FaceIndex, x int) (adjacentFace FaceIndex
 // face could not already be on the y axis
 func GetAdjacentYEdge(cube *Cube, face FaceIndex, y int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
 	// fisrt determine the adjacent face based on the y coordinate
-	if y == 1 {
-		adjacentFace = Up
-	} else if y == -1 {
-		adjacentFace = Down
-	}
+	adjacentFace = GetAdjacentFace(face, 0, y, 0)
 	switch face {
 	case Front: // (x=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: 1, Y: y, Z: i - 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: 1, Y: y, Z: i - 1})
 		}
 	case Back: // (x=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: -1, Y: y, Z: i - 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: -1, Y: y, Z: i - 1})
 		}
 	case Left: // (z=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: -1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: i - 1, Y: y, Z: -1})
 		}
 	case Right: // (z=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: 1})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: i - 1, Y: y, Z: 1})
 		}
 	default:
 		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)
@@ -289,27 +281,23 @@ func GetAdjacentYEdge(cube *Cube, face FaceIndex, y int) (adjacentFace FaceIndex
 // face could not already be on the z axis
 func GetAdjacentZEdge(cube *Cube, face FaceIndex, z int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
 	// fisrt determine the adjacent face based on the z coordinate
-	if z == 1 {
-		adjacentFace = Right
-	} else if z == -1 {
-		adjacentFace = Left
-	}
+	adjacentFace = GetAdjacentFace(face, 0, 0, z)
 	switch face {
 	case Front: // (x=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: 1, Y: i - 1, Z: z})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: 1, Y: i - 1, Z: z})
 		}
 	case Back: // (x=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: -1, Y: i - 1, Z: z})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: -1, Y: i - 1, Z: z})
 		}
 	case Up: // (y=1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: 1, Z: z})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: i - 1, Y: 1, Z: z})
 		}
 	case Down: // (y=-1)
 		for i := range 3 {
-			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: -1, Z: z})
+			edge[i], err = cube.GetSticker(adjacentFace, CubeCoordinate{X: i - 1, Y: -1, Z: z})
 		}
 	default:
 		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)

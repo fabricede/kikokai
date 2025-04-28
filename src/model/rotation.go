@@ -37,36 +37,54 @@ func (m Matrix5x5) RotateCounterClockwise() Matrix5x5 {
 
 // Init initializes the matrix from the cube's face point of view
 func (m *Matrix5x5) Init(c *Cube, face FaceIndex) {
+
 	// Copy the face's state into the matrix center
 	for i := range 3 {
 		for j := range 3 {
 			m[i+1][j+1] = c.State[face].Stickers[i][j]
 		}
 	}
-	// Get the north edge
-	northEdge := GetNorthEdge(c, face)
-	// Copy the north edge to the matrix
-	m[0][1] = northEdge[0]
-	m[0][2] = northEdge[1]
-	m[0][3] = northEdge[2]
-	// Get the south edge
-	southEdge := GetSouthEdge(c, face)
-	// Copy the south edge to the matrix
-	m[4][1] = southEdge[0]
-	m[4][2] = southEdge[1]
-	m[4][3] = southEdge[2]
-	// Get the west edge
-	westEdge := GetWestEdge(c, face)
-	// Copy the west edge to the matrix
-	m[1][0] = westEdge[0]
-	m[2][0] = westEdge[1]
-	m[3][0] = westEdge[2]
-	// Get the east edge
-	eastEdge := GetEastEdge(c, face)
-	// Copy the east edge to the matrix
-	m[1][4] = eastEdge[0]
-	m[2][4] = eastEdge[1]
-	m[3][4] = eastEdge[2]
+
+	faceCoord := FaceToCoordinate(face)
+	var xcol, ycol, yrow, zrow int
+	if faceCoord.X != 0 {
+		ycol = 1
+		zrow = 1
+	} else {
+		xcol = 1
+		yrow = 1
+	}
+	// Get the adjacent face on row = 2
+	r2Face := GetAdjacentFace(face, 0, 1*yrow, 1*zrow)
+	// Get the r2 edge
+	r2Edge := c.GetEdge(r2Face, faceCoord)
+	// Copy the r2 edge to the matrix
+	m[0][1] = r2Edge[0]
+	m[0][2] = r2Edge[1]
+	m[0][3] = r2Edge[2]
+	// Get the adjacent face on row = 0
+	r0Face := GetAdjacentFace(face, 0, -1*yrow, -1*zrow)
+	// Get the r0 edge
+	r0Edge := c.GetEdge(r0Face, faceCoord)
+	// Copy the r0 edge to the matrix
+	m[4][1] = r0Edge[0]
+	m[4][2] = r0Edge[1]
+	m[4][3] = r0Edge[2]
+	// Get the adjacent face on col = 0
+	c0Face := GetAdjacentFace(face, -1*xcol, -1*ycol, 0)
+	// Get the r0 edge
+	c0Edge := c.GetEdge(c0Face, faceCoord)
+	// Copy the c0 edge to the matrix
+	m[1][0] = c0Edge[0]
+	m[2][0] = c0Edge[1]
+	m[3][0] = c0Edge[2]
+	// Get the adjacent face on col = 2
+	c2Face := GetAdjacentFace(face, 1*xcol, 1*ycol, 0)
+	// Get the r0 edge
+	c2Edge := c.GetEdge(c2Face, faceCoord)
+	m[1][4] = c2Edge[0]
+	m[2][4] = c2Edge[1]
+	m[3][4] = c2Edge[2]
 }
 
 // SetCube updates the cube's state from the matrix
@@ -77,18 +95,35 @@ func (m *Matrix5x5) SetCube(c *Cube, face FaceIndex) {
 			c.State[face].Stickers[i][j] = m[i+1][j+1]
 		}
 	}
-	// Copy the north edge back to the cube
-	northEdge := [3]Sticker{m[0][1], m[0][2], m[0][3]}
-	SetNorthEdge(c, face, northEdge)
-	// Copy the south edge back to the cube
-	southEdge := [3]Sticker{m[4][1], m[4][2], m[4][3]}
-	SetSouthEdge(c, face, southEdge)
-	// Copy the west edge back to the cube
-	westEdge := [3]Sticker{m[1][0], m[2][0], m[3][0]}
-	SetWestEdge(c, face, westEdge)
-	// Copy the east edge back to the cube
-	eastEdge := [3]Sticker{m[1][4], m[2][4], m[3][4]}
-	SetEastEdge(c, face, eastEdge)
+	faceCoord := FaceToCoordinate(face)
+	var xcol, ycol, yrow, zrow int
+	if faceCoord.X != 0 {
+		ycol = 1
+		zrow = 1
+	} else {
+		xcol = 1
+		yrow = 1
+	}
+	// Get the adjacent face on row = 2
+	r2Face := GetAdjacentFace(face, 0, 1*yrow, 1*zrow)
+	// Set the r2 edge
+	r2Edge := [3]Sticker{m[0][1], m[0][2], m[0][3]}
+	c.SetEdge(r2Face, faceCoord, r2Edge)
+	// Get the adjacent face on row = 0
+	r0Face := GetAdjacentFace(face, 0, -1*yrow, -1*zrow)
+	// Set the r0 edge
+	r0Edge := [3]Sticker{m[4][1], m[4][2], m[4][3]}
+	c.SetEdge(r0Face, faceCoord, r0Edge)
+	// Get the adjacent face on col = 0
+	c0Face := GetAdjacentFace(face, -1*xcol, -1*ycol, 0)
+	// Set the c0 edge
+	c0Edge := [3]Sticker{m[1][0], m[2][0], m[3][0]}
+	c.SetEdge(c0Face, faceCoord, c0Edge)
+	// Get the adjacent face on col = 2
+	c2Face := GetAdjacentFace(face, 1*xcol, 1*ycol, 0)
+	// Set the c2 edge
+	c2Edge := [3]Sticker{m[1][4], m[2][4], m[3][4]}
+	c.SetEdge(c2Face, faceCoord, c2Edge)
 }
 
 // RotateFace rotates a specific face of the cube

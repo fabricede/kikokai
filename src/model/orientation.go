@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 // Orientation represents the orientation of a face on the cube
 // It is used to determine the position of the faces relative to each other
 // For exemple, from the perspective of the cube's Front face
@@ -13,8 +15,6 @@ package model
 
 // FaceIndex represents the order of representation of faces on the cube
 type FaceIndex int
-
-type Orientation int
 
 // TurningDirection for rotation
 type TurningDirection bool
@@ -36,13 +36,6 @@ const (
 	Down
 	Left
 	Right
-
-	// Orientation constants
-	North Orientation = iota
-	East
-	Center
-	West
-	South
 
 	// Turning direction
 	Clockwise        TurningDirection = true
@@ -79,184 +72,117 @@ func FaceToCoordinate(face FaceIndex) CubeCoordinate {
 	}
 }
 
-// CoordinateToFace converts a CubeCoordinate to its corresponding FaceIndex
-func CoordinateToFace(coord CubeCoordinate) FaceIndex {
-	switch {
-	case coord.X == 1:
-		return Front
-	case coord.X == -1:
-		return Back
-	case coord.Y == 1:
-		return Up
-	case coord.Y == -1:
-		return Down
-	case coord.Z == -1:
-		return Left
-	case coord.Z == 1:
-		return Right
-	default:
-		// Invalid coordinate, return Front as default
-		return Front
-	}
-}
-
-// GetNorthFace returns the face that is North to the given face when the cube's face is facing us
-func GetNorthFace(face FaceIndex) (FaceIndex, Orientation) {
+// only one x, y or z should not be 0
+func GetAdjacentFace(face FaceIndex, x, y, z int) FaceIndex {
 	switch face {
 	case Front:
-		return Up, West
-	case Up:
-		return Left, East
+		if y == 1 {
+			return Up
+		} else if y == -1 {
+			return Down
+		} else if z == 1 {
+			return Right
+		} else if z == -1 {
+			return Left
+		}
 	case Back:
-		return Down, East
-	case Down:
-		return Right, West
-	case Left:
-		return Back, West
-	case Right:
-		return Front, East
-	default:
-		return face, Center
-	}
-}
-
-// GetSouthFace returns the face that is South to the given face when the cube's face is facing us
-func GetSouthFace(face FaceIndex) (FaceIndex, Orientation) {
-	switch face {
-	case Front:
-		return Down, West
+		if y == 1 {
+			return Up
+		} else if y == -1 {
+			return Down
+		} else if z == 1 {
+			return Right
+		} else if z == -1 {
+			return Left
+		}
 	case Up:
-		return Right, East
-	case Back:
-		return Up, East
+		if x == 1 {
+			return Front
+		} else if x == -1 {
+			return Back
+		} else if z == 1 {
+			return Right
+		} else if z == -1 {
+			return Left
+		}
 	case Down:
-		return Left, West
+		if x == 1 {
+			return Front
+		} else if x == -1 {
+			return Back
+		} else if z == 1 {
+			return Right
+		} else if z == -1 {
+			return Left
+		}
 	case Left:
-		return Front, West
+		if x == 1 {
+			return Front
+		} else if x == -1 {
+			return Back
+		} else if y == 1 {
+			return Up
+		} else if y == -1 {
+			return Down
+		}
 	case Right:
-		return Back, East
-	default:
-		return face, Center
+		if x == 1 {
+			return Front
+		} else if x == -1 {
+			return Back
+		} else if y == 1 {
+			return Up
+		} else if y == -1 {
+			return Down
+		}
 	}
-}
-
-// GetEastFace returns the face that is East to the given face when the cube's face is facing us
-func GetEastFace(face FaceIndex) (FaceIndex, Orientation) {
-	switch face {
-	case Front:
-		return Right, North
-	case Up:
-		return Back, South
-	case Back:
-		return Right, South
-	case Down:
-		return Back, North
-	case Left:
-		return Up, North
-	case Right:
-		return Up, South
-	default:
-		return face, Center
-	}
-}
-
-// GetWestFace returns the face that is West to the given face when the cube's face is facing us
-func GetWestFace(face FaceIndex) (FaceIndex, Orientation) {
-	switch face {
-	case Front:
-		return Left, South
-	case Up:
-		return Front, North
-	case Back:
-		return Left, North
-	case Down:
-		return Front, South
-	case Left:
-		return Down, South
-	case Right:
-		return Down, North
-	default:
-		return face, Center
-	}
-}
-
-// GetNorthEdge returns the edge that is North to the given face when the cube's face is facing us
-func GetNorthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
-	north, border := GetNorthFace(face)
-	return cube.GetEdge(north, border)
-}
-
-// GetSouthEdge returns the edge that is South to the given face when the cube's face is facing us
-func GetSouthEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
-	south, border := GetSouthFace(face)
-	return cube.GetEdge(south, border)
-}
-
-// GetEastEdge returns the edge that is East to the given face when the cube's face is facing us
-func GetEastEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
-	east, border := GetEastFace(face)
-	return cube.GetEdge(east, border)
-}
-
-// GetWestEdge returns the edge that is West to the given face when the cube's face is facing us
-func GetWestEdge(cube *Cube, face FaceIndex) (edge [3]Sticker) {
-	west, border := GetWestFace(face)
-	return cube.GetEdge(west, border)
-}
-
-// SetNorthEdge sets the edge that is Notrh to the given face when the cube's face is facing us
-func SetNorthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
-	north, border := GetNorthFace(face)
-	cube.SetEdge(north, border, edge)
-}
-
-// SetSouthEdge sets the edge that is South to the given face when the cube's face is facing us
-func SetSouthEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
-	south, border := GetSouthFace(face)
-	cube.SetEdge(south, border, edge)
-}
-
-// SetEastEdge sets the edge that is East to the given face when the cube's face is facing us
-func SetEastEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
-	east, border := GetEastFace(face)
-	cube.SetEdge(east, border, edge)
-}
-
-// SetWestEdge sets the edge that is West to the given face when the cube's face is facing us
-func SetWestEdge(cube *Cube, face FaceIndex, edge [3]Sticker) {
-	west, border := GetWestFace(face)
-	cube.SetEdge(west, border, edge)
+	return face
 }
 
 // GetStickerCoordinate returns the row and column coordinates of a sticker on a face based on its 3D position
-func GetStickerCoordinate(position CubeCoordinate) (face FaceIndex, row, col int) {
-	// Get the face coordinate (the normal vector of the face)
-	face = CoordinateToFace(position)
-
+func GetStickerCoordinate(face FaceIndex, position CubeCoordinate) (row, col int, err error) {
 	// Calculate the local coordinates on the face
 	// We need to project the 3D position onto the 2D face
 	switch face {
 	case Front: // x = 1
+		if position.X != 1 {
+			return 0, 0, fmt.Errorf("position %v is not on Front face ", position)
+		}
 		col = 1 + position.Y // Down/South (z=-1) is row 0, Up   /North (z=1) is row 2
 		row = 1 + position.Z // Left/West  (y=-1) is col 0, Right/East  (y=1) is col 2
 	case Back: // x = -1
-		row = 1 - position.Z // Right/West  (y=-1) is col 0, Left/East  (y=1) is col 2
+		if position.X != -1 {
+			return 0, 0, fmt.Errorf("position %v is not on Back face ", position)
+		}
 		col = 1 + position.Y // Down /South (z=-1) is row 0, Up  /North (z=1) is row 2
-	case Up: // z = 1
-		row = 1 - position.X // Back (x=-1) is row 0, Front (x=1) is row 2
-		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2
-	case Down: // z = -1
-		row = 1 + position.X // Front (x=1) is row 0, Back (x=-1) is row 2
-		col = 1 + position.Y // Left (y=-1) is col 0, Right (y=1) is col 2
-	case Left: // y = -1
-		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
-		col = 1 - position.X // Back (x=-1) is col 0, Front (x=1) is col 2
-	case Right: // y = 1
-		row = 1 - position.Z // Up (z=1) is row 0, Down (z=-1) is row 2
+		row = 1 + position.Z // Right/West  (y=-1) is col 0, Left/East  (y=1) is col 2
+	case Up: // y = 1
+		if position.Z != 1 {
+			return 0, 0, fmt.Errorf("position %v is not on Up face ", position)
+		}
+		col = 1 + position.X // Back (x=-1) is row 0, Front (x=1) is row 2
+		row = 1 + position.Z // Left (z=-1) is col 0, Right (z=1) is col 2
+	case Down: // y = -1
+		if position.Z != -1 {
+			return 0, 0, fmt.Errorf("position %v is not on Down face ", position)
+		}
+		col = 1 + position.X // Front (x=1) is row 0, Back (x=-1) is row 2
+		row = 1 + position.Z // Left (z=-1) is col 0, Right (z=1) is col 2
+	case Left: // z = -1
+		if position.Y != -1 {
+			return 0, 0, fmt.Errorf("position %v is not on Left face ", position)
+		}
+		col = 1 + position.X // Back (x=-1) is col 0, Front (x=1) is col 2
+		row = 1 + position.Y // Up (y=1) is row 0, Down (y=-1) is row 2
+	case Right: // z = 1
+		if position.Y != 1 {
+			return 0, 0, fmt.Errorf("position %v is not on Right face ", position)
+		}
 		col = 1 + position.X // Front (x=1) is col 0, Back (x=-1) is col 2
+		row = 1 + position.Y // Up (y=1) is row 0, Down (y=-1) is row 2
 	}
 
-	return face, row, col
+	return row, col, nil
 }
 
 // GetCubePosition returns the 3D position of a sticker based on its face and row/column coordinates
@@ -265,54 +191,129 @@ func GetCubePosition(face FaceIndex, row, col int) CubeCoordinate {
 	position := FaceToCoordinate(face)
 
 	// Calculate the offsets from the center of the face
-	rowOffset := 1 - row // row 0 is top, row 2 is bottom
+	rowOffset := row - 1 // row 0 is bottom, row 2 is top
 	colOffset := col - 1 // col 0 is left, col 2 is right
 
 	// Apply the offsets based on the face
 	switch face {
 	case Front: // x = 1
 		position.Y += colOffset // Left to Right
-		position.Z -= rowOffset // Up to Down
+		position.Z += rowOffset // Up to Down
 	case Back: // x = -1
-		position.Y -= colOffset // Right to Left (mirrored)
-		position.Z -= rowOffset // Up to Down
+		position.Y += colOffset // Right to Left (mirrored)
+		position.Z += rowOffset // Up to Down
 	case Up: // z = 1
 		position.X += rowOffset // Back to Front
-		position.Y += colOffset // Left to Right
+		position.Z += colOffset // Left to Right
 	case Down: // z = -1
-		position.X -= rowOffset // Front to Back (mirrored)
-		position.Y += colOffset // Left to Right
+		position.X += rowOffset // Front to Back (mirrored)
+		position.Z += colOffset // Left to Right
 	case Left: // y = -1
-		position.X -= colOffset // Back to Front (mirrored)
-		position.Z -= rowOffset // Up to Down
+		position.Y += colOffset // Back to Front (mirrored)
+		position.Z += rowOffset // Up to Down
 	case Right: // y = 1
-		position.X += colOffset // Front to Back
-		position.Z -= rowOffset // Up to Down
+		position.Y += colOffset // Front to Back
+		position.Z += rowOffset // Up to Down
 	}
 
 	return position
 }
 
-// GetSticker returns the sticker at the given 3D position
-func GetSticker(cube *Cube, position CubeCoordinate) Sticker {
-	// Find which face the position is on
-	face := CoordinateToFace(position)
+// GetAdjacentXEdge returns the adjacent edge on the X direction for a given face and X coordinate
+// face could not already be on the x axis
+func GetAdjacentXEdge(cube *Cube, face FaceIndex, x int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
+	// fisrt determine the adjacent face based on the x coordinate
+	if x == 1 {
+		adjacentFace = Front
+	} else if x == -1 {
+		adjacentFace = Back
+	}
+	switch face {
+	case Up: // (y=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: 1, Z: i - 1})
+		}
+	case Down: // (y=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: -1, Z: i - 1})
+		}
+	case Left: // (z=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: -1})
+		}
+	case Right: // (z=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: 1})
+		}
+	default:
+		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)
+	}
 
-	// Get the row and column on that face
-	face, row, col := GetStickerCoordinate(position)
-
-	// Return the sticker at that position
-	return cube.State[face].Stickers[row][col]
+	return adjacentFace, edge, nil
 }
 
-// SetSticker sets the sticker at the given 3D position
-func SetSticker(cube *Cube, position CubeCoordinate, sticker Sticker) {
-	// Find which face the position is on
-	face := CoordinateToFace(position)
+// GetAdjacentYEdge returns the adjacent edge on the Y direction for a given face and Y coordinate
+// face could not already be on the y axis
+func GetAdjacentYEdge(cube *Cube, face FaceIndex, y int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
+	// fisrt determine the adjacent face based on the y coordinate
+	if y == 1 {
+		adjacentFace = Up
+	} else if y == -1 {
+		adjacentFace = Down
+	}
+	switch face {
+	case Front: // (x=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: 1, Y: y, Z: i - 1})
+		}
+	case Back: // (x=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: -1, Y: y, Z: i - 1})
+		}
+	case Left: // (z=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: -1})
+		}
+	case Right: // (z=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: 1})
+		}
+	default:
+		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)
+	}
 
-	// Get the row and column on that face
-	face, row, col := GetStickerCoordinate(position)
+	return adjacentFace, edge, nil
+}
 
-	// Set the sticker at that position
-	cube.State[face].Stickers[row][col] = sticker
+// GetAdjacentZEdge returns the adjacent edge on the Z direction for a given face and Z coordinate
+// face could not already be on the z axis
+func GetAdjacentZEdge(cube *Cube, face FaceIndex, z int) (adjacentFace FaceIndex, edge [3]Sticker, err error) {
+	// fisrt determine the adjacent face based on the z coordinate
+	if z == 1 {
+		adjacentFace = Right
+	} else if z == -1 {
+		adjacentFace = Left
+	}
+	switch face {
+	case Front: // (x=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: 1, Y: i - 1, Z: z})
+		}
+	case Back: // (x=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: -1, Y: i - 1, Z: z})
+		}
+	case Up: // (y=1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: 1, Z: z})
+		}
+	case Down: // (y=-1)
+		for i := range 3 {
+			edge[i], err = cube.GetSticker(face, CubeCoordinate{X: i - 1, Y: -1, Z: z})
+		}
+	default:
+		return face, [3]Sticker{}, fmt.Errorf("invalid face %d", face)
+	}
+
+	return adjacentFace, edge, nil
 }

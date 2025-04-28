@@ -7,10 +7,12 @@ import (
 
 // SharedCube is the global cube instance to be shared across servers
 var SharedCube *Cube
+var initialCube *Cube
 
 func init() {
 	// Initialize a new cube
 	SharedCube = NewCube()
+	initialCube = NewCube() // used to get stickers position
 }
 
 // ResetCube resets the cube to its initial state
@@ -85,61 +87,90 @@ func NewCube() *Cube {
 	return c
 }
 
+// GetSttickerIndex returns the sticker index of the specified face and position
+func (c *Cube) GetStickerIndex(face FaceIndex, row, col int) StickerIndex {
+	if face < 0 || face >= 6 {
+		log.Println("Invalid face index")
+		return -1
+	}
+	if row < 0 || row >= 3 || col < 0 || col >= 3 {
+		log.Println("Invalid row or column index")
+		return -1
+	}
+	return c.State[face].Stickers[row][col].Index
+}
+
+// GetSticker returns the sticker at the given 3D position
+func (cube *Cube) GetSticker(face FaceIndex, position CubeCoordinate) (Sticker, error) {
+	// Get the row and column on that face
+	row, col, err := GetStickerCoordinate(face, position)
+	if err != nil {
+		return Sticker{}, err
+	}
+	// Return the sticker at that position
+	return cube.State[face].Stickers[row][col], nil
+}
+
+// SetSticker sets the sticker at the given 3D position
+func (cube *Cube) SetSticker(face FaceIndex, position CubeCoordinate, sticker Sticker) error {
+	// Get the row and column on that face
+	row, col, err := GetStickerCoordinate(face, position)
+	if err != nil {
+		return err
+	}
+	// Set the sticker at that position
+	cube.State[face].Stickers[row][col] = sticker
+	return nil
+}
+
 // RotateFace rotates the specified face
 func (c *Cube) RotateFace(face FaceIndex, clockwise TurningDirection) {
 	RotateFace(c, face, clockwise)
 }
 
-// GetEdge returns the edge stickers of the adjacent face in the given orientation
-func (c *Cube) GetEdge(face FaceIndex, orientation Orientation) (edge [3]Sticker) {
-	switch orientation {
-	case North:
-		edge[0] = c.State[face].Stickers[0][0]
-		edge[1] = c.State[face].Stickers[0][1]
-		edge[2] = c.State[face].Stickers[0][2]
-	case South:
-		edge[0] = c.State[face].Stickers[2][0]
-		edge[1] = c.State[face].Stickers[2][1]
-		edge[2] = c.State[face].Stickers[2][2]
-	case East:
-		edge[0] = c.State[face].Stickers[0][2]
-		edge[1] = c.State[face].Stickers[1][2]
-		edge[2] = c.State[face].Stickers[2][2]
-	case West:
-		edge[0] = c.State[face].Stickers[0][0]
-		edge[1] = c.State[face].Stickers[1][0]
-		edge[2] = c.State[face].Stickers[2][0]
-	default:
-		edge[0] = c.State[face].Stickers[1][1]
-		edge[1] = c.State[face].Stickers[1][1]
-		edge[2] = c.State[face].Stickers[1][1]
+// GetEdge returns the edge stickers of the face in the given axis in cubecoordinate{(-1/+1),0,0}
+func (c *Cube) GetEdge(face FaceIndex, axis CubeCoordinate) (edge [3]Sticker) {
+	faceCoord := FaceToCoordinate(face)
+	x := faceCoord.X | axis.X
+	y := faceCoord.Y | axis.Y
+	z := faceCoord.Z | axis.Z
+	switch {
+	case x == 0:
+		for i := range 3 {
+			edge[i], _ = c.GetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: z})
+		}
+	case y == 0:
+		for i := range 3 {
+			edge[i], _ = c.GetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: z})
+		}
+	case z == 0:
+		for i := range 3 {
+			edge[i], _ = c.GetSticker(face, CubeCoordinate{X: x, Y: y, Z: i - 1})
+		}
 	}
 	return edge
 }
 
-// SetEdge sets the edge stickers of the adjacent face in the given orientation
-func (cube *Cube) SetEdge(face FaceIndex, orientation Orientation, edge [3]Sticker) {
-	// copy the stickers from the cube
-	stickers := cube.State[face].Stickers
-	switch orientation {
-	case North:
-		stickers[0][0] = edge[0]
-		stickers[0][1] = edge[1]
-		stickers[0][2] = edge[2]
-	case South:
-		stickers[2][0] = edge[0]
-		stickers[2][1] = edge[1]
-		stickers[2][2] = edge[2]
-	case East:
-		stickers[0][2] = edge[0]
-		stickers[1][2] = edge[1]
-		stickers[2][2] = edge[2]
-	case West:
-		stickers[0][0] = edge[0]
-		stickers[1][0] = edge[1]
-		stickers[2][0] = edge[2]
+// SetEdge sets the edge stickers of the face in the given axis in cubecoordinate{(-1/+1),0,0}
+func (c *Cube) SetEdge(face FaceIndex, axis CubeCoordinate, edge [3]Sticker) {
+	faceCoord := FaceToCoordinate(face)
+	x := faceCoord.X | axis.X
+	y := faceCoord.Y | axis.Y
+	z := faceCoord.Z | axis.Z
+	switch {
+	case x == 0:
+		for i := range 3 {
+			c.SetSticker(face, CubeCoordinate{X: i - 1, Y: y, Z: z}, edge[i])
+		}
+	case y == 0:
+		for i := range 3 {
+			c.SetSticker(face, CubeCoordinate{X: x, Y: i - 1, Z: z}, edge[i])
+		}
+	case z == 0:
+		for i := range 3 {
+			c.SetSticker(face, CubeCoordinate{X: x, Y: y, Z: i - 1}, edge[i])
+		}
 	}
-	cube.State[face].Stickers = stickers
 }
 
 // Scramble applies a series of random rotations to the cube

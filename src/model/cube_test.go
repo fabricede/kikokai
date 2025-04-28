@@ -340,39 +340,3 @@ func TestCube_RotationConsistency(t *testing.T) {
 		t.Errorf("Cube did not return to original state after 4 clockwise rotations")
 	}
 }
-
-func TestCube_RotateFrontDebug(t *testing.T) {
-	// Create a cube and rotate the front face clockwise
-	c := NewCube()
-
-	// Get the initial state of the edges around the front face
-	up, uborder := GetNorthFace(Front)
-	upEdge := c.GetEdge(up, uborder)
-	right, rborder := GetEastFace(Front)
-	rightEdge := c.GetEdge(right, rborder)
-	down, dborder := GetSouthFace(Front)
-	downEdge := c.GetEdge(down, dborder)
-	left, lborder := GetWestFace(Front)
-	leftEdge := c.GetEdge(left, lborder)
-
-	t.Logf("Before rotation:")
-	t.Logf("  Up (%v) edge: %v %v %v", uborder, upEdge[0], upEdge[1], upEdge[2])
-	t.Logf("  Right (%v) edge: %v %v %v", rborder, rightEdge[0], rightEdge[1], rightEdge[2])
-	t.Logf("  Down (%v) edge: %v %v %v", dborder, downEdge[0], downEdge[1], downEdge[2])
-	t.Logf("  Left (%v) edge: %v %v %v", lborder, leftEdge[0], leftEdge[1], leftEdge[2])
-
-	// Rotate the front face clockwise
-	c.RotateFace(Front, Clockwise)
-
-	// Get the state after rotation
-	upEdgeAfter := c.GetEdge(up, uborder)
-	rightEdgeAfter := c.GetEdge(right, rborder)
-	downEdgeAfter := c.GetEdge(down, dborder)
-	leftEdgeAfter := c.GetEdge(left, lborder)
-
-	t.Logf("After clockwise rotation:")
-	t.Logf("  Up (%v) edge: %v %v %v", uborder, upEdgeAfter[0], upEdgeAfter[1], upEdgeAfter[2])
-	t.Logf("  Right (%v) edge: %v %v %v", rborder, rightEdgeAfter[0], rightEdgeAfter[1], rightEdgeAfter[2])
-	t.Logf("  Down (%v) edge: %v %v %v", dborder, downEdgeAfter[0], downEdgeAfter[1], downEdgeAfter[2])
-	t.Logf("  Left (%v) edge: %v %v %v", lborder, leftEdgeAfter[0], leftEdgeAfter[1], leftEdgeAfter[2])
-}

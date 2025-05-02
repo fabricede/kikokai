@@ -20,6 +20,9 @@ func ResetCube() {
 	SharedCube = NewCube()
 }
 
+// ------------------------------------------------
+// Sticker represents a sticker on the Rubik's cube
+// ------------------------------------------------
 type Sticker struct {
 	Color Color
 	Index StickerIndex
@@ -35,26 +38,84 @@ func (s *Sticker) GetName() string {
 	return StickerColorName[s.Index]
 }
 
+// ------------------------------------------
+// Face represents a face of the Rubik's cube
+// ------------------------------------------
 type Face struct {
-	Name     string
 	Index    FaceIndex
 	Stickers [3][3]Sticker
 }
 
 func (f *Face) GetName() string {
-	return f.Name
+	return FaceColorName[f.Index]
 }
 func (f *Face) GetIndex() FaceIndex {
 	return f.Index
 }
-func (f *Face) GetColor() Color {
-	return f.Stickers[1][1].GetColor()
+func (f *Face) GetCubeCoordinate(row, col int) CubeCoordinate {
+	faceCoordinate := FaceToCoordinate(f.Index)
+
+	// Adjust coordinates based on the face's axis alignment
+	switch {
+	case faceCoordinate.X != 0: // Face is aligned along the X-axis
+		if faceCoordinate.X == 1 { // Front face YZ
+			return CubeCoordinate{
+				X: faceCoordinate.X, // X remains constant
+				Y: row - 1,          // Adjust Y based on column
+				Z: col - 1,          // Adjust Z based on row
+			}
+		} else {
+			return CubeCoordinate{
+				X: faceCoordinate.X, // X remains constant
+				Y: col - 1,          // Adjust Y based on column
+				Z: row - 1,          // Adjust Z based on row
+			}
+		}
+	case faceCoordinate.Y != 0: // Face is aligned along the Y-axis
+		return CubeCoordinate{
+			X: col - 1,          // Adjust X based on column
+			Y: faceCoordinate.Y, // Y remains constant
+			Z: row - 1,          // Adjust Z based on row
+		}
+	case faceCoordinate.Z != 0: // Face is aligned along the Z-axis
+		return CubeCoordinate{
+			X: col - 1,          // Adjust X based on column
+			Y: row - 1,          // Adjust Y based on row
+			Z: faceCoordinate.Z, // Z remains constant
+		}
+	default:
+		log.Println("Invalid face alignment")
+		return CubeCoordinate{}
+	}
 }
-func GetFaceNameFromIndex(i FaceIndex) string {
-	return FaceColorName[i]
+func (f *Face) GetFaceCoordinate(coord CubeCoordinate) (row, col int) {
+	faceCoordinate := FaceToCoordinate(f.Index)
+
+	// Adjust coordinates based on the face's axis alignment
+	switch {
+	case faceCoordinate.X != 0 && coord.X == faceCoordinate.X: // Face is aligned along the X-axis
+		if faceCoordinate.X == 1 { // Front face YZ
+			row = coord.Y + 1 // Adjust row based on Y
+			col = coord.Z + 1 // Adjust column based on Z
+		} else {
+			row = 1 + coord.Z // Adjust row based on Z
+			col = 1 + coord.Y // Adjust column based on Y
+		}
+	case faceCoordinate.Y != 0 && coord.Y == faceCoordinate.Y: // Face is aligned along the Y-axis
+		row = 1 + coord.Z // Adjust row based on Z
+		col = coord.X + 1 // Adjust column based on X
+	case faceCoordinate.Z != 0 && coord.Z == faceCoordinate.Z: // Face is aligned along the Z-axis
+		row = 1 + coord.Y // Adjust row based on Y
+		col = coord.X + 1 // Adjust column based on X
+	default:
+		log.Println("Invalid face alignment")
+	}
+	return row, col
 }
 
+// -------------------------------------------
 // Cube represents a Rubik's cube with 6 faces
+// -------------------------------------------
 type Cube struct {
 	State [6]Face // 6 faces
 }
@@ -65,7 +126,6 @@ func NewCube() *Cube {
 	for i := range c.State {
 		face := &c.State[i]
 		face.Index = FaceIndex(i)
-		face.Name = GetFaceNameFromIndex(face.Index)
 
 		// Initialize stickers for each face
 		stickerCount := 0
@@ -73,7 +133,7 @@ func NewCube() *Cube {
 			for col := range 3 {
 				currentStickerIndex := StickerIndex(i*9 + stickerCount)
 				colorName := StickerColorName[currentStickerIndex]
-				log.Printf("Initializing sticker %d,%d on face %s : color %s", row, col, face.Name, colorName)
+				log.Printf("Initializing sticker %d,%d on face %s : color %s", row, col, face.GetName(), colorName)
 
 				// Assign colors based on the face index
 				face.Stickers[row][col] = Sticker{

@@ -235,6 +235,10 @@ func TestGetAdjacentXEdge(t *testing.T) {
 			if !reflect.DeepEqual(gotEdge, tt.wantEdge) {
 				t.Errorf("GetAdjacentXEdge() gotEdge = %v, want %v", gotEdge, tt.wantEdge)
 			}
+			confirmEdge := tt.args.cube.GetEdge(gotAdjacentFace, CubeCoordinate{X: 0, Y: 1, Z: 0})
+			if !reflect.DeepEqual(gotEdge, confirmEdge) {
+				t.Errorf("GetAdjacentXEdge() gotEdge = %v, confirmEdge %v", gotEdge, confirmEdge)
+			}
 		})
 	}
 }

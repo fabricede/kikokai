@@ -16,7 +16,6 @@ func Test_NewCube(t *testing.T) {
 				State: [6]Face{
 					// Front - white
 					{
-						Name:  "white",
 						Index: Front,
 						Stickers: [3][3]Sticker{
 							{{Color: White, Index: Front_2_0_0},
@@ -32,7 +31,6 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Back - yellow
 					{
-						Name:  "yellow",
 						Index: Back,
 						Stickers: [3][3]Sticker{
 							{{Color: Yellow, Index: Back_0_0_0},
@@ -48,7 +46,6 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Up - blue
 					{
-						Name:  "blue",
 						Index: Up,
 						Stickers: [3][3]Sticker{
 							{{Color: Blue, Index: Up_0_0_2},
@@ -64,7 +61,6 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Down - green
 					{
-						Name:  "green",
 						Index: Down,
 						Stickers: [3][3]Sticker{
 							{{Color: Green, Index: Down_0_0_0},
@@ -80,7 +76,6 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Left - red
 					{
-						Name:  "red",
 						Index: Left,
 						Stickers: [3][3]Sticker{
 							{{Color: Red, Index: Left_0_0_0},
@@ -96,7 +91,6 @@ func Test_NewCube(t *testing.T) {
 					},
 					// Right - orange
 					{
-						Name:  "orange",
 						Index: Right,
 						Stickers: [3][3]Sticker{
 							{{Color: Orange, Index: Right_0_2_0},

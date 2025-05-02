@@ -123,24 +123,158 @@ type Cube struct {
 // NewCube creates and initializes a new Rubik's cube
 func NewCube() *Cube {
 	c := &Cube{}
+
+	// Initialize each face
 	for i := range c.State {
 		face := &c.State[i]
 		face.Index = FaceIndex(i)
-
 		// Initialize stickers for each face
-		stickerCount := 0
 		for row := range 3 {
 			for col := range 3 {
-				currentStickerIndex := StickerIndex(i*9 + stickerCount)
-				colorName := StickerColorName[currentStickerIndex]
-				log.Printf("Initializing sticker %d,%d on face %s : color %s", row, col, face.GetName(), colorName)
+				// Determine the sticker index based on its position
+				var stickerIdx StickerIndex
 
-				// Assign colors based on the face index
-				face.Stickers[row][col] = Sticker{
-					Color: Color(i),            // Use the face index as the color
-					Index: currentStickerIndex, // Use the calculated sticker index
+				// For corners and edges, use predefined indices that match across faces
+				switch face.Index {
+				case Front:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Front_2_0_0
+					case row == 0 && col == 1:
+						stickerIdx = Front_2_0_1
+					case row == 0 && col == 2:
+						stickerIdx = Front_2_0_2
+					case row == 1 && col == 0:
+						stickerIdx = Front_2_1_0
+					case row == 1 && col == 1:
+						stickerIdx = Front_2_1_1
+					case row == 1 && col == 2:
+						stickerIdx = Front_2_1_2
+					case row == 2 && col == 0:
+						stickerIdx = Front_2_2_0
+					case row == 2 && col == 1:
+						stickerIdx = Front_2_2_1
+					case row == 2 && col == 2:
+						stickerIdx = Front_2_2_2
+					}
+				case Back:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Back_0_0_0
+					case row == 0 && col == 1:
+						stickerIdx = Back_0_1_0
+					case row == 0 && col == 2:
+						stickerIdx = Back_0_2_0
+					case row == 1 && col == 0:
+						stickerIdx = Back_0_0_1
+					case row == 1 && col == 1:
+						stickerIdx = Back_0_1_1
+					case row == 1 && col == 2:
+						stickerIdx = Back_0_2_1
+					case row == 2 && col == 0:
+						stickerIdx = Back_0_0_2
+					case row == 2 && col == 1:
+						stickerIdx = Back_0_1_2
+					case row == 2 && col == 2:
+						stickerIdx = Back_0_2_2
+					}
+				case Up:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Up_0_0_2
+					case row == 0 && col == 1:
+						stickerIdx = Up_1_0_2
+					case row == 0 && col == 2:
+						stickerIdx = Up_2_0_2
+					case row == 1 && col == 0:
+						stickerIdx = Up_0_1_2
+					case row == 1 && col == 1:
+						stickerIdx = Up_1_1_2
+					case row == 1 && col == 2:
+						stickerIdx = Up_1_1_2
+					case row == 2 && col == 0:
+						stickerIdx = Up_0_2_2
+					case row == 2 && col == 1:
+						stickerIdx = Up_1_2_2
+					case row == 2 && col == 2:
+						stickerIdx = Up_2_2_2
+					}
+				case Down:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Down_0_0_0
+					case row == 0 && col == 1:
+						stickerIdx = Down_1_0_0
+					case row == 0 && col == 2:
+						stickerIdx = Down_2_0_0
+					case row == 1 && col == 0:
+						stickerIdx = Down_0_1_0
+					case row == 1 && col == 1:
+						stickerIdx = Down_1_1_0
+					case row == 1 && col == 2:
+						stickerIdx = Down_2_1_0
+					case row == 2 && col == 0:
+						stickerIdx = Down_0_2_0
+					case row == 2 && col == 1:
+						stickerIdx = Down_1_2_0
+					case row == 2 && col == 2:
+						stickerIdx = Down_2_2_0
+					}
+				case Left:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Left_0_0_0
+					case row == 0 && col == 1:
+						stickerIdx = Left_0_0_1
+					case row == 0 && col == 2:
+						stickerIdx = Left_0_0_1
+					case row == 1 && col == 0:
+						stickerIdx = Left_1_0_1
+					case row == 1 && col == 1:
+						stickerIdx = Left_1_0_1
+					case row == 1 && col == 2:
+						stickerIdx = Left_1_0_1
+					case row == 2 && col == 0:
+						stickerIdx = Left_2_0_0
+					case row == 2 && col == 1:
+						stickerIdx = Left_2_0_1
+					case row == 2 && col == 2:
+						stickerIdx = Left_2_0_2
+					}
+				case Right:
+					switch {
+					case row == 0 && col == 0:
+						stickerIdx = Right_0_2_0
+					case row == 0 && col == 1:
+						stickerIdx = Right_1_2_0
+					case row == 0 && col == 2:
+						stickerIdx = Right_2_2_0
+					case row == 1 && col == 0:
+						stickerIdx = Right_0_2_1
+					case row == 1 && col == 1:
+						stickerIdx = Right_1_2_1
+					case row == 1 && col == 2:
+						stickerIdx = Right_2_2_1
+					case row == 2 && col == 0:
+						stickerIdx = Right_0_2_2
+					case row == 2 && col == 1:
+						stickerIdx = Right_1_2_2
+					case row == 2 && col == 2:
+						stickerIdx = Right_2_2_2
+					}
 				}
-				stickerCount++
+
+				// If no specific index was assigned (shouldn't happen), fall back to a calculated one
+				if stickerIdx == 0 && face.Index != 0 {
+					// Use face index * 9 + position in face as fallback
+					stickerIdx = StickerIndex(int(face.Index)*9 + row*3 + col)
+				}
+
+				// Create the sticker with the appropriate color and index
+				face.Stickers[row][col] = Sticker{
+					Color: Color(face.Index), // Color matches the face
+					Index: stickerIdx,        // Use the calculated sticker index
+				}
 			}
 		}
 	}

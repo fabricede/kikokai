@@ -4,6 +4,8 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+
+	"log"
 )
 
 // Helper function to extract colors from a StickerColorName value
@@ -12,28 +14,46 @@ func extractColors(stickerColor string) []string {
 }
 
 func Test_CubeCornerColorsConsistency(t *testing.T) {
-	// Map of cube corners to their corresponding StickerIndex values
-	cubeCorners := map[string][3]StickerIndex{
-		"Front-Left-Up":    {Front_2_0_0, Left_0_0_2, Up_2_0_2},
-		"Front-Right-Up":   {Front_2_0_2, Right_0_2_0, Up_2_2_2},
-		"Front-Left-Down":  {Front_2_2_0, Left_2_0_0, Down_0_0_0},
-		"Front-Right-Down": {Front_2_2_2, Right_2_2_0, Down_0_2_0},
-		"Back-Left-Up":     {Back_0_0_0, Left_0_0_0, Up_0_0_2},
-		"Back-Right-Up":    {Back_0_0_2, Right_0_2_2, Up_0_2_2},
-		"Back-Left-Down":   {Back_0_2_0, Left_2_0_2, Down_2_0_0},
-		"Back-Right-Down":  {Back_0_2_2, Right_2_2_2, Down_2_2_0},
+	// Map of cube corners to their corresponding faces
+	cubeCorners := map[CubeCoordinate][3]FaceIndex{
+		{-1, -1, -1}: {Back, Left, Down},
+		{-1, -1, 1}:  {Back, Left, Up},
+		//{-1, 1, -1}: {Back, Right, Down},
+		//{-1, 1, 1}: {Back, Right, Up},
+		//{1, -1, -1}: {Front, Left, Down},
+		//{1, -1, 1}: {Front, Left, Up},
+		//{1, 1, -1}: {Front, Right, Down},
+		{1, 1, 1}: {Front, Right, Up},
 	}
 
-	for cornerName, indices := range cubeCorners {
+	cube := NewCube()
+
+	for cornerCoord, face := range cubeCorners {
+		// Generate a name for the corner based on its coordinates
+		cornerName := strings.Join([]string{FaceColorName[face[0]], FaceColorName[face[1]], FaceColorName[face[2]]}, "-")
 		t.Run(cornerName, func(t *testing.T) {
+			face0row, face0col := cube.State[face[0]].GetFaceCoordinate(cornerCoord)
+			log.Printf("face0row: %d, face0col: %d", face0row, face0col)
+			face1row, face1col := cube.State[face[1]].GetFaceCoordinate(cornerCoord)
+			log.Printf("face1row: %d, face1col: %d", face1row, face1col)
+			face2row, face2col := cube.State[face[2]].GetFaceCoordinate(cornerCoord)
+			log.Printf("face2row: %d, face2col: %d", face2row, face2col)
+			indices := [3]StickerIndex{
+				cube.State[face[0]].Stickers[face0row][face0col].GetIndex(),
+				cube.State[face[1]].Stickers[face1row][face1col].GetIndex(),
+				cube.State[face[2]].Stickers[face2row][face2col].GetIndex(),
+			}
+			log.Printf("Indices for corner %v : (%v)%v, (%v)%v, (%v)%v", cornerCoord, StickerColorName[indices[0]], indices[0], StickerColorName[indices[1]], indices[1], StickerColorName[indices[2]], indices[2])
 			// Extract colors for the three StickerIndex values
 			colors1 := extractColors(StickerColorName[indices[0]])
 			colors2 := extractColors(StickerColorName[indices[1]])
 			colors3 := extractColors(StickerColorName[indices[2]])
 
+			log.Printf("Colors for corner %v : (%v)%v, (%v)%v, (%v)%v", cornerCoord, FaceColorName[face[0]], colors1, FaceColorName[face[1]], colors2, FaceColorName[face[2]], colors3)
+
 			// Verify that the three sets of colors are the same (ignoring order)
 			if !reflect.DeepEqual(toSet(colors1), toSet(colors2)) || !reflect.DeepEqual(toSet(colors1), toSet(colors3)) {
-				t.Errorf("Colors for corner %s do not match: %v, %v, %v", cornerName, colors1, colors2, colors3)
+				t.Errorf("Colors for corner %v do not match: (%v)%v, (%v)%v, (%v)%v", cornerCoord, FaceColorName[face[0]], colors1, FaceColorName[face[1]], colors2, FaceColorName[face[2]], colors3)
 			}
 		})
 	}

@@ -14,13 +14,13 @@ func TestMatrix5x5_RotateClockwise(t *testing.T) {
 		// TODO: Add test cases.
 		{
 			name: "Test 1",
-			m: *SetMatrix([5][5]StickerIndex{
+			m: *SetMatrix([5][5]Color{
 				{1, 2, 3, 4, 5},
 				{6, 7, 8, 9, 10},
 				{11, 12, 13, 14, 15},
 				{16, 17, 18, 19, 20},
 				{21, 22, 23, 24, 25}}),
-			want: *SetMatrix([5][5]StickerIndex{
+			want: *SetMatrix([5][5]Color{
 				{21, 16, 11, 6, 1},
 				{22, 17, 12, 7, 2},
 				{23, 18, 13, 8, 3},
@@ -45,13 +45,13 @@ func TestMatrix5x5_RotateCounterClockwise(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{name: "Test 1",
-			m: *SetMatrix([5][5]StickerIndex{
+			m: *SetMatrix([5][5]Color{
 				{1, 2, 3, 4, 5},
 				{6, 7, 8, 9, 10},
 				{11, 12, 13, 14, 15},
 				{16, 17, 18, 19, 20},
 				{21, 22, 23, 24, 25}}),
-			want: *SetMatrix([5][5]StickerIndex{
+			want: *SetMatrix([5][5]Color{
 				{5, 10, 15, 20, 25},
 				{4, 9, 14, 19, 24},
 				{3, 8, 13, 18, 23},

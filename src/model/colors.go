@@ -13,6 +13,17 @@ const (
 	Red
 	Orange
 )
+
+// ColorNames maps Color constants to their string representations
+var FaceColorName = map[FaceIndex]string{
+	Front: "white",
+	Back:  "yellow",
+	Up:    "blue",
+	Down:  "green",
+	Left:  "red",
+	Right: "orange",
+}
+
 const (
 	// Sticker Colors
 	// Front Face (x=1) => 2 Y Z
@@ -76,16 +87,6 @@ const (
 	Right_2_2_1
 	Right_2_2_2
 )
-
-// ColorNames maps Color constants to their string representations
-var FaceColorName = map[FaceIndex]string{
-	Front: "white",
-	Back:  "yellow",
-	Up:    "blue",
-	Down:  "green",
-	Left:  "red",
-	Right: "orange",
-}
 
 var StickerColorName = map[StickerIndex]string{
 	// Front Face (White) YZ

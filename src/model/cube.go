@@ -51,7 +51,7 @@ func NewCubie(x, y, z int) *Cubie {
 // Cube represents the Rubik's Cube as a 3x3x3 array of cubies.
 // --------------------------------------------
 type Cube struct {
-	cubies [3][3][3]*Cubie
+	Cubies [3][3][3]*Cubie
 }
 
 // NewCube initializes a solved Rubik's Cube.
@@ -60,7 +60,7 @@ func NewCube() *Cube {
 	for x := 0; x < 3; x++ {
 		for y := 0; y < 3; y++ {
 			for z := 0; z < 3; z++ {
-				cube.cubies[x][y][z] = NewCubie(x, y, z)
+				cube.Cubies[x][y][z] = NewCubie(x, y, z)
 			}
 		}
 	}
@@ -71,17 +71,17 @@ func NewCube() *Cube {
 func (c *Cube) GetFaceColor(face FaceIndex, x, y int) Color {
 	switch face {
 	case Front:
-		return c.cubies[x][y][0].Colors[Front]
+		return c.Cubies[x][y][0].Colors[Front]
 	case Back:
-		return c.cubies[x][y][2].Colors[Back]
+		return c.Cubies[x][y][2].Colors[Back]
 	case Left:
-		return c.cubies[0][y][x].Colors[Left]
+		return c.Cubies[0][y][x].Colors[Left]
 	case Right:
-		return c.cubies[2][y][2-x].Colors[Right]
+		return c.Cubies[2][y][2-x].Colors[Right]
 	case Up:
-		return c.cubies[x][2][2-y].Colors[Up]
+		return c.Cubies[x][2][2-y].Colors[Up]
 	case Down:
-		return c.cubies[x][0][y].Colors[Down]
+		return c.Cubies[x][0][y].Colors[Down]
 	default:
 		return Green // Default case, shouldn't happen
 	}
@@ -95,7 +95,7 @@ func (c *Cube) RotateFace(face FaceIndex, clockwise TurningDirection) {
 // Scramble applies a series of random rotations to the cube
 func (c *Cube) Scramble(moves int) {
 	// Apply random rotations
-	for i := 0; i < moves; i++ {
+	for range moves {
 		// Random face (0-5)
 		face := FaceIndex(rand.Intn(6))
 

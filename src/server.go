@@ -21,16 +21,16 @@ type RotateAxisRequest struct {
 }
 
 type CubeStateResponse struct {
-	State [6]model.Face `json:"state"`
+	State [3][3][3]*model.Cubie `json:"state"`
 }
 
 // Event types for SSE
 type CubeEvent struct {
-	Type      string        `json:"type"`
-	Axis      string        `json:"axis,omitempty"`      // x, y, z
-	Layer     int           `json:"layer,omitempty"`     // 1 ou -1
-	Direction int           `json:"direction,omitempty"` // 1 pour sens horaire, -1 pour sens anti-horaire
-	State     [6]model.Face `json:"state,omitempty"`
+	Type      string                `json:"type"`
+	Axis      string                `json:"axis,omitempty"`      // x, y, z
+	Layer     int                   `json:"layer,omitempty"`     // 1 ou -1
+	Direction int                   `json:"direction,omitempty"` // 1 pour sens horaire, -1 pour sens anti-horaire
+	State     [3][3][3]*model.Cubie `json:"state,omitempty"`
 }
 
 // EventBroker manages SSE connections
@@ -121,7 +121,7 @@ func (eb *EventBroker) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// Send initial state event
 	initialState, _ := json.Marshal(CubeEvent{
 		Type:  "state",
-		State: model.SharedCube.State,
+		State: model.SharedCube.Cubies,
 	})
 	fmt.Fprintf(w, "data: %s\n\n", initialState)
 	w.(http.Flusher).Flush()
@@ -166,10 +166,10 @@ func main() {
 
 	// Setup routes
 	http.Handle("/", http.FileServer(http.Dir("static")))
-	http.HandleFunc("/api/state", getStateHandler)
-	http.HandleFunc("/api/rotate-axis", rotateAxisHandler) // Nouvelle route pour la rotation par axe
-	http.HandleFunc("/api/reset", resetHandler)
-	http.HandleFunc("/api/scramble", scrambleHandler)
+	http.HandleFunc("/api/state", handleState)
+	http.HandleFunc("/api/rotate-axis", handleRotate) // Nouvelle route pour la rotation par axe
+	http.HandleFunc("/api/reset", handleReset)
+	http.HandleFunc("/api/scramble", handleScramble)
 	http.Handle("/api/events", broker)
 
 	// Start MCP server in a goroutine
@@ -180,107 +180,28 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8090", nil))
 }
 
-func getStateHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request for cube state")
-	if r.Method != http.MethodGet {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
+// Adapted to the new cube structure
+func handleState(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling state request")
+
+	// Return the cube state using the updated structure
+	response := struct {
+		State [3][3][3]*model.Cubie `json:"state"`
+	}{
+		State: model.SharedCube.Cubies,
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Printf("Error encoding state response: %v", err)
+		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	}
 }
 
-// rotateAxisHandler traite les rotations basées sur l'axe, la couche et la direction
-func rotateAxisHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request to rotate cube by axis")
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func handleReset(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling reset request")
 
-	var req RotateAxisRequest
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	// Validation des entrées
-	if req.Axis != "x" && req.Axis != "y" && req.Axis != "z" {
-		http.Error(w, "Invalid axis, must be 'x', 'y', or 'z'", http.StatusBadRequest)
-		return
-	}
-
-	if req.Layer != 1 && req.Layer != -1 {
-		http.Error(w, "Invalid layer, must be 1 or -1", http.StatusBadRequest)
-		return
-	}
-
-	if req.Direction != 1 && req.Direction != -1 {
-		http.Error(w, "Invalid direction, must be 1 (clockwise) or -1 (counter-clockwise)", http.StatusBadRequest)
-		return
-	}
-
-	// Table de conversion de l'axe, couche et direction vers face et sens de rotation
-	// Le sens de rotation est inversé pour certaines faces pour maintenir une cohérence dans le modèle 3D
-	var face model.FaceIndex
-	var clockwise model.TurningDirection
-
-	// Définir la face et le sens de rotation en fonction de l'axe, de la couche et de la direction
-	switch req.Axis {
-	case "x":
-		if req.Layer == 1 { // Front face (x=1)
-			face = model.Front
-			clockwise = model.TurningDirection(req.Direction == 1) // 1 = Clockwise, -1 = CounterClockwise
-		} else { // Back face (x=-1)
-			face = model.Back
-			clockwise = model.TurningDirection(req.Direction == -1) // Sens inversé pour la face arrière
-		}
-	case "y":
-		if req.Layer == 1 { // Up face (y=1)
-			face = model.Up
-			clockwise = model.TurningDirection(req.Direction == 1)
-		} else { // Down face (y=-1)
-			face = model.Down
-			clockwise = model.TurningDirection(req.Direction == -1) // Sens inversé pour la face inférieure
-		}
-	case "z":
-		if req.Layer == 1 { // Right face (z=1)
-			face = model.Right
-			clockwise = model.TurningDirection(req.Direction == 1)
-		} else { // Left face (z=-1)
-			face = model.Left
-			clockwise = model.TurningDirection(req.Direction == -1) // Sens inversé pour la face gauche
-		}
-	}
-
-	// Journalisation de la conversion
-	log.Printf("Axis rotation: axis=%s, layer=%d, direction=%d mapped to face=%d, clockwise=%t",
-		req.Axis, req.Layer, req.Direction, face, clockwise)
-
-	// Diffuser l'événement de rotation aux clients connectés avec les paramètres d'axe originaux
-	broker.BroadcastEvent(CubeEvent{
-		Type:      "rotate",
-		Axis:      req.Axis,
-		Layer:     req.Layer,
-		Direction: req.Direction,
-	})
-
-	// Appliquer la rotation au cube côté serveur
-	model.SharedCube.RotateFace(face, clockwise)
-
-	// Envoyer la réponse avec l'état mis à jour
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
-}
-
-func resetHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request to reset cube")
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+	// Reset the cube using the new structure
 	model.ResetCube()
 
 	// Broadcast the reset event
@@ -288,19 +209,14 @@ func resetHandler(w http.ResponseWriter, r *http.Request) {
 		Type: "reset",
 	})
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
+	// Return the updated state
+	handleState(w, r)
 }
 
-// scrambleHandler randomly scrambles the cube
-func scrambleHandler(w http.ResponseWriter, r *http.Request) {
-	log.Println("Received request to scramble cube")
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func handleScramble(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling scramble request")
 
-	// Use the new Scramble method from the refactored cube model
+	// Scramble the cube using the new structure
 	model.SharedCube.Scramble(20) // Scramble with 20 random moves
 
 	// Broadcast the scramble event
@@ -308,6 +224,81 @@ func scrambleHandler(w http.ResponseWriter, r *http.Request) {
 		Type: "scramble",
 	})
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(CubeStateResponse{State: model.SharedCube.State})
+	// Return the updated state
+	handleState(w, r)
+}
+
+func handleRotate(w http.ResponseWriter, r *http.Request) {
+	log.Println("Handling rotate request")
+
+	// Parse the request body
+	var req struct {
+		Axis      string `json:"axis"`
+		Layer     int    `json:"layer"`
+		Direction int    `json:"direction"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Printf("Error decoding rotate request: %v", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Validate inputs
+	if req.Axis != "x" && req.Axis != "y" && req.Axis != "z" {
+		http.Error(w, "Invalid axis; must be 'x', 'y', or 'z'", http.StatusBadRequest)
+		return
+	}
+	if req.Layer != 1 && req.Layer != -1 {
+		http.Error(w, "Invalid layer; must be 1 or -1", http.StatusBadRequest)
+		return
+	}
+	if req.Direction != 1 && req.Direction != -1 {
+		http.Error(w, "Invalid direction; must be 1 or -1", http.StatusBadRequest)
+		return
+	}
+
+	// Map axis, layer, and direction to face and rotation direction
+	var face model.FaceIndex
+	var clockwise model.TurningDirection
+
+	switch req.Axis {
+	case "x":
+		if req.Layer == 1 {
+			face = model.Front
+			clockwise = model.TurningDirection(req.Direction == 1)
+		} else {
+			face = model.Back
+			clockwise = model.TurningDirection(req.Direction == -1)
+		}
+	case "y":
+		if req.Layer == 1 {
+			face = model.Up
+			clockwise = model.TurningDirection(req.Direction == 1)
+		} else {
+			face = model.Down
+			clockwise = model.TurningDirection(req.Direction == -1)
+		}
+	case "z":
+		if req.Layer == 1 {
+			face = model.Right
+			clockwise = model.TurningDirection(req.Direction == 1)
+		} else {
+			face = model.Left
+			clockwise = model.TurningDirection(req.Direction == -1)
+		}
+	}
+
+	// Apply the rotation to the cube
+	model.SharedCube.RotateFace(face, clockwise)
+
+	// Broadcast the rotation event
+	broker.BroadcastEvent(CubeEvent{
+		Type:      "rotate",
+		Axis:      req.Axis,
+		Layer:     req.Layer,
+		Direction: req.Direction,
+	})
+
+	// Return the updated state
+	handleState(w, r)
 }

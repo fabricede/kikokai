@@ -13,11 +13,11 @@ import (
 
 // Event types for SSE (copied from server.go to maintain consistency)
 type CubeEvent struct {
-	Type      string        `json:"type"`
-	Axis      string        `json:"axis,omitempty"`      // x, y, z
-	Layer     int           `json:"layer,omitempty"`     // 1 ou -1
-	Direction int           `json:"direction,omitempty"` // 1 pour sens horaire, -1 pour sens anti-horaire
-	State     [6]model.Face `json:"state,omitempty"`
+	Type      string                `json:"type"`
+	Axis      string                `json:"axis,omitempty"`      // x, y, z
+	Layer     int                   `json:"layer,omitempty"`     // 1 ou -1
+	Direction int                   `json:"direction,omitempty"` // 1 pour sens horaire, -1 pour sens anti-horaire
+	State     [3][3][3]*model.Cubie `json:"state,omitempty"`
 }
 
 // Interface for broadcasting events
@@ -36,10 +36,12 @@ const (
 	CommandScramble = "scramble"
 )
 
+// Adapted to the new cube structure
 func stateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	log.Printf("Received MCP request: %s", CommandState)
 
-	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
+	// Return the cube state using the updated structure
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.Cubies)), nil
 }
 
 func resetHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -52,9 +54,11 @@ func resetHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToo
 		})
 	}
 
+	// Reset the cube using the new structure
 	model.ResetCube()
+
 	// Send the response
-	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.Cubies)), nil
 }
 
 func scrambleHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -67,16 +71,17 @@ func scrambleHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.Call
 		})
 	}
 
-	// Add scramble support to the MCP server
+	// Scramble the cube using the new structure
 	model.SharedCube.Scramble(20) // Scramble with 20 random moves
+
 	// Send the response
-	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.State)), nil
+	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.Cubies)), nil
 }
 
 func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	log.Printf("Received MCP request: rotate_axis")
 
-	// Récupérer les paramètres de la requête
+	// Extract parameters from the request
 	axis, ok := request.Params.Arguments["axis"].(string)
 	if !ok {
 		return nil, errors.New("axis must be a string ('x', 'y', or 'z')")
@@ -92,7 +97,7 @@ func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 		return nil, err
 	}
 
-	// Validation des entrées
+	// Validate inputs
 	if axis != "x" && axis != "y" && axis != "z" {
 		return nil, errors.New("axis must be 'x', 'y', or 'z'")
 	}
@@ -105,39 +110,38 @@ func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 		return nil, errors.New("direction must be 1 (clockwise) or -1 (counter-clockwise)")
 	}
 
-	// Table de conversion de l'axe, couche et direction vers face et sens de rotation
+	// Map axis, layer, and direction to face and rotation direction
 	var face model.FaceIndex
 	var clockwise model.TurningDirection
 
-	// Définir la face et le sens de rotation en fonction de l'axe, de la couche et de la direction
 	switch axis {
 	case "x":
-		if layer == 1 { // Front face (x=1)
+		if layer == 1 {
 			face = model.Front
 			clockwise = model.TurningDirection(direction == 1)
-		} else { // Back face (x=-1)
+		} else {
 			face = model.Back
-			clockwise = model.TurningDirection(direction == -1) // Sens inversé
+			clockwise = model.TurningDirection(direction == -1)
 		}
 	case "y":
-		if layer == 1 { // Up face (y=1)
+		if layer == 1 {
 			face = model.Up
 			clockwise = model.TurningDirection(direction == 1)
-		} else { // Down face (y=-1)
+		} else {
 			face = model.Down
-			clockwise = model.TurningDirection(direction == -1) // Sens inversé
+			clockwise = model.TurningDirection(direction == -1)
 		}
 	case "z":
-		if layer == 1 { // Right face (z=1)
+		if layer == 1 {
 			face = model.Right
 			clockwise = model.TurningDirection(direction == 1)
-		} else { // Left face (z=-1)
+		} else {
 			face = model.Left
-			clockwise = model.TurningDirection(direction == -1) // Sens inversé
+			clockwise = model.TurningDirection(direction == -1)
 		}
 	}
 
-	// Diffuser l'événement de rotation aux clients connectés
+	// Broadcast the rotation event
 	if Broadcaster != nil {
 		log.Printf("Broadcasting MCP axis rotation: axis=%s, layer=%d, direction=%d", axis, int(layer), int(direction))
 		Broadcaster.BroadcastEvent(CubeEvent{
@@ -148,10 +152,10 @@ func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 		})
 	}
 
-	// Appliquer la rotation au cube
+	// Apply the rotation to the cube
 	model.SharedCube.RotateFace(face, clockwise)
 
-	// Envoyer la réponse
+	// Send the response
 	return mcp.NewToolResultText(fmt.Sprintf("Rotated cube: axis=%s, layer=%d, direction=%d", axis, int(layer), int(direction))), nil
 }
 

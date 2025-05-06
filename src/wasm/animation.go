@@ -145,14 +145,14 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 			scene.Call("remove", rotationGroup)
 
 			// Log cube state before update
-			stateBeforeJSON, _ := json.Marshal(cube.State)
+			stateBeforeJSON, _ := json.Marshal(cube.Cubies)
 			println("Cube state before update:", string(stateBeforeJSON))
 
 			// Update the model
 			cube.RotateFace(face, clockwise)
 
 			// Log cube state after update
-			stateAfterJSON, _ := json.Marshal(cube.State)
+			stateAfterJSON, _ := json.Marshal(cube.Cubies)
 			println("Cube state after update:", string(stateAfterJSON))
 
 			// Recreate the cube with new state

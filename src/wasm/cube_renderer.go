@@ -46,9 +46,12 @@ func createCubePiece(x, y, z int) {
 		materials.SetIndex(i, material)
 	}
 
+	// Convert from -1,0,1 coordinates to 0,1,2 array indices
+	cubeX, cubeY, cubeZ := x+1, y+1, z+1
+
 	// Right face (x = 1)
 	if x == 1 {
-		colorIdx := cube.State[model.Right].Stickers[y+1][z+1].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Right]
 		color := colorMap[colorIdx]
 		println("Right face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(0).Get("color").Call("setHex", color)
@@ -56,7 +59,7 @@ func createCubePiece(x, y, z int) {
 
 	// Left face (x = -1)
 	if x == -1 {
-		colorIdx := cube.State[model.Left].Stickers[y+1][1-z].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Left]
 		color := colorMap[colorIdx]
 		println("Left face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(1).Get("color").Call("setHex", color)
@@ -64,7 +67,7 @@ func createCubePiece(x, y, z int) {
 
 	// Top face (y = 1)
 	if y == 1 {
-		colorIdx := cube.State[model.Up].Stickers[1-z][x+1].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Up]
 		color := colorMap[colorIdx]
 		println("Top face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(2).Get("color").Call("setHex", color)
@@ -72,7 +75,7 @@ func createCubePiece(x, y, z int) {
 
 	// Bottom face (y = -1)
 	if y == -1 {
-		colorIdx := cube.State[model.Down].Stickers[z+1][x+1].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Down]
 		color := colorMap[colorIdx]
 		println("Bottom face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(3).Get("color").Call("setHex", color)
@@ -80,7 +83,7 @@ func createCubePiece(x, y, z int) {
 
 	// Front face (z = 1)
 	if z == 1 {
-		colorIdx := cube.State[model.Front].Stickers[y+1][x+1].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Front]
 		color := colorMap[colorIdx]
 		println("Front face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(4).Get("color").Call("setHex", color)
@@ -88,7 +91,7 @@ func createCubePiece(x, y, z int) {
 
 	// Back face (z = -1)
 	if z == -1 {
-		colorIdx := cube.State[model.Back].Stickers[y+1][1-x].Color
+		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Back]
 		color := colorMap[colorIdx]
 		println("Back face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
 		materials.Index(5).Get("color").Call("setHex", color)
@@ -114,7 +117,7 @@ func createCubePiece(x, y, z int) {
 
 // Get the state of the cube
 func getState(this js.Value, args []js.Value) any {
-	stateJSON, _ := json.Marshal(cube.State)
+	stateJSON, _ := json.Marshal(cube.Cubies)
 	return js.ValueOf(string(stateJSON))
 }
 
@@ -131,15 +134,15 @@ func updateCubeFromState(this js.Value, args []js.Value) any {
 	stateJSON := args[0].String()
 
 	// Parse the JSON string into cube state
-	var state [6]model.Face
-	err := json.Unmarshal([]byte(stateJSON), &state)
+	var cubies [3][3][3]*model.Cubie
+	err := json.Unmarshal([]byte(stateJSON), &cubies)
 	if err != nil {
 		println("Error parsing cube state:", err.Error())
 		return js.ValueOf("Error: Invalid state format")
 	}
 
 	// Update the cube state
-	cube.State = state
+	cube.Cubies = cubies
 
 	// Rebuild the cube visualization
 	createCube()

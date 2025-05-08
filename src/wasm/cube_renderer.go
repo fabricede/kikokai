@@ -47,54 +47,90 @@ func createCubePiece(x, y, z int) {
 	}
 
 	// Convert from -1,0,1 coordinates to 0,1,2 array indices
-	cubeX, cubeY, cubeZ := x+1, y+1, z+1
+	cubeX := x + 1
+	cubeY := y + 1
+	cubeZ := z + 1
+
+	// Debug info
+	println("Creating cubie at visual coordinates:", x, y, z, "array indices:", cubeX, cubeY, cubeZ)
+
+	// Check if this cubie exists and has colors
+	cubie := cube.Cubies[cubeX][cubeY][cubeZ]
+	if cubie == nil {
+		println("Warning: No cubie at position", x, y, z, "(converted to", cubeX, cubeY, cubeZ, ")")
+		return
+	}
+
+	// Log all colors for this cubie for debugging
+	println("Colors for cubie at", cubeX, cubeY, cubeZ, ":")
+	for face, color := range cubie.Colors {
+		println("  Face", face, "has color", color)
+	}
 
 	// Right face (x = 1)
-	if x == 1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Right]
-		color := colorMap[colorIdx]
-		println("Right face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(0).Get("color").Call("setHex", color)
+	if x == 1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Right]; ok {
+			hexColor := colorMap[color]
+			println("Setting RIGHT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(0).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No RIGHT face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Left face (x = -1)
-	if x == -1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Left]
-		color := colorMap[colorIdx]
-		println("Left face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(1).Get("color").Call("setHex", color)
+	if x == -1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Left]; ok {
+			hexColor := colorMap[color]
+			println("Setting LEFT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(1).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No LEFT face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Top face (y = 1)
-	if y == 1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Up]
-		color := colorMap[colorIdx]
-		println("Top face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(2).Get("color").Call("setHex", color)
+	if y == 1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Up]; ok {
+			hexColor := colorMap[color]
+			println("Setting UP face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(2).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No UP face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Bottom face (y = -1)
-	if y == -1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Down]
-		color := colorMap[colorIdx]
-		println("Bottom face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(3).Get("color").Call("setHex", color)
+	if y == -1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Down]; ok {
+			hexColor := colorMap[color]
+			println("Setting DOWN face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(3).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No DOWN face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Front face (z = 1)
-	if z == 1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Front]
-		color := colorMap[colorIdx]
-		println("Front face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(4).Get("color").Call("setHex", color)
+	if z == 1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Back]; ok { // Changed from Front to Back
+			hexColor := colorMap[color]
+			println("Setting FRONT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(4).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No FRONT face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Back face (z = -1)
-	if z == -1 {
-		colorIdx := cube.Cubies[cubeX][cubeY][cubeZ].Colors[model.Back]
-		color := colorMap[colorIdx]
-		println("Back face color at", x, y, z, ":", colorIdx, "mapped to hex:", color)
-		materials.Index(5).Get("color").Call("setHex", color)
+	if z == -1 && cubie.Colors != nil {
+		if color, ok := cubie.Colors[model.Front]; ok { // Changed from Back to Front
+			hexColor := colorMap[color]
+			println("Setting BACK face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
+			materials.Index(5).Get("color").Call("setHex", hexColor)
+		} else {
+			println("No BACK face color found for cubie at", x, y, z)
+		}
 	}
 
 	// Create mesh with materials

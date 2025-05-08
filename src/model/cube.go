@@ -29,21 +29,40 @@ type Cubie struct {
 // NewCubie initializes a cubie with colors based on its position (x, y, z).
 func NewCubie(x, y, z int) *Cubie {
 	c := &Cubie{Colors: make(map[FaceIndex]Color)}
+
+	// The positions are in array coordinates (0,1,2)
+	// Assign colors only to visible/external faces
+
+	// Left face (x = 0) gets Red
 	if x == 0 {
-		c.Colors[Left] = Orange
-	} else if x == 2 {
-		c.Colors[Right] = Red
+		c.Colors[Left] = Red
 	}
+
+	// Right face (x = 2) gets Orange
+	if x == 2 {
+		c.Colors[Right] = Orange
+	}
+
+	// Down face (y = 0) gets Yellow
 	if y == 0 {
 		c.Colors[Down] = Yellow
-	} else if y == 2 {
+	}
+
+	// Up face (y = 2) gets White
+	if y == 2 {
 		c.Colors[Up] = White
 	}
+
+	// Front face (z = 0) gets Green
 	if z == 0 {
 		c.Colors[Front] = Green
-	} else if z == 2 {
+	}
+
+	// Back face (z = 2) gets Blue
+	if z == 2 {
 		c.Colors[Back] = Blue
 	}
+
 	return c
 }
 

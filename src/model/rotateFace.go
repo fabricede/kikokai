@@ -37,6 +37,12 @@ func (m Matrix3x3) rotateClockwise() Matrix3x3 {
 	for i := range 3 {
 		for j := range 3 {
 			result[j][2-i] = m[i][j]
+			if i == 0 && j == 0 || i == 2 && j == 2 || i == 0 && j == 2 || i == 2 && j == 0 {
+				// if corner cubie, swap 2 colors clockwise
+
+			} else if i == 0 && j == 1 || i == 1 && j == 0 || i == 1 && j == 2 || i == 2 && j == 1 {
+				// if edge cubie, swap 1 color
+			} // else center cubie, nothing to do
 		}
 	}
 	return result
@@ -48,6 +54,11 @@ func (m Matrix3x3) rotateCounterClockwise() Matrix3x3 {
 	for i := range 3 {
 		for j := range 3 {
 			result[2-j][i] = m[i][j]
+			if i == 0 && j == 0 || i == 2 && j == 2 || i == 0 && j == 2 || i == 2 && j == 0 {
+				// if corner cubie, swap 2 colors clockwise
+			} else if i == 0 && j == 1 || i == 1 && j == 0 || i == 1 && j == 2 || i == 2 && j == 1 {
+				// if edge cubie, swap 1 color
+			} // else center cubie, nothing to do
 		}
 	}
 	return result
@@ -74,195 +85,7 @@ func (m *Matrix3x3) SetCube(c *Cube, face FaceIndex, clockwise TurningDirection)
 				x, y, z = 2, i, 2-j
 			}
 
-			// Get the cubie that will be placed at this position
-			cubie := m[i][j]
-
-			// Create a new colors map with only the colors for faces that shouldn't change
-			newColors := make(map[FaceIndex]Color)
-
-			// The face we're rotating and its opposite face colors don't change
-			oppositeFace := getOppositeFace(face)
-			if color, exists := cubie.Colors[face]; exists {
-				newColors[face] = color
-			}
-			if color, exists := cubie.Colors[oppositeFace]; exists {
-				newColors[oppositeFace] = color
-			}
-
-			// Now apply the proper color transformations based on the tests
-			if face == Front && clockwise {
-				// Front face clockwise: Up → Right → Down → Left → Up
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Right] = color
-				}
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Left] = color
-				}
-			} else if face == Front && !clockwise {
-				// Front face counter-clockwise: Up → Left → Down → Right → Up
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Left] = color
-				}
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Right] = color
-				}
-			} else if face == Back && clockwise {
-				// Back face clockwise: Up → Left → Down → Right → Up
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Left] = color
-				}
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Right] = color
-				}
-			} else if face == Back && !clockwise {
-				// Back face counter-clockwise: Up → Right → Down → Left → Up
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Right] = color
-				}
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Left] = color
-				}
-			} else if face == Up && clockwise {
-				// Up face clockwise: Front → Right → Back → Left → Front
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Right] = color
-				}
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Left] = color
-				}
-			} else if face == Up && !clockwise {
-				// Up face counter-clockwise: Front → Left → Back → Right → Front
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Left] = color
-				}
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Right] = color
-				}
-			} else if face == Down && clockwise {
-				// Down face clockwise: Front → Left → Back → Right → Front
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Left] = color
-				}
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Right] = color
-				}
-			} else if face == Down && !clockwise {
-				// Down face counter-clockwise: Front → Right → Back → Left → Front
-				if color, exists := cubie.Colors[Left]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Right] = color
-				}
-				if color, exists := cubie.Colors[Right]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Left] = color
-				}
-			} else if face == Left && clockwise {
-				// Left face clockwise: Up → Front → Down → Back → Up
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Back] = color
-				}
-			} else if face == Left && !clockwise {
-				// Left face counter-clockwise: Up → Back → Down → Front → Up
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Front] = color
-				}
-			} else if face == Right && clockwise {
-				// Right face clockwise: Up → Back → Down → Front → Up
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Back] = color
-				}
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Front] = color
-				}
-			} else if face == Right && !clockwise {
-				// Right face counter-clockwise: Up → Front → Down → Back → Up
-				if color, exists := cubie.Colors[Back]; exists {
-					newColors[Up] = color
-				}
-				if color, exists := cubie.Colors[Up]; exists {
-					newColors[Front] = color
-				}
-				if color, exists := cubie.Colors[Front]; exists {
-					newColors[Down] = color
-				}
-				if color, exists := cubie.Colors[Down]; exists {
-					newColors[Back] = color
-				}
-			}
-
-			// Update the cube with the transformed cubie
-			cubie.Colors = newColors
-			c.Cubies[x][y][z] = cubie
+			c.Cubies[x][y][z] = m[i][j]
 		}
 	}
 }

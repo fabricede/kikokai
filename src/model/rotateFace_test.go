@@ -1,6 +1,7 @@
 package model
 
 import (
+	"maps"
 	"testing"
 )
 
@@ -111,50 +112,88 @@ func TestMatrixInit(t *testing.T) {
 
 // TestCubieRotation tests that cubies' orientations are correctly transformed during rotation
 func TestCubieRotation(t *testing.T) {
-	// Test case: Front face clockwise rotation
-	t.Run("Front face clockwise rotation", func(t *testing.T) {
-		// Create a new cube for this test
-		cube := NewCube()
+	// Define test cases
+	testCases := []struct {
+		name      string
+		face      FaceIndex
+		direction TurningDirection
+		position  [3]int // [x, y, z] of the cubie to check
+		// map of face -> face indicating which initial face's color should be on which face after rotation
+		// e.g., {Up: Right} means the color initially on Up face should be on Right face after rotation
+		colorTransformations map[FaceIndex]FaceIndex
+		// face that should remain unchanged during this rotation
+		unchangedFaces []FaceIndex
+	}{
+		{
+			name:      "Front face clockwise rotation",
+			face:      Front,
+			direction: Clockwise,
+			position:  [3]int{2, 0, 2}, // top-right cubie on Front face
+			colorTransformations: map[FaceIndex]FaceIndex{
+				Up:    Left,
+				Right: Up,
+				Down:  Right,
+				Left:  Down,
+			},
+			unchangedFaces: []FaceIndex{Front, Back},
+		},
+		{
+			name:      "Up face clockwise rotation",
+			face:      Up,
+			direction: Clockwise,
+			position:  [3]int{2, 0, 0}, // top-right cubie on Up face
+			colorTransformations: map[FaceIndex]FaceIndex{
+				Front: Right,
+				Right: Back,
+				Back:  Left,
+				Left:  Front,
+			},
+			unchangedFaces: []FaceIndex{Up, Down},
+		},
+		{
+			name:      "Right face counter-clockwise rotation",
+			face:      Right,
+			direction: CounterClockwise,
+			position:  [3]int{2, 0, 2}, // top-front cubie on Right face
+			colorTransformations: map[FaceIndex]FaceIndex{
+				Up:    Back,
+				Front: Up,
+				Down:  Front,
+				Back:  Down,
+			},
+			unchangedFaces: []FaceIndex{Right, Left},
+		},
+	}
 
-		// Check initial colors for a few key cubies
-		// Top-right cubie on Front face (position [2][2][2])
-		topRightFront := cube.Cubies[2][2][2]
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create a new cube for this test
+			cube := NewCube()
 
-		initialColors := map[FaceIndex]Color{}
-		// Copy the initial colors
-		for face, color := range topRightFront.Colors {
-			initialColors[face] = color
-		}
+			// Get the test cubie
+			testCubie := cube.Cubies[tc.position[0]][tc.position[1]][tc.position[2]]
 
-		// Apply a clockwise rotation to the Front face
-		RotateFace(cube, Front, Clockwise)
+			initialColors := map[FaceIndex]Color{}
+			// Copy the initial colors
+			maps.Copy(initialColors, testCubie.Colors)
 
-		// After rotation, the cubie's colors should be transformed
-		// The color that was on Up should now be on Right
-		// The color that was on Right should now be on Down
-		// The color that was on Down should now be on Left
-		// The color that was on Left should now be on Up
+			// Apply the rotation to the face
+			RotateFace(cube, tc.face, tc.direction)
 
-		// The Front face color should stay the same
-		if got, want := topRightFront.Colors[Front], initialColors[Front]; got != want {
-			t.Errorf("Front face color changed after rotation: got %v, want %v", got, want)
-		}
+			// Check that the unchanged faces remain unchanged
+			for _, face := range tc.unchangedFaces {
+				if got, want := testCubie.Colors[face], initialColors[face]; got != want {
+					t.Errorf("%d(%s) color changed after rotation: got %v, want %v", face, FaceColorName[face], got, want)
+				}
+			}
 
-		// Check color transformations for a corner cubie
-		if got, want := topRightFront.Colors[Up], initialColors[Left]; got != want {
-			t.Errorf("Up face color incorrect after rotation: got %v, want %v", got, want)
-		}
-
-		if got, want := topRightFront.Colors[Right], initialColors[Up]; got != want {
-			t.Errorf("Right face color incorrect after rotation: got %v, want %v", got, want)
-		}
-
-		if got, want := topRightFront.Colors[Down], initialColors[Right]; got != want {
-			t.Errorf("Down face color incorrect after rotation: got %v, want %v", got, want)
-		}
-
-		if got, want := topRightFront.Colors[Left], initialColors[Down]; got != want {
-			t.Errorf("Left face color incorrect after rotation: got %v, want %v", got, want)
-		}
-	})
+			// Check color transformations
+			for newFace, originalFace := range tc.colorTransformations {
+				if got, want := testCubie.Colors[newFace], initialColors[originalFace]; got != want {
+					t.Errorf("%d(%s) face color incorrect after rotation: got %v, want %v (should be color from %d(%s))",
+						newFace, FaceColorName[newFace], got, want, originalFace, FaceColorName[originalFace])
+				}
+			}
+		})
+	}
 }

@@ -14,7 +14,7 @@ func SetMatrix(init [5][5]Color) (m *Matrix5x5) {
 }
 
 // RotateClockwise rotates the 5x5 matrix 90 degrees clockwise
-func (m Matrix5x5) RotateClockwise() Matrix5x5 {
+func (m Matrix5x5) Rotate5Clockwise() Matrix5x5 {
 	var result Matrix5x5
 	for i := range 5 {
 		for j := range 5 {
@@ -25,7 +25,7 @@ func (m Matrix5x5) RotateClockwise() Matrix5x5 {
 }
 
 // RotateCounterClockwise rotates the 5x5 matrix 90 degrees counter-clockwise
-func (m Matrix5x5) RotateCounterClockwise() Matrix5x5 {
+func (m Matrix5x5) Rotate5CounterClockwise() Matrix5x5 {
 	var result Matrix5x5
 	for i := range 5 {
 		for j := range 5 {
@@ -36,14 +36,14 @@ func (m Matrix5x5) RotateCounterClockwise() Matrix5x5 {
 }
 
 // RotateFace rotates a specific face of the cube
-func RotateFace(c *Cube, face FaceIndex, clockwise TurningDirection) {
+func RotateFace5(c *Cube, face FaceIndex, clockwise TurningDirection) {
 	var m Matrix5x5
 	//m.Init(c, face)
 	// Rotate the matrix
 	if clockwise {
-		m = m.RotateClockwise()
+		m = m.Rotate5Clockwise()
 	} else {
-		m = m.RotateCounterClockwise()
+		m = m.Rotate5CounterClockwise()
 	}
 	//m.SetCube(c, face)
 }

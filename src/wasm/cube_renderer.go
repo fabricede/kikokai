@@ -113,7 +113,7 @@ func createCubePiece(x, y, z int) {
 
 	// Front face (z = 1)
 	if z == 1 && cubie.Colors != nil {
-		if color, ok := cubie.Colors[model.Back]; ok { // Changed from Front to Back
+		if color, ok := cubie.Colors[model.Back]; ok {
 			hexColor := colorMap[color]
 			println("Setting FRONT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(4).Get("color").Call("setHex", hexColor)
@@ -124,7 +124,7 @@ func createCubePiece(x, y, z int) {
 
 	// Back face (z = -1)
 	if z == -1 && cubie.Colors != nil {
-		if color, ok := cubie.Colors[model.Front]; ok { // Changed from Back to Front
+		if color, ok := cubie.Colors[model.Front]; ok {
 			hexColor := colorMap[color]
 			println("Setting BACK face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(5).Get("color").Call("setHex", hexColor)

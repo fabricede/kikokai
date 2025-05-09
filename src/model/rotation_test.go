@@ -30,7 +30,7 @@ func TestMatrix5x5_RotateClockwise(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.m.RotateClockwise(); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.m.Rotate5Clockwise(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Matrix5x5.RotateClockwise() = %v, want %v", got, tt.want)
 			}
 		})
@@ -61,7 +61,7 @@ func TestMatrix5x5_RotateCounterClockwise(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := tt.m.RotateCounterClockwise(); !reflect.DeepEqual(got, tt.want) {
+			if got := tt.m.Rotate5CounterClockwise(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Matrix5x5.RotateCounterClockwise() = %v, want %v", got, tt.want)
 			}
 		})

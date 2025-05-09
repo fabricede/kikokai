@@ -76,9 +76,9 @@ type Cube struct {
 // NewCube initializes a solved Rubik's Cube.
 func NewCube() *Cube {
 	cube := &Cube{}
-	for x := 0; x < 3; x++ {
-		for y := 0; y < 3; y++ {
-			for z := 0; z < 3; z++ {
+	for x := range 3 {
+		for y := range 3 {
+			for z := range 3 {
 				cube.Cubies[x][y][z] = NewCubie(x, y, z)
 			}
 		}

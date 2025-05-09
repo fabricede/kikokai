@@ -55,9 +55,10 @@ func (m Matrix3x3) rotateCounterClockwise() Matrix3x3 {
 		for j := range 3 {
 			result[2-j][i] = m[i][j]
 			if i == 0 && j == 0 || i == 2 && j == 2 || i == 0 && j == 2 || i == 2 && j == 0 {
-				// if corner cubie, swap 2 colors clockwise
+				// if corner cubie, rotate 2 colors clockwise
 			} else if i == 0 && j == 1 || i == 1 && j == 0 || i == 1 && j == 2 || i == 2 && j == 1 {
-				// if edge cubie, swap 1 color
+				// if edge cubie, rotate the only setted color
+
 			} // else center cubie, nothing to do
 		}
 	}

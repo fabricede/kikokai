@@ -83,7 +83,7 @@ func TestMatrixInit(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var matrix Matrix3x3
+			var matrix Layer
 			matrix.init(cube, tc.face)
 
 			// Verify each position in the matrix
@@ -105,6 +105,69 @@ func TestMatrixInit(t *testing.T) {
 							i, j, expectedX, expectedY, expectedZ)
 					}
 				}
+			}
+		})
+	}
+}
+
+// TestFaceToAxisLayer tests the conversion from face to axis+layer parameters
+func TestFaceToAxisLayer(t *testing.T) {
+	testCases := []struct {
+		name      string
+		face      FaceIndex
+		clockwise TurningDirection
+		wantAxis  CubeCoordinate
+		wantLayer int
+		wantClock bool
+	}{
+		{
+			name:      "Front face clockwise",
+			face:      Front,
+			clockwise: Clockwise,
+			wantAxis:  CubeCoordinate{Z: 1},
+			wantLayer: 2,
+			wantClock: true,
+		},
+		{
+			name:      "Back face clockwise",
+			face:      Back,
+			clockwise: Clockwise,
+			wantAxis:  CubeCoordinate{Z: 1},
+			wantLayer: 0,
+			wantClock: false, // Inverted for back face
+		},
+		{
+			name:      "Up face counter-clockwise",
+			face:      Up,
+			clockwise: CounterClockwise,
+			wantAxis:  CubeCoordinate{Y: 1},
+			wantLayer: 2,
+			wantClock: false,
+		},
+		{
+			name:      "Left face counter-clockwise",
+			face:      Left,
+			clockwise: CounterClockwise,
+			wantAxis:  CubeCoordinate{X: 1},
+			wantLayer: 0,
+			wantClock: true, // Inverted for left face
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			axis, layer, isClock := faceToAxisLayerDirection(tc.face, tc.clockwise)
+
+			if axis.X != tc.wantAxis.X || axis.Y != tc.wantAxis.Y || axis.Z != tc.wantAxis.Z {
+				t.Errorf("faceToAxisLayerDirection(%v, %v) got axis = %v, want %v", tc.face, tc.clockwise, axis, tc.wantAxis)
+			}
+
+			if layer != tc.wantLayer {
+				t.Errorf("faceToAxisLayerDirection(%v, %v) got layer = %d, want %d", tc.face, tc.clockwise, layer, tc.wantLayer)
+			}
+
+			if isClock != tc.wantClock {
+				t.Errorf("faceToAxisLayerDirection(%v, %v) got clockwise = %v, want %v", tc.face, tc.clockwise, isClock, tc.wantClock)
 			}
 		})
 	}
@@ -178,7 +241,7 @@ func TestCubieRotation(t *testing.T) {
 			maps.Copy(initialColors, testCubie.Colors)
 
 			// Apply the rotation to the face
-			RotateFace(cube, tc.face, tc.direction)
+			cube.RotateFace(tc.face, tc.direction)
 
 			// Check that the unchanged faces remain unchanged
 			for _, face := range tc.unchangedFaces {
@@ -193,6 +256,75 @@ func TestCubieRotation(t *testing.T) {
 					t.Errorf("%d(%s) face color incorrect after rotation: got %v, want %v (should be color from %d(%s))",
 						newFace, FaceColorName[newFace], got, want, originalFace, FaceColorName[originalFace])
 				}
+			}
+		})
+	}
+}
+
+// TestAxisRotation tests the axis-based rotation directly
+func TestAxisRotation(t *testing.T) {
+	testCases := []struct {
+		name      string
+		axis      CubeCoordinate
+		layer     int
+		clockwise bool
+		// Starting position coordinates to check
+		startPos [3]int
+		// Expected ending position coordinates after rotation
+		endPos [3]int
+	}{
+		{
+			name:      "X-Axis Layer 0 Clockwise",
+			axis:      CubeCoordinate{X: 1},
+			layer:     0,
+			clockwise: true,
+			startPos:  [3]int{0, 0, 0},
+			endPos:    [3]int{0, 2, 0},
+		},
+		{
+			name:      "Y-Axis Layer 2 Counter-Clockwise",
+			axis:      CubeCoordinate{Y: 1},
+			layer:     2,
+			clockwise: false,
+			startPos:  [3]int{0, 2, 0},
+			endPos:    [3]int{0, 2, 2},
+		},
+		{
+			name:      "Z-Axis Layer 1 Clockwise",
+			axis:      CubeCoordinate{Z: 1},
+			layer:     1,
+			clockwise: true,
+			startPos:  [3]int{0, 0, 1},
+			endPos:    [3]int{2, 0, 1},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			// Create a new cube
+			cube := NewCube()
+
+			// Store the pointer to the initial cubie we want to track
+			initialCubie := cube.Cubies[tc.startPos[0]][tc.startPos[1]][tc.startPos[2]]
+			if initialCubie == nil {
+				t.Fatalf("No cubie at initial position %v", tc.startPos)
+			}
+
+			// Get a reference to this cubie
+			initialPtr := initialCubie
+
+			// Apply rotation
+			cube.RotateAxis(tc.axis, tc.layer, tc.clockwise)
+
+			// Validate if the cubie at endPos is the same instance as our initialCubie
+			endCubie := cube.Cubies[tc.endPos[0]][tc.endPos[1]][tc.endPos[2]]
+			if endCubie == nil {
+				t.Fatalf("No cubie at end position %v", tc.endPos)
+			}
+
+			if initialPtr != endCubie {
+				t.Errorf("Expected cubie at %v to move to %v, but found a different cubie",
+					tc.startPos, tc.endPos)
 			}
 		})
 	}

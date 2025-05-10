@@ -39,6 +39,37 @@ func NewCube() *Cube {
 	return cube
 }
 
+// RotateAxis rotates a slice of the cube around a specified axis
+func (c *Cube) RotateAxis(axis CubeCoordinate, clockwise TurningDirection) {
+	// copies the layer of the cube to a matrix
+	var layer Layer
+	layer.init(c, axis)
+	// rotates the layer
+	if clockwise {
+		layer = layer.rotateClockwise(axis)
+	} else {
+		layer = layer.rotateCounterClockwise(axis)
+	}
+	// copies the layer back to the cube
+	layer.setLayer(c, axis)
+}
+
+// Scramble applies a series of random rotations to the cube
+func (c *Cube) Scramble(moves int) {
+	// Apply random rotations
+	for range moves {
+		// Random face (0-5)
+		face := FaceIndex(rand.Intn(6))
+		axis := FaceToCoordinate(face)
+
+		// Random direction (true/false for clockwise/counter-clockwise)
+		clockwise := TurningDirection(rand.Intn(2) == 1)
+
+		// Rotate the face
+		c.RotateAxis(axis, clockwise)
+	}
+}
+
 // GetFaceColor returns the color of a specific face and position.
 func (c *Cube) GetFaceColor(face FaceIndex, x, y int) Color {
 	switch face {
@@ -56,25 +87,5 @@ func (c *Cube) GetFaceColor(face FaceIndex, x, y int) Color {
 		return c.Cubies[x][0][y].Colors[Down]
 	default:
 		return Green // Default case, shouldn't happen
-	}
-}
-
-// RotateFace rotates the specified face
-func (c *Cube) RotateFace(face FaceIndex, clockwise TurningDirection) {
-	RotateFace(c, face, clockwise)
-}
-
-// Scramble applies a series of random rotations to the cube
-func (c *Cube) Scramble(moves int) {
-	// Apply random rotations
-	for range moves {
-		// Random face (0-5)
-		face := FaceIndex(rand.Intn(6))
-
-		// Random direction (true/false for clockwise/counter-clockwise)
-		clockwise := TurningDirection(rand.Intn(2) == 1)
-
-		// Rotate the face
-		c.RotateFace(face, clockwise)
 	}
 }

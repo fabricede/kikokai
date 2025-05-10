@@ -25,10 +25,10 @@ func (m *Layer) init(c *Cube, axis CubeCoordinate) {
 				x, y, z = 0, i, j
 			case LeftCoord:
 				// Left face (z = 0)
-				x, y, z = 0, i, j
+				x, y, z = i, j, 0
 			case RightCoord:
 				// Right face (z = 2)
-				x, y, z = 2, i, j
+				x, y, z = i, j, 2
 			}
 			// Assign the cubie to the matrix position
 			m[i][j] = c.Cubies[x][y][z]

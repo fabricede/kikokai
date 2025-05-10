@@ -1,6 +1,7 @@
 package model
 
 import (
+	"maps"
 	"reflect"
 	"testing"
 )
@@ -8,138 +9,77 @@ import (
 func TestCubie_RotateClockwise(t *testing.T) {
 	tests := []struct {
 		name      string
-		cubie     *Cubie
 		axis      CubeCoordinate
 		wantColor map[FaceIndex]Color
 	}{
 		{
 			name: "Rotate X-axis positive",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
 			axis: CubeCoordinate{X: 1},
 			wantColor: map[FaceIndex]Color{
 				Front: Red,
-				Right: Green,
+				Right: White,
 				Back:  Orange,
-				Left:  Blue,
-				Up:    White,
-				Down:  Yellow,
-			},
-		},
-		{
-			name: "Rotate X-axis negative",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
-			axis: CubeCoordinate{X: -1},
-			wantColor: map[FaceIndex]Color{
-				Front: Orange,
-				Right: Blue,
-				Back:  Red,
-				Left:  Green,
-				Up:    White,
-				Down:  Yellow,
-			},
-		},
-		{
-			name: "Rotate Y-axis positive",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
-			axis: CubeCoordinate{Y: 1},
-			wantColor: map[FaceIndex]Color{
-				Front: Yellow,
-				Right: Orange,
-				Back:  White,
-				Left:  Red,
-				Up:    Green,
-				Down:  Blue,
-			},
-		},
-		{
-			name: "Rotate Y-axis negative",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
-			axis: CubeCoordinate{Y: -1},
-			wantColor: map[FaceIndex]Color{
-				Front: White,
-				Right: Orange,
-				Back:  Yellow,
-				Left:  Red,
+				Left:  Yellow,
 				Up:    Blue,
 				Down:  Green,
 			},
 		},
 		{
-			name: "Rotate Z-axis positive",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
+			name: "Rotate X-axis negative",
+			axis: CubeCoordinate{X: -1},
+			wantColor: map[FaceIndex]Color{
+				Front: Orange,
+				Right: Yellow,
+				Back:  Red,
+				Left:  White,
+				Up:    Blue,
+				Down:  Green,
 			},
-			axis: CubeCoordinate{Z: 1},
+		},
+		{
+			name: "Rotate Y-axis positive",
+			axis: CubeCoordinate{Y: 1},
 			wantColor: map[FaceIndex]Color{
 				Front: Green,
-				Right: White,
+				Right: Orange,
 				Back:  Blue,
-				Left:  Yellow,
+				Left:  Red,
+				Up:    White,
+				Down:  Yellow,
+			},
+		},
+		{
+			name: "Rotate Y-axis negative",
+			axis: CubeCoordinate{Y: -1},
+			wantColor: map[FaceIndex]Color{
+				Front: Blue,
+				Right: Orange,
+				Back:  Green,
+				Left:  Red,
+				Up:    Yellow,
+				Down:  White,
+			},
+		},
+		{
+			name: "Rotate Z-axis positive",
+			axis: CubeCoordinate{Z: 1},
+			wantColor: map[FaceIndex]Color{
+				Front: White,
+				Right: Blue,
+				Back:  Yellow,
+				Left:  Green,
 				Up:    Red,
 				Down:  Orange,
 			},
 		},
 		{
 			name: "Rotate Z-axis negative",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
 			axis: CubeCoordinate{Z: -1},
 			wantColor: map[FaceIndex]Color{
-				Front: Green,
-				Right: Yellow,
-				Back:  Blue,
-				Left:  White,
+				Front: White,
+				Right: Green,
+				Back:  Yellow,
+				Left:  Blue,
 				Up:    Orange,
 				Down:  Red,
 			},
@@ -148,9 +88,10 @@ func TestCubie_RotateClockwise(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.cubie.rotateClockwise(tt.axis)
-			if !reflect.DeepEqual(tt.cubie.Colors, tt.wantColor) {
-				t.Errorf("rotateClockwise() got = %v, want %v", tt.cubie.Colors, tt.wantColor)
+			cubie := NewCubie()
+			cubie.rotateClockwise(tt.axis)
+			if !reflect.DeepEqual(cubie.Colors, tt.wantColor) {
+				t.Errorf("rotateClockwise() got = %v, want %v", cubie.Colors, tt.wantColor)
 			}
 		})
 	}
@@ -159,138 +100,77 @@ func TestCubie_RotateClockwise(t *testing.T) {
 func TestCubie_RotateCounterClockwise(t *testing.T) {
 	tests := []struct {
 		name      string
-		cubie     *Cubie
 		axis      CubeCoordinate
 		wantColor map[FaceIndex]Color
 	}{
 		{
 			name: "Rotate X-axis positive counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
 			axis: CubeCoordinate{X: 1},
 			wantColor: map[FaceIndex]Color{
 				Front: Orange,
-				Right: Blue,
+				Right: Yellow,
 				Back:  Red,
-				Left:  Green,
-				Up:    White,
-				Down:  Yellow,
-			},
-		},
-		{
-			name: "Rotate X-axis negative counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
-			axis: CubeCoordinate{X: -1},
-			wantColor: map[FaceIndex]Color{
-				Front: Red,
-				Right: Green,
-				Back:  Orange,
-				Left:  Blue,
-				Up:    White,
-				Down:  Yellow,
-			},
-		},
-		{
-			name: "Rotate Y-axis positive counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
-			axis: CubeCoordinate{Y: 1},
-			wantColor: map[FaceIndex]Color{
-				Front: White,
-				Right: Orange,
-				Back:  Yellow,
-				Left:  Red,
+				Left:  White,
 				Up:    Blue,
 				Down:  Green,
 			},
 		},
 		{
-			name: "Rotate Y-axis negative counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
+			name: "Rotate X-axis negative counter-clockwise",
+			axis: CubeCoordinate{X: -1},
+			wantColor: map[FaceIndex]Color{
+				Front: Red,
+				Right: White,
+				Back:  Orange,
+				Left:  Yellow,
+				Up:    Blue,
+				Down:  Green,
 			},
+		},
+		{
+			name: "Rotate Y-axis positive counter-clockwise",
+			axis: CubeCoordinate{Y: 1},
+			wantColor: map[FaceIndex]Color{
+				Front: Blue,
+				Right: Orange,
+				Back:  Green,
+				Left:  Red,
+				Up:    Yellow,
+				Down:  White,
+			},
+		},
+		{
+			name: "Rotate Y-axis negative counter-clockwise",
 			axis: CubeCoordinate{Y: -1},
 			wantColor: map[FaceIndex]Color{
-				Front: Yellow,
+				Front: Green,
 				Right: Orange,
-				Back:  White,
+				Back:  Blue,
 				Left:  Red,
-				Up:    Green,
-				Down:  Blue,
+				Up:    White,
+				Down:  Yellow,
 			},
 		},
 		{
 			name: "Rotate Z-axis positive counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
 			axis: CubeCoordinate{Z: 1},
 			wantColor: map[FaceIndex]Color{
-				Front: Green,
-				Right: Yellow,
-				Back:  Blue,
-				Left:  White,
+				Front: White,
+				Right: Green,
+				Back:  Yellow,
+				Left:  Blue,
 				Up:    Orange,
 				Down:  Red,
 			},
 		},
 		{
 			name: "Rotate Z-axis negative counter-clockwise",
-			cubie: &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			},
 			axis: CubeCoordinate{Z: -1},
 			wantColor: map[FaceIndex]Color{
-				Front: Green,
-				Right: White,
-				Back:  Blue,
-				Left:  Yellow,
+				Front: White,
+				Right: Blue,
+				Back:  Yellow,
+				Left:  Green,
 				Up:    Red,
 				Down:  Orange,
 			},
@@ -299,9 +179,10 @@ func TestCubie_RotateCounterClockwise(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.cubie.rotateCounterClockwise(tt.axis)
-			if !reflect.DeepEqual(tt.cubie.Colors, tt.wantColor) {
-				t.Errorf("rotateCounterClockwise() got = %v, want %v", tt.cubie.Colors, tt.wantColor)
+			cubie := NewCubie()
+			cubie.rotateCounterClockwise(tt.axis)
+			if !reflect.DeepEqual(cubie.Colors, tt.wantColor) {
+				t.Errorf("rotateCounterClockwise() got = %v, want %v", cubie.Colors, tt.wantColor)
 			}
 		})
 	}
@@ -318,22 +199,8 @@ func TestRotateIdentity(t *testing.T) {
 	for _, axis := range axes {
 		t.Run("Clockwise then Counter-clockwise on axis "+axis.String(), func(t *testing.T) {
 			// Create a cubie with all faces colored
-			original := &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			}
-
-			// Deep copy original colors for comparison later
-			originalColors := make(map[FaceIndex]Color)
-			for k, v := range original.Colors {
-				originalColors[k] = v
-			}
+			original := NewCubie()
+			originalColors := maps.Clone(original.Colors)
 
 			// Rotate clockwise then counter-clockwise
 			original.rotateClockwise(axis)
@@ -348,22 +215,8 @@ func TestRotateIdentity(t *testing.T) {
 
 		t.Run("Counter-clockwise then Clockwise on axis "+axis.String(), func(t *testing.T) {
 			// Create a cubie with all faces colored
-			original := &Cubie{
-				Colors: map[FaceIndex]Color{
-					Front: Green,
-					Right: Orange,
-					Back:  Blue,
-					Left:  Red,
-					Up:    White,
-					Down:  Yellow,
-				},
-			}
-
-			// Deep copy original colors for comparison later
-			originalColors := make(map[FaceIndex]Color)
-			for k, v := range original.Colors {
-				originalColors[k] = v
-			}
+			original := NewCubie()
+			originalColors := maps.Clone(original.Colors)
 
 			// Rotate counter-clockwise then clockwise
 			original.rotateCounterClockwise(axis)

@@ -36,7 +36,8 @@ func createCubePiece(x, y, z int) {
 	// Create geometry
 	geometry := box.New(cubeSize, cubeSize, cubeSize)
 
-	// Create materials array (right, left, top, bottom, front, back)
+	// Create materials array for the six faces of the cube
+	// Order in ThreeJS: right, left, top, bottom, front, back
 	materials := js.Global().Get("Array").New(6)
 
 	for i := 0; i < 6; i++ {
@@ -46,96 +47,98 @@ func createCubePiece(x, y, z int) {
 		materials.SetIndex(i, material)
 	}
 
-	// Convert from -1,0,1 coordinates to 0,1,2 array indices
-	cubeX := x + 1
-	cubeY := y + 1
-	cubeZ := z + 1
+	// Convert from ThreeJS coordinates (-1,0,1) to model array indices (0,1,2)
+	modelX := z + 1 // z in ThreeJS maps to x in model
+	modelY := y + 1 // y in ThreeJS maps to y in model
+	modelZ := x + 1 // x in ThreeJS maps to z in model
 
 	// Debug info
-	println("Creating cubie at visual coordinates:", x, y, z, "array indices:", cubeX, cubeY, cubeZ)
+	println("Creating cubie at ThreeJS coords (x,y,z):", x, y, z, ", model array indices:", modelX, modelY, modelZ)
 
 	// Check if this cubie exists and has colors
-	cubie := cube.Cubies[cubeX][cubeY][cubeZ]
+	cubie := cube.Cubies[modelX][modelY][modelZ]
 	if cubie == nil {
-		println("Warning: No cubie at position", x, y, z, "(converted to", cubeX, cubeY, cubeZ, ")")
+		println("Warning: No cubie at position", x, y, z, "(converted to", modelX, modelY, modelZ, ")")
 		return
 	}
 
 	// Log all colors for this cubie for debugging
-	println("Colors for cubie at", cubeX, cubeY, cubeZ, ":")
+	println("Colors for cubie at", modelX, modelY, modelZ, ":")
 	for face, color := range cubie.Colors {
 		println("  Face", face, "has color", color)
 	}
 
-	// Right face (x = 1)
-	if x == 1 && cubie.Colors != nil {
+	// Map the colors according to how they're actually assigned in the NewCubie function
+	// and how faces relate to ThreeJS cube faces
+
+	// In your NewCubie:
+	// - Front is assigned when z=0 (Green)
+	// - Back is assigned when z=2 (Blue)
+	// - Left is assigned when x=0 (Red)
+	// - Right is assigned when x=2 (Orange)
+	// - Up is assigned when y=2 (White)
+	// - Down is assigned when y=0 (Yellow)
+
+	// ThreeJS cube faces: right, left, top, bottom, front, back
+
+	// RIGHT face in ThreeJS (x=1)
+	if x == 1 && modelZ == 2 { // In model, Right is x=2
 		if color, ok := cubie.Colors[model.Right]; ok {
 			hexColor := colorMap[color]
 			println("Setting RIGHT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(0).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No RIGHT face color found for cubie at", x, y, z)
 		}
 	}
 
-	// Left face (x = -1)
-	if x == -1 && cubie.Colors != nil {
+	// LEFT face in ThreeJS (x=-1)
+	if x == -1 && modelZ == 0 { // In model, Left is x=0
 		if color, ok := cubie.Colors[model.Left]; ok {
 			hexColor := colorMap[color]
 			println("Setting LEFT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(1).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No LEFT face color found for cubie at", x, y, z)
 		}
 	}
 
-	// Top face (y = 1)
-	if y == 1 && cubie.Colors != nil {
+	// TOP face in ThreeJS (y=1)
+	if y == 1 && modelY == 2 { // In model, Up is y=2
 		if color, ok := cubie.Colors[model.Up]; ok {
 			hexColor := colorMap[color]
 			println("Setting UP face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(2).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No UP face color found for cubie at", x, y, z)
 		}
 	}
 
-	// Bottom face (y = -1)
-	if y == -1 && cubie.Colors != nil {
+	// BOTTOM face in ThreeJS (y=-1)
+	if y == -1 && modelY == 0 { // In model, Down is y=0
 		if color, ok := cubie.Colors[model.Down]; ok {
 			hexColor := colorMap[color]
 			println("Setting DOWN face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(3).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No DOWN face color found for cubie at", x, y, z)
 		}
 	}
 
-	// Front face (z = 1)
-	if z == 1 && cubie.Colors != nil {
-		if color, ok := cubie.Colors[model.Back]; ok {
+	// FRONT face in ThreeJS (z=1)
+	if z == 1 && modelX == 2 { // In model, Front should be z=0, but based on your rotations it needs to be x=2
+		if color, ok := cubie.Colors[model.Front]; ok {
 			hexColor := colorMap[color]
 			println("Setting FRONT face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(4).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No FRONT face color found for cubie at", x, y, z)
 		}
 	}
 
-	// Back face (z = -1)
-	if z == -1 && cubie.Colors != nil {
-		if color, ok := cubie.Colors[model.Front]; ok {
+	// BACK face in ThreeJS (z=-1)
+	if z == -1 && modelX == 0 { // In model, Back should be z=2, but based on your rotations it needs to be x=0
+		if color, ok := cubie.Colors[model.Back]; ok {
 			hexColor := colorMap[color]
 			println("Setting BACK face color at", x, y, z, "to", color, "(hex:", hexColor, ")")
 			materials.Index(5).Get("color").Call("setHex", hexColor)
-		} else {
-			println("No BACK face color found for cubie at", x, y, z)
 		}
 	}
 
 	// Create mesh with materials
 	cubeMesh := mesh.New(geometry, materials)
-	// Set position directly as properties instead of using set() method
+
+	// Set position in the 3D space
 	cubeMesh.Get("position").Set("x", float64(x)*(cubeSize+gap))
 	cubeMesh.Get("position").Set("y", float64(y)*(cubeSize+gap))
 	cubeMesh.Get("position").Set("z", float64(z)*(cubeSize+gap))

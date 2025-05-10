@@ -106,6 +106,9 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 	// Get rotation axis
 	rotationAxis := model.FaceToCoordinate(face)
 
+	// Convert the CubeCoordinate to a Three.js Vector3 object
+	jsRotationAxis := getRotationAxis(rotationAxis)
+
 	// Define rotation parameters based on direction
 	var rotationAngle float64
 	var targetRotation float64
@@ -127,7 +130,7 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 		// Check if we've reached the target rotation amount
 		if math.Abs(totalRotation) < math.Abs(targetRotation) {
 			// Continue animation
-			rotationGroup.Call("rotateOnAxis", rotationAxis, rotationAngle)
+			rotationGroup.Call("rotateOnAxis", jsRotationAxis, rotationAngle)
 			totalRotation += rotationAngle
 			js.Global().Call("requestAnimationFrame", animateFrame)
 		} else {
@@ -197,21 +200,34 @@ func shouldRotateWithFace(cube js.Value, face model.FaceIndex) bool {
 	posY := userData.Get("posY").Int()
 	posZ := userData.Get("posZ").Int()
 
+	// Convert ThreeJS positions (-1,0,1) to model array indices (0,1,2)
+	modelX := posZ + 1 // ThreeJS z → model x
+	modelY := posY + 1 // ThreeJS y → model y
+	modelZ := posX + 1 // ThreeJS x → model z
+
 	var shouldRotate bool
 
+	// Based on how faces are assigned in your NewCubie function:
+	// - Front is z=0
+	// - Back is z=2
+	// - Left is x=0
+	// - Right is x=2
+	// - Up is y=2
+	// - Down is y=0
+
 	switch face {
-	case model.Front:
-		shouldRotate = posZ == 1
-	case model.Back:
-		shouldRotate = posZ == -1
-	case model.Up:
-		shouldRotate = posY == 1
-	case model.Down:
-		shouldRotate = posY == -1
-	case model.Left:
-		shouldRotate = posX == -1
-	case model.Right:
-		shouldRotate = posX == 1
+	case model.Front: // Model assigns Front color when z=0
+		shouldRotate = modelX == 2
+	case model.Back: // Model assigns Back color when z=2
+		shouldRotate = modelX == 0
+	case model.Left: // Model assigns Left color when x=0
+		shouldRotate = modelZ == 0
+	case model.Right: // Model assigns Right color when x=2
+		shouldRotate = modelZ == 2
+	case model.Up: // Model assigns Up color when y=2
+		shouldRotate = modelY == 2
+	case model.Down: // Model assigns Down color when y=0
+		shouldRotate = modelY == 0
 	default:
 		shouldRotate = false
 	}
@@ -226,5 +242,17 @@ func shouldRotateWithFace(cube js.Value, face model.FaceIndex) bool {
 
 // Get the axis for rotation based on the face
 func getRotationAxis(face model.CubeCoordinate) js.Value {
-	return vector3.New(face.X, face.Y, face.Z)
+	// Convert from model's coordinate system to Three.js coordinate system
+	// Model coordinates:
+	// - X-axis: Back (x=-1) to Front (x=1)
+	// - Y-axis: Down (y=-1) to Up (y=1)
+	// - Z-axis: Left (z=-1) to Right (z=1)
+	//
+	// Three.js coordinates:
+	// - X-axis: Left to Right
+	// - Y-axis: Down to Up
+	// - Z-axis: Back to Front
+	//
+	// So we need to swap X and Z axes to convert from model to Three.js
+	return vector3.New(face.Z, face.Y, face.X)
 }

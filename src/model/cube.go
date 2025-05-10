@@ -32,7 +32,7 @@ func NewCube() *Cube {
 	for x := range 3 {
 		for y := range 3 {
 			for z := range 3 {
-				cube.Cubies[x][y][z] = NewCubie(x, y, z)
+				cube.Cubies[x][y][z] = NewCubie()
 			}
 		}
 	}

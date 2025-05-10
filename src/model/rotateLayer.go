@@ -13,22 +13,22 @@ func (m *Layer) init(c *Cube, axis CubeCoordinate) {
 			switch axis {
 			case UpCoord:
 				// Up face (y = 2)
-				x, y, z = j, 2, i
+				x, y, z = i, 2, j
 			case DownCoord:
 				// Down face (y = 0)
-				x, y, z = j, 0, 2-i
+				x, y, z = i, 0, j
 			case FrontCoord:
-				// Front face (z = 2)
-				x, y, z = j, i, 2
+				// Front face (x = 2)
+				x, y, z = 2, i, j
 			case BackCoord:
-				// Back face (z = 0)
-				x, y, z = j, i, 0
+				// Back face (x = 0)
+				x, y, z = 0, i, j
 			case LeftCoord:
-				// Left face (x = 0)
+				// Left face (z = 0)
 				x, y, z = 0, i, j
 			case RightCoord:
-				// Right face (x = 2)
-				x, y, z = 2, i, 2-j
+				// Right face (z = 2)
+				x, y, z = 2, i, j
 			}
 			// Assign the cubie to the matrix position
 			m[i][j] = c.Cubies[x][y][z]
@@ -70,20 +70,20 @@ func (layer *Layer) setLayer(c *Cube, axis CubeCoordinate) {
 			var x, y, z int
 			switch axis {
 			case UpCoord:
-				x, y, z = j, 0, i
+				x, y, z = i, 2, j
 			case DownCoord:
-				x, y, z = j, 2, 2-i
+				x, y, z = i, 0, j
 			case FrontCoord:
-				x, y, z = j, i, 2
+				x, y, z = 2, i, j
 			case BackCoord:
-				x, y, z = j, i, 0
-			case LeftCoord:
 				x, y, z = 0, i, j
+			case LeftCoord:
+				x, y, z = i, j, 0
 			case RightCoord:
-				x, y, z = 2, i, 2-j
+				x, y, z = i, j, 2
 			}
 
-			// Assign the cubie to the matrix position
+			// Assign the matrix position to the cubie
 			c.Cubies[x][y][z] = layer[i][j]
 		}
 	}

@@ -69,23 +69,3 @@ func (c *Cube) Scramble(moves int) {
 		c.RotateAxis(axis, clockwise)
 	}
 }
-
-// GetFaceColor returns the color of a specific face and position.
-func (c *Cube) GetFaceColor(face FaceIndex, x, y int) Color {
-	switch face {
-	case Front:
-		return c.Cubies[x][y][0].Colors[Front]
-	case Back:
-		return c.Cubies[x][y][2].Colors[Back]
-	case Left:
-		return c.Cubies[0][y][x].Colors[Left]
-	case Right:
-		return c.Cubies[2][y][2-x].Colors[Right]
-	case Up:
-		return c.Cubies[x][2][2-y].Colors[Up]
-	case Down:
-		return c.Cubies[x][0][y].Colors[Down]
-	default:
-		return Green // Default case, shouldn't happen
-	}
-}

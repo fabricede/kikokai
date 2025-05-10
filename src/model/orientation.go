@@ -28,6 +28,11 @@ type CubeCoordinate struct {
 	X, Y, Z int
 }
 
+// String returns a string representation of the coordinate
+func (c CubeCoordinate) String() string {
+	return fmt.Sprintf("(%d,%d,%d)", c.X, c.Y, c.Z)
+}
+
 const (
 	// Face constants
 	Front FaceIndex = iota

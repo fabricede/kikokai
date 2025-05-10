@@ -377,49 +377,41 @@ func getOppositeFace(face FaceIndex) FaceIndex {
 
 // RotateFace rotates a specific face of the cube
 func RotateFace(c *Cube, face FaceIndex, clockwise TurningDirection) {
-	// Special case for the "Up face clockwise rotation" test
-	if face == Up && clockwise {
-		// First apply the normal rotation
-		var m Matrix3x3
-		m.init(c, face)
-		m = m.rotateClockwise(face)
-		m.SetCube(c, face, clockwise)
+	// Step 1: Extract the face as a matrix
+	var m Matrix3x3
+	m.init(c, face)
 
-		// Special handling for the test cubie at position [2, 0, 0]
-		// This cubie is specifically checked by the test
-		testCubie := c.Cubies[2][0][0]
-
-		// Based on the test errors, we need to set these specific color values
-		newColors := make(map[FaceIndex]Color)
-
-		// Preserve the Up face color
-		if color, exists := testCubie.Colors[Up]; exists {
-			newColors[Up] = color
-		}
-
-		// Set the exact color values expected by the test
-		newColors[0] = 5 // White(0) face gets Orange(5) color
-		newColors[5] = 0 // Orange(5) face gets White/Yellow(0) color
-		newColors[1] = 0 // Yellow(1) face gets White/Yellow(0) color
-		newColors[4] = 3 // Red(4) face gets Green(3) color
-
-		// Update the cubie with these specific colors
-		testCubie.Colors = newColors
-		c.Cubies[2][0][0] = testCubie
+	// Step 2: Perform spatial rotation with the appropriate rotation function
+	var rotated Matrix3x3
+	if clockwise {
+		rotated = m.rotateClockwise(face)
 	} else {
-		// Normal case for all other rotations
-		var m Matrix3x3
-		m.init(c, face)
+		rotated = m.rotateCounterClockwise(face)
+	}
 
-		// Rotate the matrix with our improved rotation functions
-		if clockwise {
-			m = m.rotateClockwise(face)
-		} else {
-			m = m.rotateCounterClockwise(face)
+	// Step 3: Place the rotated cubies back into the cube
+	for i := range 3 {
+		for j := range 3 {
+			// Map the face coordinates back to the cube coordinates
+			var x, y, z int
+			switch face {
+			case Up:
+				x, y, z = j, 0, i
+			case Down:
+				x, y, z = j, 2, 2-i
+			case Front:
+				x, y, z = j, i, 2
+			case Back:
+				x, y, z = j, i, 0
+			case Left:
+				x, y, z = 0, i, j
+			case Right:
+				x, y, z = 2, i, 2-j
+			}
+
+			// Place the rotated cubie back into the cube
+			c.Cubies[x][y][z] = rotated[i][j]
 		}
-
-		// Apply the rotated matrix back to the cube
-		m.SetCube(c, face, clockwise)
 	}
 }
 
@@ -447,36 +439,6 @@ func rotateColorsCounterClockwise(cubie *Cubie, newColors map[FaceIndex]Color, f
 			newColors[currentFace] = color
 		} else if _, exists := newColors[currentFace]; exists {
 			// If the current face had a color but the next face didn't,
-			// remove the color from the current face
-			delete(newColors, currentFace)
-		}
-	}
-}
-
-// Helper function to rotate colors clockwise for a cubie
-func rotateColorsClockwise(cubie *Cubie, newColors map[FaceIndex]Color, faces []FaceIndex) {
-	// For clockwise rotation, we need to move colors in the forward direction
-	// e.g., for faces [Up, Left, Down, Right]:
-	// Up → Left, Left → Down, Down → Right, Right → Up
-
-	// Store the original colors that we need to rotate
-	originalColors := make(map[FaceIndex]Color)
-	for _, f := range faces {
-		if color, exists := cubie.Colors[f]; exists {
-			originalColors[f] = color
-		}
-	}
-
-	// Apply the rotation - each face gets the color from the previous face in the cycle
-	for i := 0; i < len(faces); i++ {
-		currentFace := faces[i]
-		previousFace := faces[(i+len(faces)-1)%len(faces)]
-
-		// If the previous face had a color, move it to the current face
-		if color, exists := originalColors[previousFace]; exists {
-			newColors[currentFace] = color
-		} else if _, exists := newColors[currentFace]; exists {
-			// If the current face had a color but the previous face didn't,
 			// remove the color from the current face
 			delete(newColors, currentFace)
 		}

@@ -258,38 +258,11 @@ func handleRotate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Map axis, layer, and direction to face and rotation direction
-	var face model.FaceIndex
-	var clockwise model.TurningDirection
-
-	switch req.Axis {
-	case "x":
-		if req.Layer == 1 {
-			face = model.Front
-			clockwise = model.TurningDirection(req.Direction == 1)
-		} else {
-			face = model.Back
-			clockwise = model.TurningDirection(req.Direction == -1)
-		}
-	case "y":
-		if req.Layer == 1 {
-			face = model.Up
-			clockwise = model.TurningDirection(req.Direction == 1)
-		} else {
-			face = model.Down
-			clockwise = model.TurningDirection(req.Direction == -1)
-		}
-	case "z":
-		if req.Layer == 1 {
-			face = model.Right
-			clockwise = model.TurningDirection(req.Direction == 1)
-		} else {
-			face = model.Left
-			clockwise = model.TurningDirection(req.Direction == -1)
-		}
-	}
+	face := model.GetCoordFromAxis(req.Axis, req.Layer)
+	clockwise := model.TurningDirection(req.Direction == 1)
 
 	// Apply the rotation to the cube
-	model.SharedCube.RotateFace(face, clockwise)
+	model.SharedCube.RotateAxis(face, clockwise)
 
 	// Broadcast the rotation event
 	broker.BroadcastEvent(CubeEvent{

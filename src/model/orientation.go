@@ -77,149 +77,29 @@ func FaceToCoordinate(face FaceIndex) CubeCoordinate {
 	}
 }
 
-// only one x, y or z should not be 0
-func GetAdjacentFace(face FaceIndex, x, y, z int) FaceIndex {
-	switch face {
-	case Front:
-		if y == 1 {
-			return Up
-		} else if y == -1 {
-			return Down
-		} else if z == 1 {
-			return Right
-		} else if z == -1 {
-			return Left
+// GetCoordFromAxis transforms axis and layer to Coordinate
+func GetCoordFromAxis(axis string, layer int) (face CubeCoordinate) {
+	switch axis {
+	case "x":
+		if layer > 0 {
+			face = FrontCoord
+		} else {
+			face = BackCoord
 		}
-	case Back:
-		if y == 1 {
-			return Up
-		} else if y == -1 {
-			return Down
-		} else if z == 1 {
-			return Right
-		} else if z == -1 {
-			return Left
+	case "y":
+		if layer > 0 {
+			face = UpCoord
+		} else {
+			face = DownCoord
 		}
-	case Up:
-		if x == 1 {
-			return Front
-		} else if x == -1 {
-			return Back
-		} else if z == 1 {
-			return Right
-		} else if z == -1 {
-			return Left
+	case "z":
+		if layer > 0 {
+			face = RightCoord
+		} else {
+			face = LeftCoord
 		}
-	case Down:
-		if x == 1 {
-			return Front
-		} else if x == -1 {
-			return Back
-		} else if z == 1 {
-			return Right
-		} else if z == -1 {
-			return Left
-		}
-	case Left:
-		if x == 1 {
-			return Front
-		} else if x == -1 {
-			return Back
-		} else if y == 1 {
-			return Up
-		} else if y == -1 {
-			return Down
-		}
-	case Right:
-		if x == 1 {
-			return Front
-		} else if x == -1 {
-			return Back
-		} else if y == 1 {
-			return Up
-		} else if y == -1 {
-			return Down
-		}
+	default:
+		panic("Invalid axis")
 	}
 	return face
-}
-
-// GetStickerCoordinate returns the row and column coordinates of a sticker on a face based on its 3D position
-func GetStickerCoordinate(face FaceIndex, position CubeCoordinate) (row, col int, err error) {
-	// Calculate the local coordinates on the face
-	// We need to project the 3D position onto the 2D face
-	switch face {
-	case Front: // x = 1
-		if position.X != 1 {
-			return 0, 0, fmt.Errorf("position %v is not on Front face ", position)
-		}
-		col = 1 + position.Y // Down/South (z=-1) is row 0, Up   /North (z=1) is row 2
-		row = 1 + position.Z // Left/West  (y=-1) is col 0, Right/East  (y=1) is col 2
-	case Back: // x = -1
-		if position.X != -1 {
-			return 0, 0, fmt.Errorf("position %v is not on Back face ", position)
-		}
-		col = 1 + position.Y // Down /South (z=-1) is row 0, Up  /North (z=1) is row 2
-		row = 1 + position.Z // Right/West  (y=-1) is col 0, Left/East  (y=1) is col 2
-	case Up: // y = 1
-		if position.Z != 1 {
-			return 0, 0, fmt.Errorf("position %v is not on Up face ", position)
-		}
-		col = 1 + position.X // Back (x=-1) is row 0, Front (x=1) is row 2
-		row = 1 + position.Z // Left (z=-1) is col 0, Right (z=1) is col 2
-	case Down: // y = -1
-		if position.Z != -1 {
-			return 0, 0, fmt.Errorf("position %v is not on Down face ", position)
-		}
-		col = 1 + position.X // Front (x=1) is row 0, Back (x=-1) is row 2
-		row = 1 + position.Z // Left (z=-1) is col 0, Right (z=1) is col 2
-	case Left: // z = -1
-		if position.Y != -1 {
-			return 0, 0, fmt.Errorf("position %v is not on Left face ", position)
-		}
-		col = 1 + position.X // Back (x=-1) is col 0, Front (x=1) is col 2
-		row = 1 + position.Y // Up (y=1) is row 0, Down (y=-1) is row 2
-	case Right: // z = 1
-		if position.Y != 1 {
-			return 0, 0, fmt.Errorf("position %v is not on Right face ", position)
-		}
-		col = 1 + position.X // Front (x=1) is col 0, Back (x=-1) is col 2
-		row = 1 + position.Y // Up (y=1) is row 0, Down (y=-1) is row 2
-	}
-
-	return row, col, nil
-}
-
-// GetCubePosition returns the 3D position of a sticker based on its face and row/column coordinates
-func GetCubePosition(face FaceIndex, row, col int) CubeCoordinate {
-	// Start with the face normal vector
-	position := FaceToCoordinate(face)
-
-	// Calculate the offsets from the center of the face
-	rowOffset := row - 1 // row 0 is bottom, row 2 is top
-	colOffset := col - 1 // col 0 is left, col 2 is right
-
-	// Apply the offsets based on the face
-	switch face {
-	case Front: // x = 1
-		position.Y += colOffset // Left to Right
-		position.Z += rowOffset // Up to Down
-	case Back: // x = -1
-		position.Y += colOffset // Right to Left (mirrored)
-		position.Z += rowOffset // Up to Down
-	case Up: // z = 1
-		position.X += rowOffset // Back to Front
-		position.Z += colOffset // Left to Right
-	case Down: // z = -1
-		position.X += rowOffset // Front to Back (mirrored)
-		position.Z += colOffset // Left to Right
-	case Left: // y = -1
-		position.Y += colOffset // Back to Front (mirrored)
-		position.Z += rowOffset // Up to Down
-	case Right: // y = 1
-		position.Y += colOffset // Front to Back
-		position.Z += rowOffset // Up to Down
-	}
-
-	return position
 }

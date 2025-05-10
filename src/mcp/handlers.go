@@ -111,35 +111,8 @@ func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 	}
 
 	// Map axis, layer, and direction to face and rotation direction
-	var face model.FaceIndex
-	var clockwise model.TurningDirection
-
-	switch axis {
-	case "x":
-		if layer == 1 {
-			face = model.Front
-			clockwise = model.TurningDirection(direction == 1)
-		} else {
-			face = model.Back
-			clockwise = model.TurningDirection(direction == -1)
-		}
-	case "y":
-		if layer == 1 {
-			face = model.Up
-			clockwise = model.TurningDirection(direction == 1)
-		} else {
-			face = model.Down
-			clockwise = model.TurningDirection(direction == -1)
-		}
-	case "z":
-		if layer == 1 {
-			face = model.Right
-			clockwise = model.TurningDirection(direction == 1)
-		} else {
-			face = model.Left
-			clockwise = model.TurningDirection(direction == -1)
-		}
-	}
+	face := model.GetCoordFromAxis(axis, int(layer))
+	clockwise := model.TurningDirection(direction == 1)
 
 	// Broadcast the rotation event
 	if Broadcaster != nil {
@@ -153,7 +126,7 @@ func rotateAxisHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.C
 	}
 
 	// Apply the rotation to the cube
-	model.SharedCube.RotateFace(face, clockwise)
+	model.SharedCube.RotateAxis(face, clockwise)
 
 	// Send the response
 	return mcp.NewToolResultText(fmt.Sprintf("Rotated cube: axis=%s, layer=%d, direction=%d", axis, int(layer), int(direction))), nil

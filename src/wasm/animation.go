@@ -104,7 +104,7 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 	}
 
 	// Get rotation axis
-	rotationAxis := getRotationAxis(face)
+	rotationAxis := model.FaceToCoordinate(face)
 
 	// Define rotation parameters based on direction
 	var rotationAngle float64
@@ -149,7 +149,7 @@ func animateFaceRotation(face model.FaceIndex, clockwise model.TurningDirection)
 			println("Cube state before update:", string(stateBeforeJSON))
 
 			// Update the model
-			cube.RotateFace(face, clockwise)
+			cube.RotateAxis(rotationAxis, clockwise)
 
 			// Log cube state after update
 			stateAfterJSON, _ := json.Marshal(cube.Cubies)
@@ -225,21 +225,6 @@ func shouldRotateWithFace(cube js.Value, face model.FaceIndex) bool {
 }
 
 // Get the axis for rotation based on the face
-func getRotationAxis(face model.FaceIndex) js.Value {
-	switch face {
-	case model.Front:
-		return vector3.New(0, 0, 1)
-	case model.Back:
-		return vector3.New(0, 0, -1)
-	case model.Up:
-		return vector3.New(0, 1, 0)
-	case model.Down:
-		return vector3.New(0, -1, 0)
-	case model.Left:
-		return vector3.New(-1, 0, 0)
-	case model.Right:
-		return vector3.New(1, 0, 0)
-	default:
-		return vector3.New(0, 1, 0)
-	}
+func getRotationAxis(face model.CubeCoordinate) js.Value {
+	return vector3.New(face.X, face.Y, face.Z)
 }

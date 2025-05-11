@@ -1,6 +1,7 @@
 package model
 
 import (
+	"log"
 	"reflect"
 	"testing"
 )
@@ -60,7 +61,7 @@ func TestLayer_rotateClockwise(t *testing.T) {
 	}{
 		// TODO: Add test cases.
 		{
-			name: "Test Front face same state",
+			name: "Test Front face init state",
 			m: Layer{
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
@@ -74,7 +75,7 @@ func TestLayer_rotateClockwise(t *testing.T) {
 			},
 		},
 		{
-			name: "Test Front face diff state",
+			name: "Test Front face same state",
 			m: Layer{
 				{createCubie(0, 0, 0, 0, 0, 0), createCubie(1, 1, 1, 1, 1, 1), createCubie(2, 2, 2, 2, 2, 2)},
 				{createCubie(3, 3, 3, 3, 3, 3), createCubie(4, 4, 4, 4, 4, 4), createCubie(5, 5, 5, 5, 5, 5)},
@@ -82,13 +83,13 @@ func TestLayer_rotateClockwise(t *testing.T) {
 			},
 			axis: FrontAxis,
 			want: Layer{
-				{createCubie(3, 3, 3, 3, 3, 3), createCubie(0, 0, 0, 0, 0, 0), createCubie(1, 1, 1, 1, 1, 1)},
-				{createCubie(6, 6, 6, 6, 6, 6), createCubie(4, 4, 4, 4, 4, 4), createCubie(2, 2, 2, 2, 2, 2)},
-				{createCubie(7, 7, 7, 7, 7, 7), createCubie(8, 8, 8, 8, 8, 8), createCubie(5, 5, 5, 5, 5, 5)},
+				{createCubie(6, 6, 6, 6, 6, 6), createCubie(3, 3, 3, 3, 3, 3), createCubie(0, 0, 0, 0, 0, 0)},
+				{createCubie(7, 7, 7, 7, 7, 7), createCubie(4, 4, 4, 4, 4, 4), createCubie(1, 1, 1, 1, 1, 1)},
+				{createCubie(8, 8, 8, 8, 8, 8), createCubie(5, 5, 5, 5, 5, 5), createCubie(2, 2, 2, 2, 2, 2)},
 			},
 		},
 		{
-			name: "Test Up face same state",
+			name: "Test Up face init state",
 			m: Layer{
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
@@ -104,12 +105,20 @@ func TestLayer_rotateClockwise(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			log.Printf("Test %s, Axis: %v", tt.name, tt.axis)
+			log.Printf("Layer before rotation:")
+			// before rotation
+			for i := range 3 {
+				for j := range 3 {
+					log.Printf("Before rotation(%d,%d): %v", i, j, tt.m[i][j].Colors)
+				}
+			}
 			got := tt.m.rotateClockwise(tt.axis)
 			// check all cubies colors
 			for i := range 3 {
 				for j := range 3 {
 					if !reflect.DeepEqual(got[i][j].Colors, tt.want[i][j].Colors) {
-						t.Errorf("Layer.rotateClockwise() = %v, want %v", got[i][j].Colors, tt.want[i][j].Colors)
+						t.Errorf("Layer.rotateClockwise(%d,%d) = %v, want %v", i, j, got[i][j].Colors, tt.want[i][j].Colors)
 					}
 				}
 			}

@@ -58,7 +58,7 @@ func (c *Cube) RotateAxis(axis CubeCoordinate, clockwise TurningDirection) {
 func (c *Cube) Scramble(moves int) {
 	// Apply random rotations
 	for range moves {
-		// Random face (0-5)
+		// Random axis (0-5)
 		face := FaceIndex(rand.Intn(6))
 		axis := FaceToCoordinate(face)
 

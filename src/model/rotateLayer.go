@@ -11,22 +11,22 @@ func (m *Layer) init(c *Cube, axis CubeCoordinate) {
 		for j := range 3 {
 			var x, y, z int
 			switch axis {
-			case UpCoord:
+			case UpAxis:
 				// Up face (y = 2)
 				x, y, z = i, 2, j
-			case DownCoord:
+			case DownAxis:
 				// Down face (y = 0)
 				x, y, z = i, 0, j
-			case FrontCoord:
+			case FrontAxis:
 				// Front face (x = 2)
 				x, y, z = 2, i, j
-			case BackCoord:
+			case BackAxis:
 				// Back face (x = 0)
 				x, y, z = 0, i, j
-			case LeftCoord:
+			case LeftAxis:
 				// Left face (z = 0)
 				x, y, z = i, j, 0
-			case RightCoord:
+			case RightAxis:
 				// Right face (z = 2)
 				x, y, z = i, j, 2
 			}
@@ -42,8 +42,7 @@ func (m Layer) rotateClockwise(axis CubeCoordinate) Layer {
 
 	for i := range 3 {
 		for j := range 3 {
-			result[j][2-i] = m[i][j]
-			result[j][2-i].rotateClockwise(axis)
+			result[j][2-i] = (m[i][j]).rotateClockwise(axis)
 		}
 	}
 	return result
@@ -55,8 +54,7 @@ func (m Layer) rotateCounterClockwise(axis CubeCoordinate) Layer {
 
 	for i := range 3 {
 		for j := range 3 {
-			result[2-j][i] = m[i][j]
-			result[2-j][i].rotateCounterClockwise(axis)
+			result[2-j][i] = m[i][j].rotateCounterClockwise(axis)
 		}
 	}
 	return result
@@ -69,21 +67,21 @@ func (layer *Layer) setLayer(c *Cube, axis CubeCoordinate) {
 			// Map the face coordinates to the cube coordinates
 			var x, y, z int
 			switch axis {
-			case UpCoord:
+			case UpAxis:
 				x, y, z = i, 2, j
-			case DownCoord:
+			case DownAxis:
 				x, y, z = i, 0, j
-			case FrontCoord:
+			case FrontAxis:
 				x, y, z = 2, i, j
-			case BackCoord:
+			case BackAxis:
 				x, y, z = 0, i, j
-			case LeftCoord:
+			case LeftAxis:
 				x, y, z = i, j, 0
-			case RightCoord:
+			case RightAxis:
 				x, y, z = i, j, 2
 			}
 
-			// Assign the matrix position to the cubie
+			// Assign the matrix position to the cube
 			c.Cubies[x][y][z] = layer[i][j]
 		}
 	}

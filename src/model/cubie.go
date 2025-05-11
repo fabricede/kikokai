@@ -41,32 +41,33 @@ Left face is at Z=-1 (negative Z-axis) red
 */
 
 // function to rotate a cubie clockwise
-func (cu *Cubie) rotateClockwise(axis CubeCoordinate) {
+func (cu *Cubie) rotateClockwise(axis CubeCoordinate) *Cubie {
 	// in a cubie all faces rotate
 	// clockwise around the axis
-	switch {
-	case axis.X == 1:
+	switch axis {
+	case FrontAxis:
 		cu.Colors[Left], cu.Colors[Up], cu.Colors[Right], cu.Colors[Down] =
 			cu.Colors[Down], cu.Colors[Left], cu.Colors[Up], cu.Colors[Right]
-	case axis.X == -1:
+	case BackAxis:
 		cu.Colors[Left], cu.Colors[Up], cu.Colors[Right], cu.Colors[Down] =
 			cu.Colors[Up], cu.Colors[Right], cu.Colors[Down], cu.Colors[Left]
-	case axis.Y == 1:
+	case UpAxis:
 		cu.Colors[Front], cu.Colors[Left], cu.Colors[Back], cu.Colors[Right] =
 			cu.Colors[Right], cu.Colors[Front], cu.Colors[Left], cu.Colors[Back]
-	case axis.Y == -1:
+	case DownAxis:
 		cu.Colors[Front], cu.Colors[Left], cu.Colors[Back], cu.Colors[Right] =
 			cu.Colors[Left], cu.Colors[Back], cu.Colors[Right], cu.Colors[Front]
-	case axis.Z == 1:
+	case RightAxis:
 		cu.Colors[Front], cu.Colors[Up], cu.Colors[Back], cu.Colors[Down] =
 			cu.Colors[Down], cu.Colors[Front], cu.Colors[Up], cu.Colors[Back]
-	case axis.Z == -1:
+	case LeftAxis:
 		cu.Colors[Front], cu.Colors[Up], cu.Colors[Back], cu.Colors[Down] =
 			cu.Colors[Up], cu.Colors[Back], cu.Colors[Down], cu.Colors[Front]
 	}
+	return cu
 }
 
 // function to rotate a cubie counter-clockwise
-func (cu *Cubie) rotateCounterClockwise(axis CubeCoordinate) {
-	cu.rotateClockwise(CubeCoordinate{X: -axis.X, Y: -axis.Y, Z: -axis.Z})
+func (cu *Cubie) rotateCounterClockwise(axis CubeCoordinate) *Cubie {
+	return cu.rotateClockwise(CubeCoordinate{X: -axis.X, Y: -axis.Y, Z: -axis.Z})
 }

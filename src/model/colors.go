@@ -7,21 +7,21 @@ type StickerIndex int // Sticker constants
 const (
 	// Common Colors
 	White Color = iota
+	Orange
 	Yellow
+	Red
 	Blue
 	Green
-	Red
-	Orange
 )
 
 // ColorNames maps Color constants to their string representations
 var FaceColorName = map[FaceIndex]string{
 	Front: "white",
+	Right: "orange",
 	Back:  "yellow",
+	Left:  "red",
 	Up:    "blue",
 	Down:  "green",
-	Left:  "red",
-	Right: "orange",
 }
 
 const (

@@ -36,11 +36,11 @@ func (c CubeCoordinate) String() string {
 const (
 	// Face constants
 	Front FaceIndex = iota
+	Right
 	Back
+	Left
 	Up
 	Down
-	Left
-	Right
 
 	// Turning direction
 	Clockwise        TurningDirection = true
@@ -49,29 +49,29 @@ const (
 
 // Face coordinate constants
 var (
-	FrontCoord = CubeCoordinate{X: 1, Y: 0, Z: 0}
-	BackCoord  = CubeCoordinate{X: -1, Y: 0, Z: 0}
-	UpCoord    = CubeCoordinate{X: 0, Y: 1, Z: 0}
-	DownCoord  = CubeCoordinate{X: 0, Y: -1, Z: 0}
-	LeftCoord  = CubeCoordinate{X: 0, Y: 0, Z: -1}
-	RightCoord = CubeCoordinate{X: 0, Y: 0, Z: 1}
+	FrontAxis = CubeCoordinate{X: 1, Y: 0, Z: 0}
+	BackAxis  = CubeCoordinate{X: -1, Y: 0, Z: 0}
+	UpAxis    = CubeCoordinate{X: 0, Y: 1, Z: 0}
+	DownAxis  = CubeCoordinate{X: 0, Y: -1, Z: 0}
+	LeftAxis  = CubeCoordinate{X: 0, Y: 0, Z: -1}
+	RightAxis = CubeCoordinate{X: 0, Y: 0, Z: 1}
 )
 
 // FaceToCoordinate converts a FaceIndex to its corresponding CubeCoordinate
 func FaceToCoordinate(face FaceIndex) CubeCoordinate {
 	switch face {
 	case Front:
-		return FrontCoord
+		return FrontAxis
 	case Back:
-		return BackCoord
+		return BackAxis
 	case Up:
-		return UpCoord
+		return UpAxis
 	case Down:
-		return DownCoord
+		return DownAxis
 	case Left:
-		return LeftCoord
+		return LeftAxis
 	case Right:
-		return RightCoord
+		return RightAxis
 	default:
 		return CubeCoordinate{0, 0, 0}
 	}
@@ -82,21 +82,21 @@ func GetCoordFromAxis(axis string, layer int) (face CubeCoordinate) {
 	switch axis {
 	case "x":
 		if layer > 0 {
-			face = FrontCoord
+			face = FrontAxis
 		} else {
-			face = BackCoord
+			face = BackAxis
 		}
 	case "y":
 		if layer > 0 {
-			face = UpCoord
+			face = UpAxis
 		} else {
-			face = DownCoord
+			face = DownAxis
 		}
 	case "z":
 		if layer > 0 {
-			face = RightCoord
+			face = RightAxis
 		} else {
-			face = LeftCoord
+			face = LeftAxis
 		}
 	default:
 		panic("Invalid axis")

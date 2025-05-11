@@ -14,7 +14,7 @@ func TestCubie_RotateClockwise(t *testing.T) {
 	}{
 		{
 			name: "Rotate X-axis positive",
-			axis: CubeCoordinate{X: 1},
+			axis: FrontAxis,
 			wantColor: map[FaceIndex]Color{
 				Front: White,
 				Right: Blue,
@@ -26,7 +26,7 @@ func TestCubie_RotateClockwise(t *testing.T) {
 		},
 		{
 			name: "Rotate X-axis negative",
-			axis: CubeCoordinate{X: -1},
+			axis: BackAxis,
 			wantColor: map[FaceIndex]Color{
 				Front: White,
 				Right: Green,
@@ -38,50 +38,50 @@ func TestCubie_RotateClockwise(t *testing.T) {
 		},
 		{
 			name: "Rotate Y-axis positive",
-			axis: CubeCoordinate{Y: 1},
+			axis: UpAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Orange, // Right → Front (5→0)
-				Right: Yellow, // Back → Right (1→5)
-				Back:  Red,    // Left → Back (4→1)
-				Left:  White,  // Front → Left (0→4)
-				Up:    Blue,   // Unchanged (2)
-				Down:  Green,  // Unchanged (3)
+				Front: Orange,
+				Right: Yellow,
+				Back:  Red,
+				Left:  White,
+				Up:    Blue,
+				Down:  Green,
 			},
 		},
 		{
 			name: "Rotate Y-axis negative",
-			axis: CubeCoordinate{Y: -1},
+			axis: DownAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Red,    // Left → Front (4→0)
-				Right: White,  // Front → Right (0→5)
-				Back:  Orange, // Right → Back (5→1)
-				Left:  Yellow, // Back → Left (1→4)
-				Up:    Blue,   // Unchanged (2)
-				Down:  Green,  // Unchanged (3)
+				Front: Red,
+				Right: White,
+				Back:  Orange,
+				Left:  Yellow,
+				Up:    Blue,
+				Down:  Green,
 			},
 		},
 		{
 			name: "Rotate Z-axis positive",
-			axis: CubeCoordinate{Z: 1},
+			axis: RightAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Green,  // Down → Front (3→0)
-				Right: Orange, // Unchanged (1)
-				Back:  Blue,   // Up → Back (2→1)
-				Left:  Red,    // Unchanged (4)
-				Up:    White,  // Front → Up (0→2)
-				Down:  Yellow, // Back → Down (1→3)
+				Front: Green,
+				Right: Orange,
+				Back:  Blue,
+				Left:  Red,
+				Up:    White,
+				Down:  Yellow,
 			},
 		},
 		{
 			name: "Rotate Z-axis negative",
-			axis: CubeCoordinate{Z: -1},
+			axis: LeftAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Blue,   // Up → Front (2→0)
-				Right: Orange, // Unchanged (1)
-				Back:  Green,  // Down → Back (3→1)
-				Left:  Red,    // Unchanged (4)
-				Up:    Yellow, // Back → Up (1→2)
-				Down:  White,  // Front → Down (0→3)
+				Front: Blue,
+				Right: Orange,
+				Back:  Green,
+				Left:  Red,
+				Up:    Yellow,
+				Down:  White,
 			},
 		},
 	}
@@ -105,74 +105,74 @@ func TestCubie_RotateCounterClockwise(t *testing.T) {
 	}{
 		{
 			name: "Rotate X-axis positive counter-clockwise",
-			axis: CubeCoordinate{X: 1},
+			axis: FrontAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: White,  // Unchanged (0)
-				Right: Green,  // Unchanged (1)
-				Back:  Yellow, // Unchanged (1)
-				Left:  Blue,   // Up → Left (2→4)
-				Up:    Orange, // Right → Up (5→2)
-				Down:  Red,    // Left → Down (4→3)
+				Front: White,
+				Right: Green,
+				Back:  Yellow,
+				Left:  Blue,
+				Up:    Orange,
+				Down:  Red,
 			},
 		},
 		{
 			name: "Rotate X-axis negative counter-clockwise",
-			axis: CubeCoordinate{X: -1},
+			axis: BackAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: White,  // Unchanged
-				Right: Blue,   // Down → Right
-				Back:  Yellow, // Unchanged
-				Left:  Green,  // Up → Left
-				Up:    Red,    // Left → Up
-				Down:  Orange, // Right → Down
+				Front: White,
+				Right: Blue,
+				Back:  Yellow,
+				Left:  Green,
+				Up:    Red,
+				Down:  Orange,
 			},
 		},
 		{
 			name: "Rotate Y-axis positive counter-clockwise",
-			axis: CubeCoordinate{Y: 1},
+			axis: UpAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Red,    // Left → Front (4→0)
-				Right: White,  // Front → Right (0→5)
-				Back:  Orange, // Right → Back (5→1)
-				Left:  Yellow, // Back → Left (1→4)
-				Up:    Blue,   // Unchanged (2)
-				Down:  Green,  // Unchanged (3)
+				Front: Red,
+				Right: White,
+				Back:  Orange,
+				Left:  Yellow,
+				Up:    Blue,
+				Down:  Green,
 			},
 		},
 		{
 			name: "Rotate Y-axis negative counter-clockwise",
-			axis: CubeCoordinate{Y: -1},
+			axis: DownAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Orange, // Right → Front (5→0)
-				Right: Yellow, // Back → Right (1→5)
-				Back:  Red,    // Left → Back (4→1)
-				Left:  White,  // Front → Left (0→4)
-				Up:    Blue,   // Unchanged (2)
-				Down:  Green,  // Unchanged (3)
+				Front: Orange,
+				Right: Yellow,
+				Back:  Red,
+				Left:  White,
+				Up:    Blue,
+				Down:  Green,
 			},
 		},
 		{
 			name: "Rotate Z-axis positive counter-clockwise",
-			axis: CubeCoordinate{Z: 1},
+			axis: RightAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Blue,   // Up → Front (2→0)
-				Right: Orange, // Unchanged (1)
-				Back:  Green,  // Down → Back (3→1)
-				Left:  Red,    // Unchanged (4)
-				Up:    Yellow, // Back → Up (1→2)
-				Down:  White,  // Front → Down (0→3)
+				Front: Blue,
+				Right: Orange,
+				Back:  Green,
+				Left:  Red,
+				Up:    Yellow,
+				Down:  White,
 			},
 		},
 		{
 			name: "Rotate Z-axis negative counter-clockwise",
-			axis: CubeCoordinate{Z: -1},
+			axis: LeftAxis,
 			wantColor: map[FaceIndex]Color{
-				Front: Green,  // Down → Front (3→0)
-				Right: Orange, // Unchanged (1)
-				Back:  Blue,   // Up → Back (2→1)
-				Left:  Red,    // Unchanged (4)
-				Up:    White,  // Front → Up (0→2)
-				Down:  Yellow, // Back → Down (1→3)
+				Front: Green,
+				Right: Orange,
+				Back:  Blue,
+				Left:  Red,
+				Up:    White,
+				Down:  Yellow,
 			},
 		},
 	}
@@ -191,9 +191,9 @@ func TestCubie_RotateCounterClockwise(t *testing.T) {
 // TestRotateIdentity verifies that rotating clockwise and then counter-clockwise (or vice versa) returns to the original state
 func TestRotateIdentity(t *testing.T) {
 	axes := []CubeCoordinate{
-		{X: 1}, {X: -1},
-		{Y: 1}, {Y: -1},
-		{Z: 1}, {Z: -1},
+		FrontAxis, BackAxis,
+		UpAxis, DownAxis,
+		RightAxis, LeftAxis,
 	}
 
 	for _, axis := range axes {
@@ -234,9 +234,9 @@ func TestRotateIdentity(t *testing.T) {
 // DebugRotationFunctions helps diagnose the actual behavior of rotations
 func TestDebugRotationFunctions(t *testing.T) {
 	axes := []CubeCoordinate{
-		{X: 1}, {X: -1},
-		{Y: 1}, {Y: -1},
-		{Z: 1}, {Z: -1},
+		FrontAxis, BackAxis,
+		UpAxis, DownAxis,
+		RightAxis, LeftAxis,
 	}
 
 	for _, axis := range axes {

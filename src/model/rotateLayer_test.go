@@ -89,7 +89,35 @@ func TestLayer_rotateClockwise(t *testing.T) {
 			},
 		},
 		{
-			name: "Test Up face init state",
+			name: "Test Front face mix state up",
+			m: Layer{
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(10, 11, 12, 13, 14, 15), createCubie(20, 21, 22, 23, 24, 25)},
+				{createCubie(30, 31, 32, 33, 34, 35), createCubie(40, 41, 42, 43, 44, 45), createCubie(50, 51, 52, 53, 54, 55)},
+				{createCubie(60, 61, 62, 63, 64, 65), createCubie(70, 71, 72, 73, 74, 75), createCubie(80, 81, 82, 83, 84, 85)},
+			},
+			axis: FrontAxis,
+			want: Layer{
+				{createCubie(60, 64, 62, 65, 63, 61), createCubie(30, 34, 32, 35, 33, 31), createCubie(0, 4, 2, 5, 3, 1)},
+				{createCubie(70, 74, 72, 75, 73, 71), createCubie(40, 44, 42, 45, 43, 41), createCubie(10, 14, 12, 15, 13, 11)},
+				{createCubie(80, 84, 82, 85, 83, 81), createCubie(50, 54, 52, 55, 53, 51), createCubie(20, 24, 22, 25, 23, 21)},
+			},
+		},
+		{
+			name: "Test Back face mix state",
+			m: Layer{
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(10, 11, 12, 13, 14, 15), createCubie(20, 21, 22, 23, 24, 25)},
+				{createCubie(30, 31, 32, 33, 34, 35), createCubie(40, 41, 42, 43, 44, 45), createCubie(50, 51, 52, 53, 54, 55)},
+				{createCubie(60, 61, 62, 63, 64, 65), createCubie(70, 71, 72, 73, 74, 75), createCubie(80, 81, 82, 83, 84, 85)},
+			},
+			axis: BackAxis,
+			want: Layer{
+				{createCubie(60, 65, 62, 64, 61, 63), createCubie(30, 35, 32, 34, 31, 33), createCubie(0, 5, 2, 4, 1, 3)},
+				{createCubie(70, 75, 72, 74, 71, 73), createCubie(40, 45, 42, 44, 41, 43), createCubie(10, 15, 12, 14, 11, 13)},
+				{createCubie(80, 85, 82, 84, 81, 83), createCubie(50, 55, 52, 54, 51, 53), createCubie(20, 25, 22, 24, 21, 23)},
+			},
+		},
+		{
+			name: "Test Up face mix state",
 			m: Layer{
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
 				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
@@ -100,6 +128,48 @@ func TestLayer_rotateClockwise(t *testing.T) {
 				{createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5)},
 				{createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5)},
 				{createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5), createCubie(1, 2, 3, 0, 4, 5)},
+			},
+		},
+		{
+			name: "Test Down face mix state",
+			m: Layer{
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+			},
+			axis: DownAxis,
+			want: Layer{
+				{createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5)},
+				{createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5)},
+				{createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5), createCubie(3, 0, 1, 2, 4, 5)},
+			},
+		},
+		{
+			name: "Test Left face mix state",
+			m: Layer{
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+			},
+			axis: LeftAxis,
+			want: Layer{
+				{createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0)},
+				{createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0)},
+				{createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0), createCubie(4, 1, 5, 3, 2, 0)},
+			},
+		},
+		{
+			name: "Test Right face mix state",
+			m: Layer{
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+				{createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5), createCubie(0, 1, 2, 3, 4, 5)},
+			},
+			axis: RightAxis,
+			want: Layer{
+				{createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2)},
+				{createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2)},
+				{createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2), createCubie(5, 1, 4, 3, 0, 2)},
 			},
 		},
 	}

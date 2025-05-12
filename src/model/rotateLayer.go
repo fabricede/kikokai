@@ -22,10 +22,10 @@ func (m *Layer) init(c *Cube, axis CubeCoordinate) {
 				x, y, z = 2, j, i
 			case BackAxis:
 				// Back face (x = 0)
-				x, y, z = 0, j, i
+				x, y, z = 0, j, 2-i
 			case LeftAxis:
 				// Left face (z = 0)
-				x, y, z = 2-i, j, 0
+				x, y, z = i, j, 0
 			case RightAxis:
 				// Right face (z = 2)
 				x, y, z = 2-i, j, 2
@@ -74,9 +74,9 @@ func (layer *Layer) setLayer(c *Cube, axis CubeCoordinate) {
 			case FrontAxis:
 				x, y, z = 2, j, i
 			case BackAxis:
-				x, y, z = 0, j, i
+				x, y, z = 0, j, 2-i
 			case LeftAxis:
-				x, y, z = 2-i, j, 0
+				x, y, z = i, j, 0
 			case RightAxis:
 				x, y, z = 2-i, j, 2
 			}

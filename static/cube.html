@@ -31,11 +31,11 @@
         // Color mapping from Color enum (integer) to hex color
         const colorEnumToHex = {
             0: 0xFFFFFF, // White
-            1: 0xFFFF00, // Yellow
-            2: 0x0000FF, // Blue
-            3: 0x00FF00, // Green
-            4: 0xFF0000, // Red
-            5: 0xFFA500  // Orange
+            1: 0xFFA500, // Orange
+            2: 0xFFFF00, // Yellow
+            3: 0xFF0000, // Red
+            4: 0x0000FF, // Blue
+            5: 0x00FF00  // Green
         };
         
         // Axis rotation mapping to face rotation
@@ -47,28 +47,28 @@
                     '-1': { face: 0, clockwise: false } // Counter-clockwise
                 },
                 '-1': { // Back layer (x=-1)
-                    '1': { face: 1, clockwise: false }, // Clockwise (inverted)
-                    '-1': { face: 1, clockwise: true } // Counter-clockwise (inverted)
+                    '1': { face: 2, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 2, clockwise: true } // Counter-clockwise (inverted)
                 }
             },
             'y': {
                 '1': { // Up layer (y=1)
-                    '1': { face: 2, clockwise: true },
-                    '-1': { face: 2, clockwise: false }
+                    '1': { face: 4, clockwise: true },
+                    '-1': { face: 4, clockwise: false }
                 },
                 '-1': { // Down layer (y=-1)
-                    '1': { face: 3, clockwise: false }, // Clockwise (inverted)
-                    '-1': { face: 3, clockwise: true } // Counter-clockwise (inverted)
+                    '1': { face: 5, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 5, clockwise: true } // Counter-clockwise (inverted)
                 }
             },
             'z': {
                 '1': { // Right layer (z=1)
-                    '1': { face: 5, clockwise: true },
-                    '-1': { face: 5, clockwise: false }
+                    '1': { face: 1, clockwise: true },
+                    '-1': { face: 1, clockwise: false }
                 },
                 '-1': { // Left layer (z=-1)
-                    '1': { face: 4, clockwise: false }, // Clockwise (inverted)
-                    '-1': { face: 4, clockwise: true } // Counter-clockwise (inverted)
+                    '1': { face: 3, clockwise: false }, // Clockwise (inverted)
+                    '-1': { face: 3, clockwise: true } // Counter-clockwise (inverted)
                 }
             }
         };

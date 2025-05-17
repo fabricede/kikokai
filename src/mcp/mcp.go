@@ -6,18 +6,19 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
 
-const describes = `Send http API request to interact with a rubick's cube, 
+const describes = `Interact with a rubik's cube, 
 possible action are 
  - 'state' to retreive the current state of the cube, 
  - 'reset' to return to initial value, 
  - 'scramble' to scramble randomly
- - 'rotate' to rotate a cube layer based on axis, layer and direction this action requires a body to indicate the axis (x, y, z), layer (1 or -1) and direction (1 for clockwise, -1 for counter-clockwise)"),
+ - 'rotate' to rotate a cube layer based on axis, layer and direction this action requires a body to indicate the axis (x, y, z), layer (1 or -1) and direction (1 for clockwise, -1 for counter-clockwise)
 `
 
 func StartMCPServer() {
@@ -32,7 +33,7 @@ func StartMCPServer() {
 		mcp.WithString("url",
 			mcp.Required(),
 			mcp.Description("URL of the cube API "),
-			mcp.Pattern("^http:localhost:8090//api/.*"),
+			mcp.Pattern("^http://localhost:8090/api/.*"),
 		),
 		mcp.WithString("method",
 			mcp.Required(),
@@ -124,10 +125,48 @@ func StartMCPServer() {
 	// Add scramble tool handler
 	mcpServer.AddTool(scramble, scrambleHandler)
 
-	// Starts the sse server
-	sseServer := server.NewSSEServer(mcpServer, server.WithBaseURL("http://localhost:9001"))
-	log.Printf("SSE server listening on :9001")
-	if err := sseServer.Start(":9001"); err != nil {
-		log.Fatalf("Server error: %v", err)
+	// Configure SSE server: SSE at "/", JSON-RPC at "/message"
+	// The SSEServer itself implements http.Handler
+	sseMCPHandler := server.NewSSEServer(mcpServer,
+		server.WithBaseURL("http://localhost:9001"),    // base URL for endpoint URLs
+		server.WithSSEEndpoint("/"),                    // mount SSE stream at root
+		server.WithMessageEndpoint("/message"),         // mount JSON-RPC messages at /message
+		server.WithUseFullURLForMessageEndpoint(false), // clients will resolve endpoints themselves
+	)
+	log.Printf("MCP SSE handler configured: SSE at '/' and JSON-RPC at '/message'")
+
+	// Wrap SSE handler to log and route based on method
+	loggedSSEHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("MCP SSE server received request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+		// Route POSTs to JSON-RPC endpoint
+		if r.Method == http.MethodPost {
+			// Rewrite path to /message
+			rr := r.Clone(r.Context())
+			rr.URL.Path = "/message"
+			sseMCPHandler.ServeHTTP(w, rr)
+			return
+		}
+		// Route GETs to SSE stream
+		if r.Method == http.MethodGet {
+			rr := r.Clone(r.Context())
+			rr.URL.Path = "/"
+			sseMCPHandler.ServeHTTP(w, rr)
+			return
+		}
+		// Other methods not allowed
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+	})
+
+	// Create and start a dedicated HTTP server for MCP SSE
+	mcpSSEHttpServer := &http.Server{
+		Addr:     ":9001",
+		Handler:  loggedSSEHandler,
+		ErrorLog: log.New(os.Stderr, "MCP SSE server: ", log.LstdFlags),
+	}
+
+	log.Printf("Starting dedicated HTTP server for MCP SSE on %s", mcpSSEHttpServer.Addr)
+	// Note: http.ErrServerClosed is a normal error on graceful shutdown.
+	if err := mcpSSEHttpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		log.Fatalf("Dedicated MCP SSE server error: %v", err)
 	}
 }

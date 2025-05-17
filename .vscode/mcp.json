@@ -3,6 +3,6 @@
         "my-mcp-cubeserver": {
             "type": "sse",
             "url": "http://localhost:9001"
-        }
+        },
     }
 }

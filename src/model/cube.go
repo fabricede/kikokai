@@ -1,6 +1,7 @@
 package model
 
 import (
+	"encoding/json"
 	"math/rand"
 )
 
@@ -67,5 +68,69 @@ func (c *Cube) Scramble(moves int) {
 
 		// Rotate the face
 		c.RotateAxis(axis, clockwise)
+	}
+}
+
+// ToReadableJSON returns a human-readable JSON representation of the cube's state.
+func (c *Cube) ToReadableJSON() (string, error) {
+	cubeState := make([][][]map[string]string, 3)
+	for x := 0; x < 3; x++ {
+		cubeState[x] = make([][]map[string]string, 3)
+		for y := 0; y < 3; y++ {
+			cubeState[x][y] = make([]map[string]string, 3)
+			for z := 0; z < 3; z++ {
+				cubie := c.Cubies[x][y][z]
+				if cubie != nil {
+					faceColors := make(map[string]string)
+					// Only include outer faces
+					if x == 0 {
+						faceColors["back"] = colorToName(cubie.Colors[Back])
+					}
+					if x == 2 {
+						faceColors["front"] = colorToName(cubie.Colors[Front])
+					}
+					if y == 0 {
+						faceColors["down"] = colorToName(cubie.Colors[Down])
+					}
+					if y == 2 {
+						faceColors["up"] = colorToName(cubie.Colors[Up])
+					}
+					if z == 0 {
+						faceColors["left"] = colorToName(cubie.Colors[Left])
+					}
+					if z == 2 {
+						faceColors["right"] = colorToName(cubie.Colors[Right])
+					}
+					cubeState[x][y][z] = faceColors
+				} else {
+					cubeState[x][y][z] = nil
+				}
+			}
+		}
+	}
+	jsonBytes, err := json.MarshalIndent(cubeState, "", "  ")
+	if err != nil {
+		return "", err
+	}
+	return string(jsonBytes), nil
+}
+
+// colorToName maps a Color to its string name
+func colorToName(color Color) string {
+	switch color {
+	case White:
+		return "white"
+	case Orange:
+		return "orange"
+	case Yellow:
+		return "yellow"
+	case Red:
+		return "red"
+	case Blue:
+		return "blue"
+	case Green:
+		return "green"
+	default:
+		return "unknown"
 	}
 }

@@ -40,8 +40,15 @@ const (
 func stateHandler(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	log.Printf("Received MCP request: %s", CommandState)
 
-	// Return the cube state using the updated structure
-	return mcp.NewToolResultText(fmt.Sprintf("Cube state: %v", model.SharedCube.Cubies)), nil
+	// Build a structured state event
+	ev := CubeEvent{Type: "state", State: model.SharedCube.Cubies}
+	data, err := json.MarshalIndent(ev, "", "  ")
+	if err != nil {
+		return nil, fmt.Errorf("unable to marshal cube state: %v", err)
+	}
+
+	// Return JSON-formatted state
+	return mcp.NewToolResultText(string(data)), nil
 }
 
 func resetHandler(tx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
